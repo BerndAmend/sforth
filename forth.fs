@@ -1,5 +1,5 @@
 
-: clearStack ( -- ) :[ stack.clear() ]: ;
+: clearStack ( -- ) :[ stack.clear() ]:d ;
 
 \ data stack operations
 : dup { x -- x x } x x ;
@@ -84,6 +84,13 @@
 : throwError { message -- } :[ throw new Error(message) ]:d ;
 
 : jseval { str -- } :[ global.eval(str) ]:d ;
+
+: execute { x1 -- } :[
+    if(x1.forth_function == true)
+        x1(stack);
+    else
+        x1();
+]:d ;
 
 :[ Math.PI ]: constant PI
 

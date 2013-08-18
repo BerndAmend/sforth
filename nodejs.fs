@@ -56,6 +56,36 @@ then
 :[ stack2.pop() ]:
 .s
 
+.s
+
 0.2 floor .
 
 13 3 /mod . .
+
+" clear " . clearStack
+
+.s
+
+2 PI * rad2deg .
+180 deg2rad .
+
+PI sin .
+180 sindeg .
+
+45 sindeg dup . asindeg . cr
+
+
+"
+: testfunc1 ( -- ) \" Func 1 \" . ;
+: testfunc2 ( -- ) \" Func 2 \" . ;
+undefined value testvar
+true if
+    ' testfunc1 to testvar
+else
+
+    ' testfunc2 to testvar
+endif
+testvar execute
+" compile jseval
+
+PI ' sin execute .

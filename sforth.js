@@ -265,7 +265,7 @@ function forth_compile(code, line_prefix, level, forth_defined) {
 			if(tokens[i] == "]:")
 				append("stack.push(" + str.slice(0,str.length-1).replace(/ \t /gm, '\t') + ");\n");
 			else // if(tokens[i] == "]:d")
-				append(str.slice(0,str.length-1).replace(/ \t /gm, '\t') + "\n");
+				append(str.slice(0,str.length-1).replace(/ \t /gm, '\t') + ";\n");
 		} else if(t == "]:") { // execute js code end
 			compiler_message_handler("unexpected token ]: found");
 		} else if(t == "]:d") { // execute js code end
@@ -393,6 +393,17 @@ function forth_compile(code, line_prefix, level, forth_defined) {
 			compiler_message_handler("unexpected token then found");
 		} else if( t == "endif") {
 			compiler_message_handler("unexpected token endif found");
+		} else if( t == "case") {
+			// TODO
+		} else if( t == "endcase") {
+			compiler_message_handler("unexpected token endcase found");
+		} else if( t == "of") {
+			compiler_message_handler("unexpected token of found");
+		} else if( t == "endof") {
+			compiler_message_handler("unexpected token endof found");
+		} else if( t == "'") {
+			i++;
+			append("stack.push(" + forth_mangleName(tokens[i]) + ");\n");
 		} else {
 			// we assume that everything else is a function
 			var mangledt = forth_mangleName(t);
@@ -410,6 +421,8 @@ function forth_compile(code, line_prefix, level, forth_defined) {
 					// TODO: Check if we already know the call type
 					if(mangledt == 'true' || mangledt == 'false') {
 						append("stack.push(" + mangledt + ");\n");
+					} else if(mangledt == 'undefined') {
+						append("stack.push(" + undefined + ");\n");
 					} else {
 						append("if(typeof " + mangledt + " == 'function') {\n");
 						append(line_prefix + "if(" + mangledt + ".forth_function == true) {\n");
