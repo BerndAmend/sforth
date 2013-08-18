@@ -418,23 +418,40 @@ function forth_compile(code, line_prefix, level, forth_defined) {
 					append("stack.push(" + mangledt + ");\n");
 					break
 				default:
-					// TODO: Check if we already know the call type
 					if(mangledt == 'true' || mangledt == 'false') {
 						append("stack.push(" + mangledt + ");\n");
 					} else if(mangledt == 'undefined') {
 						append("stack.push(" + undefined + ");\n");
+					} else if(mangledt == 'null') {
+						append("stack.push(" + null + ");\n");
 					} else {
-						append("if(typeof " + mangledt + " == 'function') {\n");
-						append(line_prefix + "if(" + mangledt + ".forth_function == true) {\n");
-						append(line_prefix + line_prefix + mangledt + "(stack);\n");
-						append(line_prefix + "} else {\n");
-						append(line_prefix + line_prefix + "stack.push(" + mangledt + "());\n");
-						append(line_prefix + "}\n");
-						append("} else if (typeof " + mangledt + " == 'undefined' ) {\n");
-						append(line_prefix  + "console.error('unknown word " + mangledt + "');\n");
-						append("} else { \n");
-						append(line_prefix + "stack.push(" + mangledt + ");\n");
-						append("}\n");
+						var type = eval("typeof " + mangledt);
+						if(type == 'undefined') {
+							append("if(typeof " + mangledt + " == 'function') {\n");
+							append(line_prefix + "if(" + mangledt + ".forth_function == true) {\n");
+							append(line_prefix + line_prefix + mangledt + "(stack);\n");
+							append(line_prefix + "} else {\n");
+							append(line_prefix + line_prefix + "stack.push(" + mangledt + "());\n");
+							append(line_prefix + "}\n");
+							append("} else if (typeof " + mangledt + " == 'undefined' ) {\n");
+							append(line_prefix  + "console.error('unknown word " + mangledt + "');\n");
+							append("} else { \n");
+							append(line_prefix + "stack.push(" + mangledt + ");\n");
+							append("}\n");
+						} else {
+							// TODO: allow to disable this case
+							if(type == 'function') {
+								if(eval(mangledt+".forth_function") == true) {
+									append(mangledt + "(stack);\n");
+								} else {
+									append("stack.push(" + mangledt + "());\n");
+								}
+							} else if (type == 'undefined' ) {
+								console.error("compiler error while processing '" + mangledt + "'");
+							} else {
+								append("stack.push(" + mangledt + ");\n");
+							}
+						}
 					}
 			}
 		}
