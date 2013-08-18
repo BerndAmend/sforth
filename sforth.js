@@ -150,7 +150,14 @@ var forth_mangling = {
 	"|": "$bar",
 	"\\": "$bslash",
 	":": "$colon",
-	".": "$dot"
+	".": "$dot",
+	",": "$comma",
+	"[": "$openbracket",
+	"]": "$closebracket",
+	"(": "$openparentheses",
+	")": "$closeparentheses",
+	"{": "$openbraces",
+	"}": "$openbraces",
 };
 
 function forth_mangleName(str) {

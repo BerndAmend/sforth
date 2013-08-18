@@ -44,6 +44,8 @@
 : - { x1 x2 -- x3 } :[ x1 - x2 ]: ;
 : * { x1 x2 -- x3 } :[ x1 * x2 ]: ;
 : / { x1 x2 -- x3 } :[ x1 / x2 ]: ;
+: mod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
+: /mod { x1 x2 -- x3 } :[ x1 % x2 ]: :[ Math.floor(x1 / x2) ]: ;
 
 : = { x1 x2 -- f } :[ x1 == x2 ]: ;
 : <> { x1 x2 -- f } :[ x1 != x2 ]: ;
@@ -80,3 +82,21 @@
 : throwError { message -- } :[ throw new Error(message) ]:d ;
 
 : jseval { str -- } :[ global.eval(str) ]:d ;
+
+\ math operations
+: abs { x1 -- x2 } :[ Math.abs(x1) ]: ;
+: acos { x1 -- x2 } :[ Math.acos(x1) ]: ;
+: asin { x1 -- x2 } :[ Math.asin(x1) ]: ;
+: atan { x1 -- x2 } :[ Math.atan(x1) ]: ;
+: atan2 { y x -- x2 } :[ Math.atan2(y,x) ]: ;
+: ceil { x1 -- x2 } :[ Math.ceil(x1) ]: ;
+: cos { x1 -- x2 } :[ Math.cos(x1) ]: ;
+: exp { x1 -- x2 } :[ Math.exp(x1) ]: ;
+: floor { x1 -- x2 } :[ Math.floor(x1) ]: ;
+: log { x1 -- x2 } :[ Math.log(x1) ]: ;
+: pow { x1 x2 -- x3 } :[ Math.pow(x1, x2) ]: ;
+: random { -- x } :[ Math.random() ]: ;
+: round { x1 -- x2 } :[ Math.round(x1) ]: ;
+: sin { x1 -- x2 } :[ Math.sin(x1) ]: ;
+: sqrt { x1 -- x2 } :[ Math.sqrt(x1) ]: ;
+: tan { x1 -- x2 } :[ Math.tan(x1) ]: ;

@@ -1,5 +1,6 @@
 
-" fs " nodejs.require fs
+(
+ " fs " nodejs.require fs
 
 : readFileSync { filename -- content } :[ fs.readFileSync(filename) ]: ;
 : writeFileSync { filename data -- } :[ fs.writeFileSync(filename, data) ]:d ;
@@ -23,3 +24,4 @@
 
 \ test
 " ps35.fbv " " ps35.fs " 84 42 convert-fbv-to-fs
+)
