@@ -1,16 +1,21 @@
 // example app for nodejs
 
-var fs = require('fs');
+var rfs = require('fs');
 
-eval(fs.readFileSync('sforth.js').toString());
+global.eval(rfs.readFileSync('sforth.js').toString());
 
-Forth.compiler_message_handler=console.log
+compiler_message_handler=console.log
 
-function forth_include(filename) {
-	Forth.forth_run(fs.readFileSync(filename).toString());
+global.include = function(stack) {
+	var generated_code = forth_compile(rfs.readFileSync(stack.pop()).toString());
+	global.eval(generated_code);
 }
+global.include.forth_function=true;
 
-// we should add the function to our forth compiler
-forth_include("forth.fs");
-//forth_include("float.fs");
-forth_include("time.fs");
+global.compile = function(stack) {
+	stack.push(global.forth_compile(stack.pop()));
+}
+global.compile.forth_function=true;
+
+stack.push("nodejs.fs")
+include(stack);
