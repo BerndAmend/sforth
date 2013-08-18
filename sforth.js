@@ -150,18 +150,18 @@ var forth_mangling = {
 	"|": "$bar",
 	"\\": "$bslash",
 	":": "$colon",
-	".": "$dot",
+	".": "$period",
 	",": "$comma",
-	"[": "$openbracket",
-	"]": "$closebracket",
-	"(": "$openparentheses",
-	")": "$closeparentheses",
-	"{": "$openbraces",
-	"}": "$openbraces",
+	"[": "$obracket",
+	"]": "$cbracket",
+	"(": "$oparentheses",
+	")": "$cparentheses",
+	"{": "$obraces",
+	"}": "$obraces",
 };
 
 function forth_mangleName(str) {
-	var result = str.toLowerCase();
+	var result = str; //.toLowerCase();
 
 	if(Number.isNumeric(str.charAt(0))) {
 		result = "$" + result;

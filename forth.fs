@@ -1,4 +1,6 @@
 
+: clearStack ( -- ) :[ stack.clear() ]: ;
+
 \ data stack operations
 : dup { x -- x x } x x ;
 
@@ -83,7 +85,13 @@
 
 : jseval { str -- } :[ global.eval(str) ]:d ;
 
+:[ Math.PI ]: constant PI
+
 \ math operations
+
+: deg2rad ( x1 -- x2 ) 180 / PI * ;
+: rad2deg ( x1 -- x2 ) PI / 180 * ;
+
 : abs { x1 -- x2 } :[ Math.abs(x1) ]: ;
 : acos { x1 -- x2 } :[ Math.acos(x1) ]: ;
 : asin { x1 -- x2 } :[ Math.asin(x1) ]: ;
@@ -100,3 +108,10 @@
 : sin { x1 -- x2 } :[ Math.sin(x1) ]: ;
 : sqrt { x1 -- x2 } :[ Math.sqrt(x1) ]: ;
 : tan { x1 -- x2 } :[ Math.tan(x1) ]: ;
+
+: acosdeg ( x1 -- x2 ) acos rad2deg ;
+: asindeg ( x1 -- x2 ) asin rad2deg ;
+: atandeg ( x1 -- x2 ) atan rad2deg ;
+: cosdeg ( x1 -- x2 ) deg2rad cos ;
+: sindeg ( x1 -- x2 ) deg2rad sin ;
+: tandeg ( x1 -- x2 ) deg2rad tan ;
