@@ -29,7 +29,7 @@ rl.on('line', function(line) {
 	try {
 		global.eval(forth_compile(line));
 	} catch(err) {
-		console.error(err);
+		console.error(err.stack);
 	}
 	rl.prompt();
 }).on('close', function() {
