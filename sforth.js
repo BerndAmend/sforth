@@ -401,6 +401,22 @@ function forth_compile(code, line_prefix, level, forth_defined) {
 			compiler_message_handler("unexpected token of found");
 		} else if( t == "endof") {
 			compiler_message_handler("unexpected token endof found");
+		} else if( t == "include") {
+			// :( copied from the string detection
+			var str = ""
+			i++;
+			while(tokens[i] != "\"") {
+				if(tokens[i] == "\n") {
+					str += " ";
+				} else {
+					str += tokens[i] + " ";
+				}
+				i++;
+			}
+
+			var filename = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
+			append(forth_compile(Filesystem.readFileSync(filename).toString(), line_prefix, level+1, forth_defined));
+
 		} else if( t == "'") {
 			i++;
 			append("stack.push(" + forth_mangleName(tokens[i]) + ");\n");
@@ -427,8 +443,9 @@ function forth_compile(code, line_prefix, level, forth_defined) {
 					} else {
 						var type = eval("typeof " + mangledt);
 						if(type == 'undefined') {
+							compiler_message_handler("performance warning: couldn't deduce at compile time how to call " + mangledt);
 							append("if(typeof " + mangledt + " == 'function') {\n");
-							append(line_prefix + "if(" + mangledt + ".forth_function == true) {\n");
+							append(line_prefix + "if(" + mangledt + ".forth_function) {\n");
 							append(line_prefix + line_prefix + mangledt + "(stack);\n");
 							append(line_prefix + "} else {\n");
 							append(line_prefix + line_prefix + "stack.push(" + mangledt + "());\n");
@@ -439,9 +456,8 @@ function forth_compile(code, line_prefix, level, forth_defined) {
 							append(line_prefix + "stack.push(" + mangledt + ");\n");
 							append("}\n");
 						} else {
-							// TODO: allow to disable this case
 							if(type == 'function') {
-								if(eval(mangledt+".forth_function") == true) {
+								if(eval(mangledt+".forth_function")) {
 									append(mangledt + "(stack);\n");
 								} else {
 									append("stack.push(" + mangledt + "());\n");

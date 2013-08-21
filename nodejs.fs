@@ -1,8 +1,13 @@
 
-" forth.fs " include
-" console.fs " include
-" time.fs " include
-" filesystem.fs " include
+include console.fs "
+include forth.fs "
+include time.fs "
+include filesystem.fs "
+
+include pdfkit.fs "
+
+: bye ( -- ) :[ process.exit(0) ]:d ;
+
 
 \ time-in-ms
 \ " wieso nur " .

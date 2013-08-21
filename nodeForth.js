@@ -1,21 +1,38 @@
 // example app for nodejs
 
-var rfs = require('fs');
+Filesystem = require('fs');
 
-global.eval(rfs.readFileSync('sforth.js').toString());
+// has to be done from the main file :(
+PDFDocument = require("pdfkit");
+
+global.eval(Filesystem.readFileSync('sforth.js').toString());
 
 compiler_message_handler=console.log
-
-global.include = function(stack) {
-	var generated_code = forth_compile(rfs.readFileSync(stack.pop()).toString());
-	global.eval(generated_code);
-}
-global.include.forth_function=true;
 
 global.compile = function(stack) {
 	stack.push(global.forth_compile(stack.pop()));
 }
 global.compile.forth_function=true;
 
-stack.push("nodejs.fs")
-include(stack);
+var compiled_code = forth_compile(Filesystem.readFileSync("nodejs.fs").toString());
+Filesystem.writeFileSync("compiled-nodejs.fs", compiled_code);
+global.eval(compiled_code);
+
+// open a simple repl
+var readline = require('readline'),
+	rl = readline.createInterface(process.stdin, process.stdout);
+
+rl.setPrompt('> ');
+rl.prompt();
+
+rl.on('line', function(line) {
+	try {
+		global.eval(forth_compile(line));
+	} catch(err) {
+		console.error(err);
+	}
+	rl.prompt();
+}).on('close', function() {
+		console.log('Bye');
+		process.exit(0);
+	});
