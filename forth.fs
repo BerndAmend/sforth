@@ -93,12 +93,10 @@
         x1();
 ]:d ;
 
-Math.PI constant PI
-
 \ math operations
 
-: deg2rad ( x1 -- x2 ) 180 / PI * ;
-: rad2deg ( x1 -- x2 ) PI / 180 * ;
+: deg2rad ( x1 -- x2 ) 180 / Math.PI * ;
+: rad2deg ( x1 -- x2 ) Math.PI / 180 * ;
 
 : abs ( x1 -- x2 )  Math.abs ;
 : acos ( x1 -- x2 ) Math.acos ;

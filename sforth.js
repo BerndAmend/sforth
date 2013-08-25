@@ -228,12 +228,6 @@ function forth_demangleName(str) {
 
 var forth = forth = forth || {};
 
-forth.types = {
-	forth_function: "forth_function",
-	constant: "constant",
-	value: "value"
-}
-
 forth.Types = {
 	BranchCase: "BranchCase",
 	BranchCaseOf: "BranchCaseOf",
@@ -252,6 +246,7 @@ forth.Types = {
 	New: "New",
 	Number: "Number",
 	String: "String",
+	TypeOf: "TypeOf",
 	Value: "Value",
 	ValueAssign: "ValueAssign",
 	ValueLocal: "ValueLocal"
@@ -347,6 +342,11 @@ forth.String = function(value) {
 	this.value = value;
 };
 
+forth.TypeOf = function(name) {
+	this.type = forth.Types.TypeOf;
+	this.name = name;
+};
+
 forth.Value = function(name) {
 	this.type = forth.Types.Value;
 	this.name = name;
@@ -438,6 +438,12 @@ forth.createFromForthTokens = function(tokens) {
 				break;
 			case "null":
 				add(new forth.ConstantValue(null));
+				break;
+			case "typeof":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find parameter'");
+				add(new forth.TypeOf(tokens[i]));
 				break;
 
 			case "(": // comment start
@@ -773,6 +779,9 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				break;
 			case forth.Types.String:
 				append("stack.push(\"" + code_tree.value + "\");");
+				break;
+			case forth.Types.TypeOf:
+				append("stack.push(typeof " + code_tree.name + ");");
 				break;
 			case forth.Types.Value:
 				//forth_defined[mn] = forth.types.value;

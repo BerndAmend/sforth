@@ -71,10 +71,10 @@ stack2.pop
 
 .s
 
-2 PI * rad2deg .
+2 Math.PI * rad2deg .
 180 deg2rad .
 
-PI sin .
+Math.PI sin .
 180 sindeg .
 
 45 sindeg dup . asindeg . cr
@@ -91,7 +91,8 @@ else
     ' testfunc2 to testvar
 endif
 
-:[ console.log(typeof testvar) ]:d
+typeof testvar .
+typeof Math.PI .
 
 testvar ' testvar execute
 
@@ -101,4 +102,4 @@ testfunc1
 testfunc2
 
 
-PI ' sin execute .
+Math.PI ' sin execute .
