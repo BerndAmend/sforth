@@ -30,7 +30,7 @@
 
 : 2over { x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2 } x1 x2 x3 x4 x1 x2 ;
 
-: depth ( -- n ) :[ stack.size() ]: ;
+: depth ( -- n ) stack.size ;
 
 : pick { x } ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get ;
 
@@ -43,12 +43,41 @@
 : not { x1 x2 -- x3 } :[ x1 ^ -1 ]: ;
 : invert { x1 x2 -- x3 } :[ x1 ^ -1 ]: ;
 
+\ math operations
+
+: deg2rad ( x1 -- x2 ) 180 / Math.PI * ;
+: rad2deg ( x1 -- x2 ) Math.PI / 180 * ;
+
+: abs ( x1 -- x2 )  Math.abs ;
+: acos ( x1 -- x2 ) Math.acos ;
+: asin ( x1 -- x2 ) Math.asin ;
+: atan ( x1 -- x2 ) Math.atan ;
+: atan2 ( y x -- x2 ) Math.atan2 ;
+: ceil ( x1 -- x2 ) Math.ceil ;
+: cos ( x1 -- x2 ) Math.cos ;
+: exp ( x1 -- x2 ) Math.exp ;
+: floor ( x1 -- x2 ) Math.floor ;
+: log ( x1 -- x2 ) Math.log ;
+: pow ( x1 x2 -- x3 ) Math.pow ;
+: random ( -- x ) Math.random ;
+: round ( x1 -- x2 ) Math.round ;
+: sin ( x1 -- x2 ) Math.sin ;
+: sqrt ( x1 -- x2 ) Math.sqrt ;
+: tan ( x1 -- x2 ) Math.tan ;
+
+: acosdeg ( x1 -- x2 ) acos rad2deg ;
+: asindeg ( x1 -- x2 ) asin rad2deg ;
+: atandeg ( x1 -- x2 ) atan rad2deg ;
+: cosdeg ( x1 -- x2 ) deg2rad cos ;
+: sindeg ( x1 -- x2 ) deg2rad sin ;
+: tandeg ( x1 -- x2 ) deg2rad tan ;
+
 : + { x1 x2 -- x3 } :[ x1 + x2 ]: ;
 : - { x1 x2 -- x3 } :[ x1 - x2 ]: ;
 : * { x1 x2 -- x3 } :[ x1 * x2 ]: ;
 : / { x1 x2 -- x3 } :[ x1 / x2 ]: ;
 : mod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
-: /mod { x1 x2 -- x3 } :[ x1 % x2 ]: :[ Math.floor(x1 / x2) ]: ;
+: /mod { x1 x2 -- x3 } :[ x1 % x2 ]: x1 x2 / floor ;
 
 : = { x1 x2 -- f } :[ x1 == x2 ]: ;
 : <> { x1 x2 -- f } :[ x1 != x2 ]: ;
@@ -84,7 +113,7 @@
 \ TODO: allow forth local words
 : throwError { message -- } :[ throw new Error(message) ]:d ;
 
-: jseval { str -- } :[ global.eval(str) ]:d ;
+: jseval ( str -- ) global.eval drop ;
 
 : execute { x1 -- } :[
     if(x1.forth_function == true)
@@ -93,31 +122,3 @@
         x1();
 ]:d ;
 
-\ math operations
-
-: deg2rad ( x1 -- x2 ) 180 / Math.PI * ;
-: rad2deg ( x1 -- x2 ) Math.PI / 180 * ;
-
-: abs ( x1 -- x2 )  Math.abs ;
-: acos ( x1 -- x2 ) Math.acos ;
-: asin ( x1 -- x2 ) Math.asin ;
-: atan ( x1 -- x2 ) Math.atan ;
-: atan2 ( y x -- x2 ) Math.atan2 ;
-: ceil ( x1 -- x2 ) Math.ceil ;
-: cos ( x1 -- x2 ) Math.cos ;
-: exp ( x1 -- x2 ) Math.exp ;
-: floor ( x1 -- x2 ) Math.floor ;
-: log ( x1 -- x2 ) Math.log ;
-: pow ( x1 x2 -- x3 ) Math.pow ;
-: random ( -- x ) Math.random ;
-: round ( x1 -- x2 ) Math.round ;
-: sin ( x1 -- x2 ) Math.sin ;
-: sqrt ( x1 -- x2 ) Math.sqrt ;
-: tan ( x1 -- x2 ) Math.tan ;
-
-: acosdeg ( x1 -- x2 ) acos rad2deg ;
-: asindeg ( x1 -- x2 ) asin rad2deg ;
-: atandeg ( x1 -- x2 ) atan rad2deg ;
-: cosdeg ( x1 -- x2 ) deg2rad cos ;
-: sindeg ( x1 -- x2 ) deg2rad sin ;
-: tandeg ( x1 -- x2 ) deg2rad tan ;

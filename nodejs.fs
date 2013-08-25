@@ -8,19 +8,18 @@ include pdfkit.fs "
 
 : bye ( -- ) 0 process.exit drop ;
 
-
-\ time-in-ms
-\ " wieso nur " .
-\ time-in-ms swap - .
+time-in-ms
+" wieso nur " .
+time-in-ms swap - . " ms " .
 
 " true if 12 . endif " compile jseval
 
 \ " false if 1 . else 2 . endif " compile jseval
 
-\ 1 2 min .
-\ 1 2 max .
+1 2 min .
+1 2 max .
 
-false false false
+false true false
 
 if
     if

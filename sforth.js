@@ -27,7 +27,7 @@ function ForthStack() {
 		return this.stac.pop();
 	}
 
-	this.size=function(item) {
+	this.size=function() {
 		return this.stac.length;
 	}
 

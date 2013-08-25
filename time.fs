@@ -1,1 +1,1 @@
-: time-in-ms ( -- x ) :[ new Date().getTime() ]: ;
+: time-in-ms ( -- x ) new Date :[ stack.pop().getTime() ]: ;
