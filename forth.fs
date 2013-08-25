@@ -1,5 +1,5 @@
 
-: clearStack ( -- ) :[ stack.clear() ]:d ;
+: clearStack ( -- ) stack.clear drop ;
 
 \ data stack operations
 : dup { x -- x x } x x ;
@@ -32,10 +32,11 @@
 
 : depth ( -- n ) :[ stack.size() ]: ;
 
-: pick { x } ( xu ... x1 x0 u -- xu ... x1 x0 xu ) :[ stack.get(x) ]: ;
+: pick { x } ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get ;
 
-: roll { x } ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) :[ stack.remove(x) ]: ;
+: roll { x } ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove ;
 
+\ TODO: extend the compiler to detect if .add() or so has to be called
 : or { x1 x2 -- x3 } :[ x1 | x2 ]: ;
 : and { x1 x2 -- x3 } :[ x1 & x2 ]: ;
 : xor { x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
@@ -92,29 +93,29 @@
         x1();
 ]:d ;
 
-:[ Math.PI ]: constant PI
+Math.PI constant PI
 
 \ math operations
 
 : deg2rad ( x1 -- x2 ) 180 / PI * ;
 : rad2deg ( x1 -- x2 ) PI / 180 * ;
 
-: abs { x1 -- x2 } :[ Math.abs(x1) ]: ;
-: acos { x1 -- x2 } :[ Math.acos(x1) ]: ;
-: asin { x1 -- x2 } :[ Math.asin(x1) ]: ;
-: atan { x1 -- x2 } :[ Math.atan(x1) ]: ;
-: atan2 { y x -- x2 } :[ Math.atan2(y,x) ]: ;
-: ceil { x1 -- x2 } :[ Math.ceil(x1) ]: ;
-: cos { x1 -- x2 } :[ Math.cos(x1) ]: ;
-: exp { x1 -- x2 } :[ Math.exp(x1) ]: ;
-: floor { x1 -- x2 } :[ Math.floor(x1) ]: ;
-: log { x1 -- x2 } :[ Math.log(x1) ]: ;
-: pow { x1 x2 -- x3 } :[ Math.pow(x1, x2) ]: ;
-: random { -- x } :[ Math.random() ]: ;
-: round { x1 -- x2 } :[ Math.round(x1) ]: ;
-: sin { x1 -- x2 } :[ Math.sin(x1) ]: ;
-: sqrt { x1 -- x2 } :[ Math.sqrt(x1) ]: ;
-: tan { x1 -- x2 } :[ Math.tan(x1) ]: ;
+: abs ( x1 -- x2 )  Math.abs ;
+: acos ( x1 -- x2 ) Math.acos ;
+: asin ( x1 -- x2 ) Math.asin ;
+: atan ( x1 -- x2 ) Math.atan ;
+: atan2 ( y x -- x2 ) Math.atan2 ;
+: ceil ( x1 -- x2 ) Math.ceil ;
+: cos ( x1 -- x2 ) Math.cos ;
+: exp ( x1 -- x2 ) Math.exp ;
+: floor ( x1 -- x2 ) Math.floor ;
+: log ( x1 -- x2 ) Math.log ;
+: pow ( x1 x2 -- x3 ) Math.pow ;
+: random ( -- x ) Math.random ;
+: round ( x1 -- x2 ) Math.round ;
+: sin ( x1 -- x2 ) Math.sin ;
+: sqrt ( x1 -- x2 ) Math.sqrt ;
+: tan ( x1 -- x2 ) Math.tan ;
 
 : acosdeg ( x1 -- x2 ) acos rad2deg ;
 : asindeg ( x1 -- x2 ) asin rad2deg ;

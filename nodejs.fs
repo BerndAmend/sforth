@@ -6,7 +6,7 @@ include filesystem.fs "
 
 include pdfkit.fs "
 
-: bye ( -- ) :[ process.exit(0) ]:d ;
+: bye ( -- ) 0 process.exit drop ;
 
 
 \ time-in-ms
@@ -54,11 +54,11 @@ then
 
 " \033[31mHello\033[0m World " .
 
-:[ new ForthStack() ]: value stack2
+new ForthStack value stack2
 
-2 { x } :[ stack2.push(x) ]:d
+2 stack2.push drop
 .s
-:[ stack2.pop() ]:
+stack2.pop
 .s
 
 .s
@@ -79,10 +79,10 @@ PI sin .
 
 45 sindeg dup . asindeg . cr
 
-
 "
 : testfunc1 ( -- ) \" Func 1 \" . ;
 : testfunc2 ( -- ) \" Func 2 \" . ;
+
 undefined value testvar
 true if
     ' testfunc1 to testvar
@@ -90,7 +90,15 @@ else
 
     ' testfunc2 to testvar
 endif
-testvar execute
+
+:[ console.log(typeof testvar) ]:d
+
+testvar ' testvar execute
+
 " compile jseval
+
+testfunc1
+testfunc2
+
 
 PI ' sin execute .

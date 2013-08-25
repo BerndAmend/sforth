@@ -14,8 +14,13 @@ global.compile = function(stack) {
 }
 global.compile.forth_function=true;
 
+//var tokens = forth.tokenize(Filesystem.readFileSync("nodejs.fs").toString());
+//var code_tree = forth.createFromForthTokens(tokens);
+//console.log(JSON.stringify(code_tree, null, "\t"));
+//console.log(forth.generateJsCode(code_tree));
+
 var compiled_code = forth_compile(Filesystem.readFileSync("nodejs.fs").toString());
-Filesystem.writeFileSync("compiled-nodejs.fs", compiled_code);
+//Filesystem.writeFileSync("compiled-nodejs.fs", compiled_code);
 global.eval(compiled_code);
 
 // open a simple repl

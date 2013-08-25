@@ -1,9 +1,8 @@
 
-(
- " fs " nodejs.require fs
+: readFileSync { filename -- content } :[ Filesystem.readFileSync(filename) ]: ;
+: writeFileSync { filename data -- } :[ Filesystem.writeFileSync(filename, data) ]:d ;
 
-: readFileSync { filename -- content } :[ fs.readFileSync(filename) ]: ;
-: writeFileSync { filename data -- } :[ fs.writeFileSync(filename, data) ]:d ;
+(
 
 
 \ Some tests, should be moved into a different file

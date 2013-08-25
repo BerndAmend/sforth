@@ -1,7 +1,7 @@
 // This file only includes everything necessary to bootstrap the rest
 // directly from forth files
 
-// TODO implement it in a faster way
+// TODO optimize functions
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
     return target.split(search).join(replacement);
@@ -124,47 +124,87 @@ function ForthStack() {
 
 
 // create the global stack
+// TODO move this definitions into another js file
+// The generated js code depends on it, not on the compiler
 var stack = new ForthStack();
 
-//var Forth = {
+function forthFunctionCall(stack, func, context) {
+	if(func.forth_function) {
+		func(stack);
+	} else {
+		var type = typeof func;
+		switch(type) {
+			case 'function':
+				var args = new Array;
+				for(var i=0;i<func.length; ++i) {
+					args.push(stack.pop());
+				}
+				args.reverse();
+				if(context)
+					stack.push(func.apply(context, args));
+				else
+					stack.push(func.apply(this, args));
+				break;
+			case 'string':
+				var args = new Array;
+				for(var i=0;i<func.length; ++i) {
+					args.push(stack.pop());
+				}
+				args.reverse();
+				if(context)
+					stack.push(eval(func + ".apply(" + context + ", args);"));
+				else
+					stack.push(eval(func + ".apply(this, args);"));
+				break;
+			case 'undefined':
+				throw new Error("Can not call undefined function");
+				break;
+			default:
+				stack.push(func);
+		}
+	}
+}
+// end
 
 var compiler_message_handler = function(str) {}
 
+// We don't allow . in function names
+// if you use $ ensure that you don't write one of the following strings
 var forth_mangling = {
-	"$": "$dollar",
-	"=": "$eq",
-	">": "$greater",
-	"<": "$less",
-	"+": "$plus",
-	"-": "$minus",
-	"*": "$times",
-	"/": "div",
-	"!": "$bang",
-	"@": "$at",
-	"#": "$hash",
-	"%": "$percent",
-	"^": "$up",
-	"&": "$amp",
-	"~": "$tilde",
-	"?": "$qmark",
-	"|": "$bar",
-	"\\": "$bslash",
-	":": "$colon",
-	".": "$period",
-	",": "$comma",
-	"[": "$obracket",
-	"]": "$cbracket",
-	"(": "$oparentheses",
-	")": "$cparentheses",
-	"{": "$obraces",
-	"}": "$obraces",
+	"€": "$$euro",
+	"=": "$$eq",
+	">": "$$greater",
+	"<": "$$less",
+	"+": "$$plus",
+	"-": "$$minus",
+	"*": "$$times",
+	"/": "$$div",
+	"!": "$$bang",
+	"@": "$$at",
+	"#": "$$hash",
+	"%": "$$percent",
+	"^": "$$up",
+	"&": "$$amp",
+	"~": "$$tilde",
+	"?": "$$qmark",
+	"|": "$$bar",
+	"\\": "$$bslash",
+	":": "$$colon",
+	";": "$$semicolon",
+	",": "$$comma",
+	"[": "$$obracket",
+	"]": "$$cbracket",
+	"(": "$$oparentheses",
+	")": "$$cparentheses",
+	"{": "$$obraces",
+	"}": "$$obraces"
 };
 
 function forth_mangleName(str) {
 	var result = str; //.toLowerCase();
 
 	if(Number.isNumeric(str.charAt(0))) {
-		result = "$" + result;
+		result = "$$" + result;
 	}
 
 	for(var s in forth_mangling) {
@@ -186,292 +226,584 @@ function forth_demangleName(str) {
 	return result; //result.toLowerCase();
 }
 
-var forth_types = {
+var forth = forth = forth || {};
+
+forth.types = {
 	forth_function: "forth_function",
 	constant: "constant",
 	value: "value"
 }
 
-// defined_vars is used to optimize away unncessary forth calls
-function forth_compile(code, line_prefix, level, forth_defined) {
-	if(line_prefix == undefined)
-		line_prefix = "\t";
-	if(level == undefined)
-		level = 0;
+forth.Types = {
+	BranchCase: "BranchCase",
+	BranchCaseOf: "BranchCaseOf",
+	BranchIf: "BranchIf",
+	Body: "Body",
+	Call: "Call",
+	CommentLine: "CommentLine",
+	CommentParentheses: "CommentParentheses",
+	Constant: "Constant",
+	ConstantValue: "ConstantValue",
+	FunctionAddress: "FunctionAddress",
+	FunctionForth: "FunctionForth",
+	FunctionJs: "FunctionJs",
+	JsCode: "JsCode",
+	JsCodeWithReturn: "JsCodeWithReturn",
+	New: "New",
+	Number: "Number",
+	String: "String",
+	Value: "Value",
+	ValueAssign: "ValueAssign",
+	ValueLocal: "ValueLocal"
+};
 
-	if(forth_defined == undefined)
-		forth_defined = new Array();
+forth.BranchCase = function() {
+	this.type = forth.Types.BranchCase;
+	this.body = new Array;
+};
 
-	var lp =  ""
-	for(var i = 0; i < level; i++)
-		lp += line_prefix;
+forth.BranchCaseOf = function(condition, body) {
+	this.type = forth.Types.BranchCaseOf;
+	this.condition = condition;
+	this.body = body;
+};
 
-	function append(str) {
-		out += lp + str;
-	}
+forth.BranchIf = function(if_body, else_body) {
+	this.type = forth.Types.BranchIf;
+	this.if_body = if_body;
+	this.else_body = else_body;
+};
 
+forth.Body = function() {
+	this.type = forth.Types.Body;
+	this.body = new Array;
+};
+
+forth.Call = function(name) {
+	this.type = forth.Types.Call;
+	this.name = name;
+};
+
+forth.CommentLine = function(comment) {
+	this.type = forth.Types.CommentLine;
+	this.comment = comment;
+};
+
+forth.CommentParentheses = function(comment) {
+	this.type = forth.Types.CommentParentheses;
+	this.comment = comment;
+};
+
+forth.Constant = function(name) {
+	this.type = forth.Types.Constant;
+	this.name = name;
+};
+
+forth.ConstantValue = function(value) {
+	this.type = forth.Types.ConstantValue;
+	this.value = value;
+};
+
+forth.FunctionAddress = function(name) {
+	this.type = forth.Types.FunctionAddress;
+	this.name = name;
+};
+
+forth.FunctionForth = function(name, body) {
+	this.type = forth.Types.FunctionForth;
+	this.name = name;
+	this.body = body;
+};
+
+forth.FunctionJs = function(name, args, body) {
+	this.type = forth.Types.FunctionJs;
+	this.name = name;
+	this.args = args;
+	this.body = body;
+};
+
+forth.JsCode = function(body) {
+	this.type = forth.Types.JsCode;
+	this.body = body;
+};
+
+forth.JsCodeWithReturn = function(body) {
+	this.type = forth.Types.JsCodeWithReturn;
+	this.body = body;
+};
+
+forth.New = function(name) {
+	this.type = forth.Types.New;
+	this.name = name;
+};
+
+forth.Number = function(value) {
+	this.type = forth.Types.Number;
+	this.value = value;
+};
+
+forth.String = function(value) {
+	this.type = forth.Types.String;
+	this.value = value;
+};
+
+forth.Value = function(name) {
+	this.type = forth.Types.Value;
+	this.name = name;
+};
+
+forth.ValueAssign = function(name) {
+	this.type = forth.Types.ValueAssign;
+	this.name = name;
+};
+
+forth.ValueLocal = function(values, comment) {
+	this.type = forth.Types.ValueLocal;
+	this.values = values;
+	this.comment = comment;
+};
+
+// Currently this function only splits the code into tokens
+// later version will also keep track where the tokens are fetched from
+forth.tokenize = function(code) {
 	// unify line endings
 	var clean_code = code.replace(/\r\n/gm, '\n')
-						.replace(/\n/gm, ' \n ')
-						.replace(/\t/gm, ' \t ');
+		.replace(/\n/gm, ' \n ')
+		.replace(/\t/gm, ' \t ');
 
 	// tokenize code
 	var tokens=clean_code.split(" ");
 
-	var out = "";
+	return tokens;
+}
+
+forth.createFromForthTokens = function(tokens) {
+	var out = new forth.Body();
+
+	function add(something) {
+		out.body.push(something);
+	}
 
 	for( var i = 0 ; i < tokens.length; i++ ) {
 		var t = tokens[i];
-		if(t == "") {
-			// ignore empty tokens
-		} else if(Number.isNumeric(t)) {
-			append("stack.push(" + t + ");\n");
-		} else if(t == "\\") { // line comments
-			// jump to the next \n
-			while(tokens[i] != "\n") i++;
-		} else if(t == "\n") {
-			// we ignore \n completely
-		} else if(t == "\"") { // strings
-			var str = ""
-			i++;
-			while(tokens[i] != "\"") {
-				if(tokens[i] == "\n") {
-					str += " ";
-				} else {
-					str += tokens[i] + " ";
+
+		switch (t) {
+			case "": // ignore empty/whitespace tokens
+			case "\n":
+				break;
+			case "\\": // line comments
+				var str = "";
+				while(tokens[i] != "\n") {
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing '\n'");
+
+					if(tokens[i] != "\n")
+						str += tokens[i] + " ";
 				}
+				add(new forth.CommentLine(str.slice(0,str.length-1)));
+				break;
+			case "\"": // strings
+				var str = "";
 				i++;
-			}
-			append("stack.push(\"" + str.slice(0,str.length-1).replace(/ \t /gm, '\t') + "\");\n");
-		} else if(t == "(") { // comment start
-			var depth = 1;
-			while(depth > 0) {
-				i++;
-				if(tokens[i] == "(")
-					depth++;
-				else if(tokens[i] == ")") {
-					depth--;
-				}
-			}
-		} else if(t == ")") { // comment end
-			compiler_message_handler("unexpected token ) found");
-		} else if(t == ":[") { // execute js code start
-			var str = ""
-			i++;
-			while(tokens[i] != "]:" && tokens[i] != "]:d") {
-				str += tokens[i] + " ";
-				i++;
-			}
-			if(tokens[i] == "]:")
-				append("stack.push(" + str.slice(0,str.length-1).replace(/ \t /gm, '\t') + ");\n");
-			else // if(tokens[i] == "]:d")
-				append(str.slice(0,str.length-1).replace(/ \t /gm, '\t') + ";\n");
-		} else if(t == "]:") { // execute js code end
-			compiler_message_handler("unexpected token ]: found");
-		} else if(t == "]:d") { // execute js code end
-			compiler_message_handler("unexpected token ]: found");
-		} else if(t == "{") { // local variable start
-			var done = false;
-			var localstack = new ForthStack;
-			i++;
-			while(tokens[i] != "}") {
-				if(tokens[i] == "--") {
-					done = true;
-				}
-				if(!done) {
-					var mn = forth_mangleName(tokens[i]);
-					localstack.push(mn);
-					forth_defined[mn] = forth_types.value;
-				}
-				i++;
-			}
-			while(!localstack.isEmpty()) {
-				append("var " + localstack.pop() + " = stack.pop();\n");
-			}
-		} else if(t == "}") { // local variable end
-			compiler_message_handler("unexpected token } found");
-		} else if(t == ":") { // function definition
-			var depth = 1;
-			var localcode = "";
-			i++;
-
-			var function_name = forth_mangleName(tokens[i]);
-
-			forth_defined[function_name] = forth_types.forth_function;
-
-			// get the function name
-			append("function " + function_name + "(stack) {\n");
-
-			while(depth > 0) {
-				i++;
-				if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js") {
-					depth++;
-				} else if(tokens[i] == ";" || tokens[i] == "return;") {
-					depth--;
-				} else {
-					localcode += tokens[i] + " ";
-				}
-			}
-
-			append(forth_compile(localcode, line_prefix, level+1, cloneMap(forth_defined)));
-
-			append("}\n");
-			append(function_name + ".forth_function=true;\n\n");
-			//append(".forth_code=\"" + localcode + "\"\n"));
-		} else if(t == ":noname") { // function definition
-			// TODO
-		} else if(t == ";") {
-			compiler_message_handler("unexpected token ; found");
-		} else if(t == ":js") { // function definition
-			// TODO
-		} else if(t == "return;") {
-			compiler_message_handler("unexpected token return; found");
-		} else if(t == "value") {
-			i++
-			var mn = forth_mangleName(tokens[i]);
-			forth_defined[mn] = forth_types.value;
-			append("var " + mn + " = stack.pop();\n");
-		} else if(t == "to") {
-			i++
-			append(tokens[i] + " = stack.pop();\n");
-		} else if(t == "constant") {
-			i++
-			var mn = forth_mangleName(tokens[i]);
-			forth_defined[mn] = forth_types.constant;
-			append("var " + mn + " = stack.pop();\n");
-		} else if( t == "if") {
-			var depth = 1
-
-			var thenstr = ""
-			var current = ""
-			while(depth > 0) {
-				i++;
-				switch(tokens[i]) {
-					case "if":
-						depth++;
-						current += tokens[i] + " ";
-						break;
-					case "else":
-						if(depth == 1) {
-							thenstr = current;
-							current = "";
-						} else {
-							current += tokens[i] + " ";
-						}
-						break;
-					case "then":
-					case "endif":
-						depth--;
-						if(depth > 0)
-							current += tokens[i] + " ";
-						break;
-					default:
-						current += tokens[i] + " ";
-				}
-				//i++;
-			}
-
-			var compiledthen = "";
-			var compiledelse = "";
-			if(thenstr) {
-				compiledthen = forth_compile(thenstr, line_prefix, level+1, cloneMap(forth_defined));
-				compiledelse = forth_compile(current, line_prefix, level+1, cloneMap(forth_defined));
-			} else {
-				compiledthen = forth_compile(current, line_prefix, level+1, cloneMap(forth_defined));
-			}
-
-			append("if(stack.pop()) {\n")
-			append(compiledthen);
-			if(compiledelse) {
-				append("} else {\n")
-				append(compiledelse);
-			}
-			append("}\n")
-		} else if( t == "else") {
-			compiler_message_handler("unexpected token else found");
-		} else if( t == "then") {
-			compiler_message_handler("unexpected token then found");
-		} else if( t == "endif") {
-			compiler_message_handler("unexpected token endif found");
-		} else if( t == "case") {
-			// TODO
-		} else if( t == "endcase") {
-			compiler_message_handler("unexpected token endcase found");
-		} else if( t == "of") {
-			compiler_message_handler("unexpected token of found");
-		} else if( t == "endof") {
-			compiler_message_handler("unexpected token endof found");
-		} else if( t == "include") {
-			// :( copied from the string detection
-			var str = ""
-			i++;
-			while(tokens[i] != "\"") {
-				if(tokens[i] == "\n") {
-					str += " ";
-				} else {
-					str += tokens[i] + " ";
-				}
-				i++;
-			}
-
-			var filename = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
-			append(forth_compile(Filesystem.readFileSync(filename).toString(), line_prefix, level+1, forth_defined));
-
-		} else if( t == "'") {
-			i++;
-			append("stack.push(" + forth_mangleName(tokens[i]) + ");\n");
-		} else {
-			// we assume that everything else is a function
-			var mangledt = forth_mangleName(t);
-
-			// check if already can decide which type the token has
-			switch (forth_defined[mangledt]) {
-				case forth_types.forth_function:
-					append(mangledt + "(stack);\n");
-					break;
-				case forth_types.constant:
-				case forth_types.value:
-					append("stack.push(" + mangledt + ");\n");
-					break
-				default:
-					if(mangledt == 'true' || mangledt == 'false') {
-						append("stack.push(" + mangledt + ");\n");
-					} else if(mangledt == 'undefined') {
-						append("stack.push(" + undefined + ");\n");
-					} else if(mangledt == 'null') {
-						append("stack.push(" + null + ");\n");
+				while(tokens[i] != "\"") {
+					if(tokens[i] == "\n") {
+						str += " ";
 					} else {
-						var type = eval("typeof " + mangledt);
-						if(type == 'undefined') {
-							compiler_message_handler("performance warning: couldn't deduce at compile time how to call " + mangledt);
-							append("if(typeof " + mangledt + " == 'function') {\n");
-							append(line_prefix + "if(" + mangledt + ".forth_function) {\n");
-							append(line_prefix + line_prefix + mangledt + "(stack);\n");
-							append(line_prefix + "} else {\n");
-							append(line_prefix + line_prefix + "stack.push(" + mangledt + "());\n");
-							append(line_prefix + "}\n");
-							append("} else if (typeof " + mangledt + " == 'undefined' ) {\n");
-							append(line_prefix  + "console.error('unknown word " + mangledt + "');\n");
-							append("} else { \n");
-							append(line_prefix + "stack.push(" + mangledt + ");\n");
-							append("}\n");
-						} else {
-							if(type == 'function') {
-								if(eval(mangledt+".forth_function")) {
-									append(mangledt + "(stack);\n");
-								} else {
-									append("stack.push(" + mangledt + "());\n");
-								}
-							} else if (type == 'undefined' ) {
-								console.error("compiler error while processing '" + mangledt + "'");
-							} else {
-								append("stack.push(" + mangledt + ");\n");
-							}
-						}
+						str += tokens[i] + " ";
 					}
-			}
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ')'");
+				}
+				add(new forth.String(str.slice(0,str.length-1).replace(/ \t /gm, '\t')));
+				break;
+
+			case ".":
+				add(new forth.Call("print"));
+				break;
+			case ".s":
+				add(new forth.Call("printStack"));
+				break;
+			case "true":
+				add(new forth.ConstantValue(true));
+				break;
+			case "false":
+				add(new forth.ConstantValue(false));
+				break;
+			case "undefined":
+				add(new forth.ConstantValue(undefined));
+				break;
+			case "null":
+				add(new forth.ConstantValue(null));
+				break;
+
+			case "(": // comment start
+				var str = ""
+				var depth = 1;
+				while(depth > 0) {
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ')'");
+
+					if(tokens[i] == "(")
+						depth++;
+					else if(tokens[i] == ")") {
+						depth--;
+					}
+
+					if(depth > 0)
+						str += tokens[i] + " ";
+				}
+				add(new forth.CommentParentheses(str.slice(0, str.length-1)));
+				break;
+			case ":[": // execute js code start
+				var str = ""
+				i++;
+				while(tokens[i] != "]:" && tokens[i] != "]:d") {
+					str += tokens[i] + " ";
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ']:' or ']:d'");
+				}
+				var localjscode = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
+				if(tokens[i] == "]:")
+					add(new forth.JsCodeWithReturn(localjscode));
+				else // if(tokens[i] == "]:d")
+					add(new forth.JsCode(localjscode));
+				break;
+
+			case "new":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ')'");
+				add(new forth.New(tokens[i]));
+				break;
+			case "value":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ')'");
+				add(new forth.Value(tokens[i]));
+				break;
+			case "to":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ')'");
+				add(new forth.ValueAssign(tokens[i]));
+				break;
+			case "constant":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ')'");
+				add(new forth.Constant(tokens[i]));
+				break;
+			case "if":
+				var depth = 1
+
+				var thenstr = null;
+				var current = new Array;
+				while(depth > 0) {
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ')'");
+
+					switch(tokens[i]) {
+						case "if":
+							depth++;
+							current.push(tokens[i]); // + " ";
+							break;
+						case "else":
+							if(depth == 1) {
+								thenstr = current;
+								current = new Array;
+							} else {
+								current.push(tokens[i]); + " ";
+							}
+							break;
+						case "then":
+						case "endif":
+							depth--;
+							if(depth > 0)
+								current.push(tokens[i]); // + " ";
+							break;
+						default:
+							current.push(tokens[i]); // + " ";
+					}
+					//i++;
+				}
+
+				var compiledthen = null;
+				var compiledelse = null;
+				if(thenstr) {
+					compiledthen = forth.createFromForthTokens(thenstr);
+					compiledelse = forth.createFromForthTokens(current);
+				} else {
+					compiledthen = forth.createFromForthTokens(current);
+				}
+				add(new forth.BranchIf(compiledthen, compiledelse));
+				break;
+			case "case":
+				// TODO
+				break;
+			case "include":
+				// :( copied from the string detection
+				var str = ""
+				i++;
+
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ')'");
+
+				while(tokens[i] != "\"") {
+					if(tokens[i] == "\n") {
+						str += " ";
+					} else {
+						str += tokens[i] + " ";
+					}
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ')'");
+				}
+
+				var filename = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
+				add(forth.createFromForth(Filesystem.readFileSync(filename).toString()));
+				break;
+			case "'":
+				i++;
+
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ')'");
+
+				add(new forth.FunctionAddress(tokens[i]));
+				break;
+
+			case "{": // local variable start
+				var done = false;
+				var localvars = new Array;
+				var comment = "";
+				i++;
+				while(tokens[i] != "}") {
+					if(tokens[i] == "--") {
+						done = true;
+						i++;
+						continue;
+					}
+					if(!done) {
+						localvars.push(tokens[i]);
+					} else {
+						comment += tokens[i] + " ";
+					}
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ')'");
+				}
+				add(new forth.ValueLocal(localvars.reverse(), comment.slice(0, comment.length-1)));
+				break;
+			case ":": // function definition
+				var depth = 1;
+				i++;
+
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ')'");
+
+				var function_name = tokens[i];
+
+				if(function_name.indexOf(".") != -1)
+					throw new Error("Function names can not contain .");
+
+				var localtokens = new Array;
+
+				while(depth > 0) {
+					i++;
+					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js") {
+						depth++;
+					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+						depth--;
+					}
+					if(depth > 0)
+						localtokens.push(tokens[i]);
+				}
+
+				add(new forth.FunctionForth(function_name, forth.createFromForthTokens(localtokens)));
+				break;
+			case ":noname": // function definition
+				// TODO
+				break;
+			case ":js": // function definition
+				// TODO
+				break;
+
+			// forbidden tokens
+			case ")": // comment end
+			case "]:": // execute js code end
+			case "]:d": // execute js code end
+			case "else":
+			case "then":
+			case "endif":
+			case "endcase":
+			case "of":
+			case "endof":
+			case ";":
+			case "return;":
+			case "}": // local variable end
+				compiler_message_handler("Unexpected token " + t + " found");
+				break;
+			default:
+				if(Number.isNumeric(t)) {
+					add(new forth.Number(t));
+				} else {
+					add(new forth.Call(t));
+				}
 		}
 	}
 
 	return out;
+};
+
+forth.createFromForth = function(code) {
+	return forth.createFromForthTokens(forth.tokenize(code));
+};
+
+forth.generateForthCode = function(code_tree) {
+	// TODO
+};
+
+forth.generateJsCode = function(code_tree, indent_characters) {
+	if(indent_characters == undefined)
+		indent_characters = "\t";
+
+	// We could optimize away many forthFunctionCall calls
+	// by keeping tracking how to call a function/value/constant
+	// in practice this is much harder than it looks since
+	// every variable in javascript that gets a function assigned
+	// behaves like a function
+	function generateCode(code_tree, level) {
+
+		var out = "";
+
+		var lp =  "";
+		for(var i = 0; i < level; i++)
+			lp += indent_characters;
+
+		function append(str) {
+			if(str && str != "")
+				out += lp + str + "\n";
+		}
+
+		switch(code_tree.type) {
+			case forth.Types.BranchCase:
+			case forth.Types.BranchCaseOf:
+				break;
+			case forth.Types.BranchIf:
+				append("if(stack.pop()) {")
+				out += generateCode(code_tree.if_body, level);
+				if(code_tree.else_body) {
+					append("} else {")
+					out += generateCode(code_tree.else_body, level);
+				}
+				append("}")
+				break;
+			case forth.Types.Body:
+				code_tree.body.forEach(function(entry) {
+					out += generateCode(entry, level+1);
+				});
+				break;
+			case forth.Types.Call:
+				var name = forth_mangleName(code_tree.name);
+				var splitted = name.split(".");
+				var ctxt = splitted.slice(0, splitted.length-1).join(".");
+				if(ctxt && ctxt != "") {
+					if(splitted[0] == "$stack") {
+						var rest = splitted.slice(1).join(".");
+						append("forthFunctionCall(stack, \"" + rest + "\", stack.pop());");
+					} else {
+						append("forthFunctionCall(stack," + name + ", " + ctxt + ");");
+					}
+				} else {
+					append("forthFunctionCall(stack," + name + ");");
+				}
+				break;
+
+			// we ignore CommentLines and CommentParentheses
+			case forth.Types.CommentLine:
+			case forth.Types.CommentParentheses:
+				break;
+
+			case forth.Types.Constant:
+				var name = forth_mangleName(code_tree.name);
+				//forth_defined[mn] = forth.types.constant;
+				append("var " + name + " = stack.pop();");
+				break;
+			case forth.Types.ConstantValue:
+				append("stack.push(" + code_tree.value + ");");
+				break;
+			case forth.Types.FunctionAddress:
+				var name = forth_mangleName(code_tree.name);
+				append("stack.push(" + name + ");");
+				break;
+			case forth.Types.FunctionForth:
+				//forth_defined[function_name] = forth.types.forth_function;
+				var name = forth_mangleName(code_tree.name);
+				append("function " + name + "(stack) {");
+				out += generateCode(code_tree.body, level);
+				append("}");
+				append(name + ".forth_function=true;\n");
+				break;
+			case forth.Types.FunctionJs:
+				break;
+			case forth.Types.JsCode:
+				var clean = code_tree.body.replaceAll(" ", "").replaceAll("\t", "").replaceAll("\n", "");
+				if(clean && clean != "")
+					append(code_tree.body + ";");
+				break;
+			case forth.Types.JsCodeWithReturn:
+				append("stack.push(" + code_tree.body + ");");
+				break;
+			case forth.Types.New:
+				append("stack.push(new " + code_tree.name + ");");
+				break;
+			case forth.Types.Number:
+				append("stack.push(" + code_tree.value + ");");
+				break;
+			case forth.Types.String:
+				append("stack.push(\"" + code_tree.value + "\");");
+				break;
+			case forth.Types.Value:
+				//forth_defined[mn] = forth.types.value;
+				var name = forth_mangleName(code_tree.name);
+				append("var " + name + " = stack.pop();");
+				break;
+			case forth.Types.ValueAssign:
+				var name = forth_mangleName(code_tree.name);
+				append(name + " = stack.pop();");
+				break;
+			case forth.Types.ValueLocal:
+				code_tree.values.forEach(function(entry) {
+					var name = forth_mangleName(entry);
+					//forth_defined[name] = forth.types.value;
+					append("var " + name + " = stack.pop();");
+				});
+				break;
+			default:
+				console.log("Unknown type=" + code_tree.type);
+				//console.log("Unknown " + JSON.stringify(code_tree, null, "\t"));
+		}
+
+		return out;
+	}
+
+	return generateCode(code_tree, -1);
+};
+
+function forth_compile(code) {
+	var tokens = forth.tokenize(code)
+	var code_tree = forth.createFromForthTokens(tokens);
+	var generated_code = forth.generateJsCode(code_tree);
+	return generated_code;
 }
