@@ -40,8 +40,8 @@
 : or { x1 x2 -- x3 } :[ x1 | x2 ]: ;
 : and { x1 x2 -- x3 } :[ x1 & x2 ]: ;
 : xor { x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
-: not { x1 x2 -- x3 } :[ x1 ^ -1 ]: ;
-: invert { x1 x2 -- x3 } :[ x1 ^ -1 ]: ;
+: not { x1 -- x3 } :[ !x1 ]: ;
+: invert { x1 -- x3 } :[ x1 ^ -1 ]: ;
 
 \ math operations
 

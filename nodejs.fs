@@ -102,3 +102,9 @@ testfunc2
 
 
 Math.PI ' sin execute .
+
+
+: nestedtest " no " to this.bla 42 to this.answer ;
+new nestedtest { nt }
+nt.answer 42 = not if " :( " . endif
+nt.bla " no " = not if " :( " . endif

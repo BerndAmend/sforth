@@ -145,23 +145,20 @@ function forthFunctionCall(stack, func, context) {
 				else
 					stack.push(func.apply(this, args));
 				break;
-			case 'string':
-				var args = new Array;
-				for(var i=0;i<func.length; ++i) {
-					args.push(stack.pop());
-				}
-				args.reverse();
-				if(context)
-					stack.push(eval(func + ".apply(" + context + ", args);"));
-				else
-					stack.push(eval(func + ".apply(this, args);"));
-				break;
 			case 'undefined':
 				throw new Error("Can not call undefined function");
 				break;
 			default:
 				stack.push(func);
 		}
+	}
+}
+
+function forthNew(stack, func) {
+	if(func.forth_function) {
+		stack.push(new func(stack));
+	} else {
+		stack.push(new func());
 	}
 }
 // end
@@ -725,12 +722,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				var splitted = name.split(".");
 				var ctxt = splitted.slice(0, splitted.length-1).join(".");
 				if(ctxt && ctxt != "") {
-					if(splitted[0] == "$stack") {
-						var rest = splitted.slice(1).join(".");
-						append("forthFunctionCall(stack, \"" + rest + "\", stack.pop());");
-					} else {
-						append("forthFunctionCall(stack," + name + ", " + ctxt + ");");
-					}
+					append("forthFunctionCall(stack," + name + ", " + ctxt + ");");
 				} else {
 					append("forthFunctionCall(stack," + name + ");");
 				}
@@ -772,7 +764,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append("stack.push(" + code_tree.body + ");");
 				break;
 			case forth.Types.New:
-				append("stack.push(new " + code_tree.name + ");");
+				append("forthNew(stack, " + code_tree.name + ");");
 				break;
 			case forth.Types.Number:
 				append("stack.push(" + code_tree.value + ");");
