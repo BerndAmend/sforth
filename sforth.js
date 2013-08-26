@@ -132,6 +132,7 @@ forth.demangleName = function (str) {
 }
 
 forth.Types = {
+	BeginUntil: "BeginUntil",
 	BranchCase: "BranchCase",
 	BranchCaseOf: "BranchCaseOf",
 	BranchIf: "BranchIf",
@@ -155,6 +156,11 @@ forth.Types = {
 	Value: "Value",
 	ValueAssign: "ValueAssign",
 	ValueLocal: "ValueLocal"
+};
+
+forth.BeginUntil = function(body) {
+	this.type = forth.Types.BeginUntil;
+	this.body = body;
 };
 
 forth.BranchCase = function() {
@@ -471,6 +477,33 @@ forth.createFromForthTokens = function(tokens) {
 				}
 				add(new forth.BranchIf(compiledthen, compiledelse));
 				break;
+			case "begin":
+				var depth = 1
+
+				var current = new Array;
+				while(depth > 0) {
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing 'until'");
+
+					switch(tokens[i].toLowerCase()) {
+						case "begin":
+							depth++;
+							current.push(tokens[i]);
+							break;
+						case "until":
+							depth--;
+							if(depth > 0)
+								current.push(tokens[i]);
+							break;
+						default:
+							current.push(tokens[i]);
+					}
+				}
+
+				add(new forth.BeginUntil(forth.createFromForthTokens(current)));
+				break;
 			case "case":
 				// TODO
 				break;
@@ -642,6 +675,11 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 		}
 
 		switch(code_tree.type) {
+			case forth.Types.BeginUntil:
+				append("do {")
+				out += generateCode(code_tree.body, level);
+				append("} while(!stack.pop());");
+				break;
 			case forth.Types.BranchCase:
 			case forth.Types.BranchCaseOf:
 				break;
