@@ -132,16 +132,19 @@ forth.demangleName = function (str) {
 }
 
 forth.Types = {
+	BeginAgain: "BeginAgain",
 	BeginUntil: "BeginUntil",
 	BranchCase: "BranchCase",
 	BranchCaseOf: "BranchCaseOf",
 	BranchIf: "BranchIf",
 	Body: "Body",
 	Call: "Call",
+	Continue: "Continue",
 	CommentLine: "CommentLine",
 	CommentParentheses: "CommentParentheses",
 	Constant: "Constant",
 	ConstantValue: "ConstantValue",
+	Exit: "Exit",
 	FunctionAddress: "FunctionAddress",
 	FunctionForth: "FunctionForth",
 	FunctionForthAnonymous: "FunctionForthAnonymous",
@@ -149,6 +152,7 @@ forth.Types = {
 	FunctionJsAnonymous: "FunctionJsAnonymous",
 	JsCode: "JsCode",
 	JsCodeWithReturn: "JsCodeWithReturn",
+	Leave: "Leave",
 	New: "New",
 	Number: "Number",
 	String: "String",
@@ -156,6 +160,11 @@ forth.Types = {
 	Value: "Value",
 	ValueAssign: "ValueAssign",
 	ValueLocal: "ValueLocal"
+};
+
+forth.BeginAgain = function(body) {
+	this.type = forth.Types.BeginAgain;
+	this.body = body;
 };
 
 forth.BeginUntil = function(body) {
@@ -185,6 +194,10 @@ forth.Body = function() {
 	this.body = new Array;
 };
 
+forth.Continue = function() {
+	this.type = forth.Types.Continue;
+};
+
 forth.Call = function(name) {
 	this.type = forth.Types.Call;
 	this.name = name;
@@ -208,6 +221,10 @@ forth.Constant = function(name) {
 forth.ConstantValue = function(value) {
 	this.type = forth.Types.ConstantValue;
 	this.value = value;
+};
+
+forth.Exit = function() {
+	this.type = forth.Types.Exit;
 };
 
 forth.FunctionAddress = function(name) {
@@ -247,6 +264,10 @@ forth.JsCode = function(body) {
 forth.JsCodeWithReturn = function(body) {
 	this.type = forth.Types.JsCodeWithReturn;
 	this.body = body;
+};
+
+forth.Leave = function() {
+	this.type = forth.Types.Leave;
 };
 
 forth.New = function(name) {
@@ -493,6 +514,7 @@ forth.createFromForthTokens = function(tokens) {
 							current.push(tokens[i]);
 							break;
 						case "until":
+						case "again":
 							depth--;
 							if(depth > 0)
 								current.push(tokens[i]);
@@ -502,7 +524,13 @@ forth.createFromForthTokens = function(tokens) {
 					}
 				}
 
-				add(new forth.BeginUntil(forth.createFromForthTokens(current)));
+				var ltoken = tokens[i].toLowerCase();
+				if(ltoken.toLowerCase() == "until")
+					add(new forth.BeginUntil(forth.createFromForthTokens(current)));
+				else if(ltoken == "again")
+					add(new forth.BeginAgain(forth.createFromForthTokens(current)));
+				else
+					throw new Error("Internal compiler error: last closing element in a begin loop was invalid");
 				break;
 			case "case":
 				// TODO
@@ -617,6 +645,18 @@ forth.createFromForthTokens = function(tokens) {
 				// TODO
 				break;
 
+			// The following functions have to check if they are called in the correct scope
+			// Question: Should this be done after the code_tree is build?
+			case "continue":
+				add(new forth.Continue());
+				break;
+			case "exit":
+				add(new forth.Exit());
+				break;
+			case "leave":
+				add(new forth.Leave());
+				break;
+
 			// forbidden tokens
 			case ")": // comment end
 			case "]:": // execute js code end
@@ -675,8 +715,13 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 		}
 
 		switch(code_tree.type) {
+			case forth.Types.BeginAgain:
+				append("do {");
+				out += generateCode(code_tree.body, level);
+				append("} while(true);");
+				break;
 			case forth.Types.BeginUntil:
-				append("do {")
+				append("do {");
 				out += generateCode(code_tree.body, level);
 				append("} while(!stack.pop());");
 				break;
@@ -684,18 +729,21 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			case forth.Types.BranchCaseOf:
 				break;
 			case forth.Types.BranchIf:
-				append("if(stack.pop()) {")
+				append("if(stack.pop()) {");
 				out += generateCode(code_tree.if_body, level);
 				if(code_tree.else_body) {
 					append("} else {")
 					out += generateCode(code_tree.else_body, level);
 				}
-				append("}")
+				append("}");
 				break;
 			case forth.Types.Body:
 				code_tree.body.forEach(function(entry) {
 					out += generateCode(entry, level+1);
 				});
+				break;
+			case forth.Types.Continue:
+				append("continue;");
 				break;
 			case forth.Types.Call:
 				var name = forth.mangleName(code_tree.name);
@@ -719,6 +767,9 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				break;
 			case forth.Types.ConstantValue:
 				append("stack.push(" + code_tree.value + ");");
+				break;
+			case forth.Types.Exit:
+				append("return;");
 				break;
 			case forth.Types.FunctionAddress:
 				var name = forth.mangleName(code_tree.name);
@@ -747,6 +798,9 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				break;
 			case forth.Types.JsCodeWithReturn:
 				append("stack.push(" + code_tree.body + ");");
+				break;
+			case forth.Types.Leave:
+				append("break;");
 				break;
 			case forth.Types.New:
 				append("forthNew(stack, " + code_tree.name + ");");
