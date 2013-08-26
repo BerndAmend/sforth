@@ -110,3 +110,6 @@ nt.answer 42 = not if " :( " . endif
 nt.bla " no " = not if " :( " . endif
 
 :noname " :) " . ; execute
+
+: begin-until-test   ( -- )  7 BEGIN  1+ dup 12 = UNTIL . ;
+begin-until-test
