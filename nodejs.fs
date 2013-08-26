@@ -108,3 +108,5 @@ Math.PI ' sin execute .
 new nestedtest { nt }
 nt.answer 42 = not if " :( " . endif
 nt.bla " no " = not if " :( " . endif
+
+:noname " :) " . ; execute

@@ -1,6 +1,3 @@
-// This file only includes everything necessary to bootstrap the rest
-// directly from forth files
-
 // TODO optimize functions
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
@@ -18,62 +15,34 @@ function cloneMap(other) {
 	return result;
 }
 
-function ForthStack() {
-	this.stac=new Array();
+// Defining a value
+// { <var1> <var2 <var3 ... -- <comment> }
+// Value <name>
+// e.g. 90 Value blobvar
 
-	this.pop=function() {
-		if(this.isEmpty())
-			throw new Error("Stack underflow");
-		return this.stac.pop();
-	}
+// Assign something to a value
+// to <name>
+// e.g. 34 to blobvar
 
-	this.size=function() {
-		return this.stac.length;
-	}
+// forth functions
+// : function-name ( stack-comment ) body ;
+//  e.g : 2* ( x -- x ) 2 * ;
 
-	this.push=function(item) {
-		this.stac.push(item);
-	}
+// anonymous forth functions
+// a reference to the created function is pushed on the stack
+// :noname ( stack-comment ) body ;
+//  e.g :noname ( x -- x ) 2 * ;
 
-	this.top=function() {
-		return this.get(0);
-	}
+// javascript functions
+// :js { parameters } body ;
+// :js { parameters } body return;
 
-	this.isEmpty=function() {
-		return this.stac.length == 0;
-	}
-
-	this.get=function(pos) {
-		var realpos = this.stac.length-1-pos;
-		if(realpos < 0)
-			throw new Error("Stack underflow"); //?
-		return this.stac[realpos];
-	}
-
-	this.remove=function(pos) {
-		var realpos = this.stac.length-1-pos;
-		if(realpos < 0)
-			throw new Error("Stack underflow"); //?
-		return this.stac.splice(realpos, 1);
-	}
-
-	this.clear=function() {
-		this.stac = new Array();
-	}
-
-	this.toString=function() {return this.stac;}
-}
+//  anonymous javascript functions
+// :js-noname { parameters } body ;
+// :js-noname { parameters } body return;
 
 // Mapping of forth functions to javascript functions
 // a pure forth function like
-//   : mul2 ( x -- x ) 2 * ;
-// is converted into the following function
-//   function gff_test1(stack) {
-//     if(!stack) stack = new DefaultStacks();
-//     stack.d.push(2);
-//     gff_$times(stack);
-//   }
-//
 // If you want to write the following javascript function in forth
 //   function mul2(num1, num2) {
 //     return num1 * num2;
@@ -88,31 +57,13 @@ function ForthStack() {
 //     gff_$times(stack);
 //     return stack.d.pop();
 //   }
-//
+
 // if you call javascript functions from forth they will take required number of parameters from the data stack
 // and place the result on the stack
-//
-// js: javascript -> get the value or function address to to data stack
-// jsc: javascript call -> calls the function the required number of parameters is taken from the data stack and the return is pushed
-// jssc: javascript stack call -> calls the javascript function on the object that is current stack top
-//
-// : name code;
-// :noname code ; -> function pointer is placed on the stack
-// :ps code ( return ) ;
-// :psnoname code return; or ;
 
 // 42 Constant THEANSWER
 //var THEANSWER = 42;
 
-
-// 90 Value blobvar
-//var blobvar = 90;
-
-// 34 to blobvar
-//blobvar = 34;
-
-
-// { x1 x2 x3 }
 //var x1 = stack.d.pop();
 //var x2 = stack.d.pop();
 //var x3 = stack.d.pop();
@@ -122,52 +73,13 @@ function ForthStack() {
 // the compiler uses it to
 // :js function { a b c -- } ( code ) return;
 
+var forth = forth = forth || {};
 
-// create the global stack
-// TODO move this definitions into another js file
-// The generated js code depends on it, not on the compiler
-var stack = new ForthStack();
-
-function forthFunctionCall(stack, func, context) {
-	if(func.forth_function) {
-		func(stack);
-	} else {
-		var type = typeof func;
-		switch(type) {
-			case 'function':
-				var args = new Array;
-				for(var i=0;i<func.length; ++i) {
-					args.push(stack.pop());
-				}
-				args.reverse();
-				if(context)
-					stack.push(func.apply(context, args));
-				else
-					stack.push(func.apply(this, args));
-				break;
-			case 'undefined':
-				throw new Error("Can not call undefined function");
-				break;
-			default:
-				stack.push(func);
-		}
-	}
-}
-
-function forthNew(stack, func) {
-	if(func.forth_function) {
-		stack.push(new func(stack));
-	} else {
-		stack.push(new func());
-	}
-}
-// end
-
-var compiler_message_handler = function(str) {}
+forth.compiler_message_handler = function(str) {};
 
 // We don't allow . in function names
 // if you use $ ensure that you don't write one of the following strings
-var forth_mangling = {
+forth.mangling = {
 	"€": "$$euro",
 	"=": "$$eq",
 	">": "$$greater",
@@ -197,33 +109,27 @@ var forth_mangling = {
 	"}": "$$obraces"
 };
 
-function forth_mangleName(str) {
-	var result = str; //.toLowerCase();
+forth.mangleName = function(str) {
+	var result = str;
 
 	if(Number.isNumeric(str.charAt(0))) {
 		result = "$$" + result;
 	}
 
-	for(var s in forth_mangling) {
-		result = result.replaceAll(s, forth_mangling[s]);
+	for(var s in forth.mangling) {
+		result = result.replaceAll(s, forth.mangling[s]);
 	}
 
 	return result;
 }
 
-function forth_demangleName(str) {
-	//if(str.substr(0,forth_mangling_prefix.length) != forth_mangling_prefix)
-	//	throw new Error("not a mangled function name");
-
-	var result = str; //str.substr(forth_mangling_prefix.length);
-
-	for(var s in forth_mangling) {
-		result = result.replaceAll(forth_mangling[s], s);
+forth.demangleName = function (str) {
+	var result = str;
+	for(var s in forth.mangling) {
+		result = result.replaceAll(forth.mangling[s], s);
 	}
-	return result; //result.toLowerCase();
+	return result;
 }
-
-var forth = forth = forth || {};
 
 forth.Types = {
 	BranchCase: "BranchCase",
@@ -237,7 +143,9 @@ forth.Types = {
 	ConstantValue: "ConstantValue",
 	FunctionAddress: "FunctionAddress",
 	FunctionForth: "FunctionForth",
+	FunctionForthAnonymous: "FunctionForthAnonymous",
 	FunctionJs: "FunctionJs",
+	FunctionJsAnonymous: "FunctionJsAnonymous",
 	JsCode: "JsCode",
 	JsCodeWithReturn: "JsCodeWithReturn",
 	New: "New",
@@ -307,9 +215,20 @@ forth.FunctionForth = function(name, body) {
 	this.body = body;
 };
 
+forth.FunctionForthAnonymous = function(body) {
+	this.type = forth.Types.FunctionForthAnonymous;
+	this.body = body;
+};
+
 forth.FunctionJs = function(name, args, body) {
 	this.type = forth.Types.FunctionJs;
 	this.name = name;
+	this.args = args;
+	this.body = body;
+};
+
+forth.FunctionJsAnonymous = function(args, body) {
+	this.type = forth.Types.FunctionJsAnonymous;
 	this.args = args;
 	this.body = body;
 };
@@ -413,7 +332,7 @@ forth.createFromForthTokens = function(tokens) {
 					i++;
 
 					if(i >= tokens.length)
-						throw new Error("Couldn't find closing ')'");
+						throw new Error("Couldn't find closing '\"'");
 				}
 				add(new forth.String(str.slice(0,str.length-1).replace(/ \t /gm, '\t')));
 				break;
@@ -580,7 +499,7 @@ forth.createFromForthTokens = function(tokens) {
 				i++;
 
 				if(i >= tokens.length)
-					throw new Error("Couldn't find closing ')'");
+					throw new Error("Required parameter missing'");
 
 				add(new forth.FunctionAddress(tokens[i]));
 				break;
@@ -624,7 +543,7 @@ forth.createFromForthTokens = function(tokens) {
 
 				while(depth > 0) {
 					i++;
-					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js") {
+					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
 						depth++;
 					} else if(tokens[i] == ";" || tokens[i] == "return;") {
 						depth--;
@@ -636,9 +555,30 @@ forth.createFromForthTokens = function(tokens) {
 				add(new forth.FunctionForth(function_name, forth.createFromForthTokens(localtokens)));
 				break;
 			case ":noname": // function definition
-				// TODO
+				var depth = 1;
+
+				var localtokens = new Array;
+
+				while(depth > 0) {
+					i++;
+					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+						depth++;
+					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+						depth--;
+					}
+					if(depth > 0)
+						localtokens.push(tokens[i]);
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ';'");
+				}
+
+				add(new forth.FunctionForthAnonymous(forth.createFromForthTokens(localtokens)));
 				break;
 			case ":js": // function definition
+				// TODO
+				break;
+			case ":jsnoname": // function definition
 				// TODO
 				break;
 
@@ -718,7 +658,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				});
 				break;
 			case forth.Types.Call:
-				var name = forth_mangleName(code_tree.name);
+				var name = forth.mangleName(code_tree.name);
 				var splitted = name.split(".");
 				var ctxt = splitted.slice(0, splitted.length-1).join(".");
 				if(ctxt && ctxt != "") {
@@ -734,24 +674,29 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				break;
 
 			case forth.Types.Constant:
-				var name = forth_mangleName(code_tree.name);
-				//forth_defined[mn] = forth.types.constant;
+				var name = forth.mangleName(code_tree.name);
 				append("var " + name + " = stack.pop();");
 				break;
 			case forth.Types.ConstantValue:
 				append("stack.push(" + code_tree.value + ");");
 				break;
 			case forth.Types.FunctionAddress:
-				var name = forth_mangleName(code_tree.name);
+				var name = forth.mangleName(code_tree.name);
 				append("stack.push(" + name + ");");
 				break;
 			case forth.Types.FunctionForth:
-				//forth_defined[function_name] = forth.types.forth_function;
-				var name = forth_mangleName(code_tree.name);
+				var name = forth.mangleName(code_tree.name);
 				append("function " + name + "(stack) {");
 				out += generateCode(code_tree.body, level);
 				append("}");
 				append(name + ".forth_function=true;\n");
+				break;
+			case forth.Types.FunctionForthAnonymous:
+				append("stack.push({forth_function_anonymous: true,");
+				append("execute: function(stack) {");
+				out += generateCode(code_tree.body, level);
+				append("}");
+				append("});");
 				break;
 			case forth.Types.FunctionJs:
 				break;
@@ -777,16 +722,16 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				break;
 			case forth.Types.Value:
 				//forth_defined[mn] = forth.types.value;
-				var name = forth_mangleName(code_tree.name);
+				var name = forth.mangleName(code_tree.name);
 				append("var " + name + " = stack.pop();");
 				break;
 			case forth.Types.ValueAssign:
-				var name = forth_mangleName(code_tree.name);
+				var name = forth.mangleName(code_tree.name);
 				append(name + " = stack.pop();");
 				break;
 			case forth.Types.ValueLocal:
 				code_tree.values.forEach(function(entry) {
-					var name = forth_mangleName(entry);
+					var name = forth.mangleName(entry);
 					//forth_defined[name] = forth.types.value;
 					append("var " + name + " = stack.pop();");
 				});
@@ -802,7 +747,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 	return generateCode(code_tree, -1);
 };
 
-function forth_compile(code) {
+forth.compile = function(code) {
 	var tokens = forth.tokenize(code)
 	var code_tree = forth.createFromForthTokens(tokens);
 	var generated_code = forth.generateJsCode(code_tree);

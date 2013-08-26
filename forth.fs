@@ -113,7 +113,9 @@
 \ TODO: allow forth local words
 : throwError { message -- } :[ throw new Error(message) ]:d ;
 
-: jseval ( str -- ) global.eval drop ;
+: jseval ( str -- ) eval drop ;
+
+: compile ( x1 -- ) forth.compile ;
 
 : execute { x1 -- } :[ forthFunctionCall(stack,x1) ]:d ;
 
