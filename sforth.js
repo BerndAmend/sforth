@@ -303,7 +303,9 @@ forth.createFromForthTokens = function(tokens) {
 	for( var i = 0 ; i < tokens.length; i++ ) {
 		var t = tokens[i];
 
-		switch (t) {
+
+
+		switch (t.toLowerCase()) {
 			case "": // ignore empty/whitespace tokens
 			case "\n":
 				break;
@@ -434,7 +436,7 @@ forth.createFromForthTokens = function(tokens) {
 					if(i >= tokens.length)
 						throw new Error("Couldn't find closing ')'");
 
-					switch(tokens[i]) {
+					switch(tokens[i].toLowerCase()) {
 						case "if":
 							depth++;
 							current.push(tokens[i]); // + " ";
