@@ -115,10 +115,5 @@
 
 : jseval ( str -- ) global.eval drop ;
 
-: execute { x1 -- } :[
-    if(x1.forth_function == true)
-        x1(stack);
-    else
-        x1();
-]:d ;
+: execute { x1 -- } :[ forthFunctionCall(stack,x1) ]:d ;
 
