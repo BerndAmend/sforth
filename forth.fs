@@ -122,3 +122,11 @@
 
 : execute { x1 -- } :[ forthFunctionCall(stack,x1) ]:d ;
 
+: create-array { num -- new Array }
+    new Array { result }
+    begin
+        result.push \ returns the number of elements in the array
+        num -
+        0=
+    until
+    result.reverse ;
