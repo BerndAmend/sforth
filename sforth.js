@@ -335,6 +335,7 @@ forth.createFromForthTokens = function(tokens) {
 		switch (t.toLowerCase()) {
 			case "": // ignore empty/whitespace tokens
 			case "\n":
+			case "\t":
 				break;
 			case "\\": // line comments
 				var str = "";
