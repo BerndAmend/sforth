@@ -312,7 +312,8 @@ forth.tokenize = function(code) {
 	// unify line endings
 	var clean_code = code.replace(/\r\n/gm, '\n')
 		.replace(/\n/gm, ' \n ')
-		.replace(/\t/gm, ' \t ');
+		.replace(/\t/gm, ' \t ')
+		.replace(/\r/gm, ' \r ');
 
 	// tokenize code
 	var tokens=clean_code.split(" ");
@@ -336,6 +337,7 @@ forth.createFromForthTokens = function(tokens) {
 			case "": // ignore empty/whitespace tokens
 			case "\n":
 			case "\t":
+			case "\r":
 				break;
 			case "\\": // line comments
 				var str = "";
@@ -364,7 +366,7 @@ forth.createFromForthTokens = function(tokens) {
 					if(i >= tokens.length)
 						throw new Error("Couldn't find closing '\"'");
 				}
-				add(new forth.String(str.slice(0,str.length-1).replace(/ \t /gm, '\t')));
+				add(new forth.String(str.slice(0,str.length-1).replace(/ \t /gm, '\t').replace(/ \r /gm, '\r')));
 				break;
 
 			case ".":
