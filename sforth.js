@@ -38,8 +38,8 @@ function cloneMap(other) {
 // :js { parameters } body return;
 
 //  anonymous javascript functions
-// :js-noname { parameters } body ;
-// :js-noname { parameters } body return;
+// :jsnoname { parameters } body ;
+// :jsnoname { parameters } body return;
 
 // Mapping of forth functions to javascript functions
 // a pure forth function like
@@ -250,17 +250,19 @@ forth.FunctionForthAnonymous = function(body) {
 	this.body = body;
 };
 
-forth.FunctionJs = function(name, args, body) {
+forth.FunctionJs = function(name, args, body, returnValue) {
 	this.type = forth.Types.FunctionJs;
 	this.name = name;
 	this.args = args;
 	this.body = body;
+	this.returnValue = returnValue;
 };
 
-forth.FunctionJsAnonymous = function(args, body) {
+forth.FunctionJsAnonymous = function(args, body, returnValue) {
 	this.type = forth.Types.FunctionJsAnonymous;
 	this.args = args;
 	this.body = body;
+	this.returnValue = returnValue;
 };
 
 forth.JsCode = function(body) {
@@ -704,10 +706,99 @@ forth.createFromForthTokens = function(tokens) {
 				add(new forth.FunctionForthAnonymous(forth.createFromForthTokens(localtokens)));
 				break;
 			case ":js": // function definition
-				// TODO
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ';/return;' for ':js'");
+
+				var function_name = tokens[i];
+
+				if(function_name.indexOf(".") != -1)
+					throw new Error("Function names can not contain .");
+
+				var depth = 1;
+
+				var localtokens = new Array;
+
+				var returnValue = false;
+
+				while(depth > 0) {
+					i++;
+					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+						depth++;
+					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+						depth--;
+					}
+					if(depth > 0)
+						localtokens.push(tokens[i]);
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ';/return;' for ':js'");
+				}
+
+				if(tokens[i] == ";")
+					returnValue = false;
+				else if(tokens[i] == "return;")
+					returnValue = true;
+				else
+					throw new Error("something went wrong ':js'");
+
+				var localtree = forth.createFromForthTokens(localtokens);
+				var args = null;
+
+				if(localtree.body.length > 0) {
+					var values = localtree.body[0];
+					if(values.type != forth.Types.ValueLocal)
+						throw new Error(":js requires { <args> -- <comment> } after the function name");
+
+					values.type = forth.Types.CommentParentheses;
+					args = values.values.reverse();
+				}
+
+				var func = new forth.FunctionJs(function_name, args, localtree, returnValue);
+				add(func);
 				break;
 			case ":jsnoname": // function definition
-				// TODO
+				var depth = 1;
+
+				var localtokens = new Array;
+
+				var returnValue = false;
+
+				while(depth > 0) {
+					i++;
+					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+						depth++;
+					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+						depth--;
+					}
+					if(depth > 0)
+						localtokens.push(tokens[i]);
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ';/return;' for ':jsnoname'");
+				}
+
+				if(tokens[i] == ";")
+					returnValue = false;
+				else if(tokens[i] == "return;")
+					returnValue = true;
+				else
+					throw new Error("something went wrong ':jsnoname'");
+
+				var localtree = forth.createFromForthTokens(localtokens);
+				var args = null;
+
+				if(localtree.body.length > 0) {
+					var values = localtree.body[0];
+					if(values.type != forth.Types.ValueLocal)
+						throw new Error(":jsnoname requires { <args> -- <comment> } after :jsnoname");
+
+					values.type = forth.Types.CommentParentheses;
+					args = values.values.reverse();
+				}
+
+				var func = new forth.FunctionJsAnonymous(args, localtree, returnValue);
+				add(func);
 				break;
 
 			// The following functions have to check if they are called in the correct scope
