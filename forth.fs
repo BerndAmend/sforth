@@ -112,6 +112,8 @@
 : min { n1 n2 -- n3 } n1 n2 < if n1 else n2 endif ;
 : max { n1 n2 -- n3 } n1 n2 > if n1 else n2 endif ;
 
+: assert { flag text -- } flag not if text . endif ;
+
 \ Exceptions
 \ TODO: allow forth local words
 : throwError { message -- } :[ throw new Error(message) ]:d ;
