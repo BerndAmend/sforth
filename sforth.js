@@ -134,6 +134,7 @@ forth.demangleName = function (str) {
 forth.Types = {
 	BeginAgain: "BeginAgain",
 	BeginUntil: "BeginUntil",
+	BeginWhileRepeat: "BeginWhileRepeat",
 	BranchCase: "BranchCase",
 	BranchCaseOf: "BranchCaseOf",
 	BranchIf: "BranchIf",
@@ -170,6 +171,12 @@ forth.BeginAgain = function(body) {
 
 forth.BeginUntil = function(body) {
 	this.type = forth.Types.BeginUntil;
+	this.body = body;
+};
+
+forth.BeginWhileRepeat = function(condition, body) {
+	this.type = forth.Types.BeginWhileRepeat;
+	this.condition = condition;
 	this.body = body;
 };
 
@@ -890,6 +897,13 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append("do {");
 				out += generateCode(code_tree.body, level);
 				append("} while(!stack.pop());");
+				break;
+			case forth.Types.BeginWhileRepeat:
+				append("do {");
+				out += generateCode(code_tree.condition, level);
+				append("if(!stack.pop()) break;");
+				out += generateCode(code_tree.body, level);
+				append("} while(true);");
 				break;
 			case forth.Types.BranchCase:
 			case forth.Types.BranchCaseOf:
