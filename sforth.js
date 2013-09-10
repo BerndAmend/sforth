@@ -741,6 +741,8 @@ forth.createFromForthTokens = function(tokens) {
 			default:
 				if(Number.isNumeric(t)) {
 					add(new forth.Number(t));
+				} else if(t[0] == "'" && t.length == 2) {
+					add(new forth.Number(t.charCodeAt(1)));
 				} else {
 					add(new forth.Call(t));
 				}
