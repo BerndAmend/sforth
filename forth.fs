@@ -1,4 +1,6 @@
 
+0 constant nil
+
 : clearStack ( -- ) stack.clear drop ;
 
 \ data stack operations
