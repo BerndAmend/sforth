@@ -1,10 +1,20 @@
 
-: print { x -- } :[ console.log(x) ]:d ;
-: hex2str { x1 -- x2 } :[ x1.toString(16) ]: ;
+\ : print { x -- }  :[ process.stdout.write(x.toString()); ]:d ;
+: print { x -- }  :[ if(x || x === "") process.stdout.write(x.toString()); else console.log(x); ]:d ;
+\ : print { x -- }  :[ if(x) console.log(x.toString()); else console.log(x); ]:d ;
+: hex2str { x1 -- x2 } 16 x1.toString ;
 : hexPrint hex2str . ;
 
-: printStack ( -- ) :[ console.log(stack.toString()) ]:d ;
-: type { str -- } :[ console._stdout.write(str) ]:d ;
-: emit { x -- } :[ console._stdout.write(String.fromCharCode(x)) ]:d ;
+: printStack
+	." < " depth . ." >  " depth dup 0
+	?DO i
+		dup i - pick . ."   "
+	LOOP
+	drop ;
 
-: cr ( -- ) console.log drop ;
+: type ( str -- ) . ;
+: emit ( x -- ) String.fromCharCode . ;
+
+: cr ( -- ) " \n " . ;
+
+: clearCurrentLine ." \r\033[K " ;

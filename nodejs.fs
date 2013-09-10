@@ -6,117 +6,82 @@ include filesystem.fs "
 
 include pdfkit.fs "
 
+." sforth, Copyright (C) 2013 Bernd Amend <bernd.amend@gmail.com>\n "
+." Type `bye' to exit\n "
+
+true process.stdin.setRawMode drop
+process.stdin.resume drop
+" utf8 " process.stdin.setEncoding drop
+
 : bye ( -- ) 0 process.exit drop ;
 
-time-in-ms
-" wieso nur " .
-time-in-ms swap - . " ms " .
+" " value entered
 
-" true if 12 . endif " compile jseval
+\ TODO: load and save cmd_history
+0 value cmd_last_pos
+new ForthStack value cmd_history
 
-\ " false if 1 . else 2 . endif " compile jseval
+"data"
+:jsnoname { key }
+\ 0 key.charCodeAt . key.length .
+key " \u0003 " === if
+	\ Control-C was pressed
+else 0 key.charCodeAt 27 = if
+	1 key.charCodeAt 91 = if
+		2 key.charCodeAt 65 = if \ up
+		cmd_history.size 0> if
+			clearCurrentLine
+			cmd_last_pos cmd_history.get dup to entered .
+		endif
+		cmd_last_pos cmd_history.size 1- < if
+			cmd_last_pos 1+ to cmd_last_pos
+		endif
+		endif
 
-1 2 min .
-1 2 max .
+		2 key.charCodeAt 66 = if \ down
+		cmd_history.size 0> if
+			clearCurrentLine
+			cmd_last_pos cmd_history.get dup to entered .
+		endif
+		cmd_last_pos 0> if
+			cmd_last_pos 1- to cmd_last_pos
+		endif
+		endif
 
-false true false
-
-if
-    if
-        if
-            1 .
-        else
-            2 .
-        endif
-    else
-        if
-            3 .
-        else
-            4 .
-        endif
-    endif
+		2 key.charCodeAt 68 = if \ left
+		endif
+		2 key.charCodeAt 67 = if \ right
+		endif
+	endif
+else key " \u007f " === if
+	\ Backspace was pressed
+	entered.length 0> if
+	0 entered.length 1- entered.substr to entered
+	clearCurrentLine
+	entered.length 0> if entered . endif
+	endif
+else key " \r " === if
+	."   "
+  \ TODO: add try catch
+  entered cmd_history.push
+  0 to cmd_last_pos
+  entered
+  :[ try {
+	compile(stack);
+	entered = "";
+	jseval(stack);
+	stack.push(" ok\n");
+	print(stack);
+	} catch(e) {
+		console.error(e.stack);
+	} ]:d
+  " " to entered
 else
-    if
-        if
-            5 .
-        else
-            6 .
-        endif
-    else
-        if
-            7 .
-        else
-            8 .
-        endif
-    endif
-then
-
-" \033[31mHello\033[0m World " .
-
-new ForthStack value stack2
-
-2 stack2.push drop
-.s
-stack2.pop
-.s
-
-.s
-
-0.2 floor .
-
-13 3 /mod . .
-
-" clear " . clearStack
-
-.s
-
-2 Math.PI * rad2deg .
-180 deg2rad .
-
-Math.PI sin .
-180 sindeg .
-
-45 sindeg dup . asindeg . cr
-
-"
-: testfunc1 ( -- ) \" Func 1 \" . ;
-: testfunc2 ( -- ) \" Func 2 \" . ;
-
-undefined value testvar
-true if
-    ' testfunc1 to testvar
-else
-
-    ' testfunc2 to testvar
+	key .
+	entered key + to entered
 endif
-
-typeof testvar .
-typeof Math.PI .
-
-testvar ' testvar execute
-
-" compile jseval
-
-testfunc1
-testfunc2
-
-
-Math.PI ' sin execute .
-
-
-: nestedtest " no " to this.bla 42 to this.answer ;
-new nestedtest { nt }
-nt.answer 42 = not if " :( " . endif
-nt.bla " no " = not if " :( " . endif
-
-:noname " :) " . ; execute
-
-: begin-until-test   ( -- )  7 BEGIN  1+ dup 12 = UNTIL . ;
-begin-until-test
-
-\ : begin-while-repeat-test  ( -- )  7 BEGIN 1+ dup 12 < WHILE dup cr . REPEAT 5 spaces . ;
-\ begin-while-repeat-test
-
-: begin-again-test   ( -- 12 )  7 BEGIN 1+ dup 12 = IF " erreicht " . EXIT THEN AGAIN " wird nie erreicht " . ;
-
-begin-again-test
+endif
+endif
+endif
+;
+process.stdin.on drop \ register the key handling function
