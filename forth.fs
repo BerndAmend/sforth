@@ -32,9 +32,9 @@
 
 : depth ( -- n ) stack.size ;
 
-: pick { x } ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get ;
+: pick ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get ;
 
-: roll { x } ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove ;
+: roll ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove ;
 
 \ TODO: extend the compiler to detect if .add() or so has to be called
 : or { x1 x2 -- x3 } :[ x1 | x2 ]: ;
