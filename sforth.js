@@ -345,7 +345,7 @@ forth.createFromForthTokens = function(tokens) {
 					i++;
 
 					if(i >= tokens.length)
-						throw new Error("Couldn't find closing '\n'");
+						break;
 
 					if(tokens[i] != "\n")
 						str += tokens[i] + " ";
@@ -390,7 +390,7 @@ forth.createFromForthTokens = function(tokens) {
 			case "typeof":
 				i++;
 				if(i >= tokens.length)
-					throw new Error("Couldn't find parameter'");
+					throw new Error("Couldn't find parameter for 'typeof'");
 				add(new forth.TypeOf(tokens[i]));
 				break;
 
@@ -422,7 +422,7 @@ forth.createFromForthTokens = function(tokens) {
 					i++;
 
 					if(i >= tokens.length)
-						throw new Error("Couldn't find closing ']:' or ']:d'");
+						throw new Error("Couldn't find closing ']:' or ']:d' for ':[");
 				}
 				var localjscode = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
 				if(tokens[i] == "]:")
@@ -434,29 +434,29 @@ forth.createFromForthTokens = function(tokens) {
 			case "new":
 				i++;
 				if(i >= tokens.length)
-					throw new Error("Couldn't find closing ')'");
+					throw new Error("Couldn't find object name to create a new instance");
 				add(new forth.New(tokens[i]));
 				break;
 			case "value":
 				i++;
 				if(i >= tokens.length)
-					throw new Error("Couldn't find closing ')'");
+					throw new Error("Couldn't find value name for 'value'");
 				add(new forth.Value(tokens[i]));
 				break;
 			case "to":
 				i++;
 				if(i >= tokens.length)
-					throw new Error("Couldn't find closing ')'");
+					throw new Error("Couldn't find the value name for 'to'");
 				add(new forth.ValueAssign(tokens[i]));
 				break;
 			case "constant":
 				i++;
 				if(i >= tokens.length)
-					throw new Error("Couldn't find closing ')'");
+					throw new Error("Couldn't find the constant name for 'constant'");
 				add(new forth.Constant(tokens[i]));
 				break;
 			case "if":
-				var depth = 1
+				var depth = 1;
 
 				var thenstr = null;
 				var current = new Array;
@@ -464,7 +464,7 @@ forth.createFromForthTokens = function(tokens) {
 					i++;
 
 					if(i >= tokens.length)
-						throw new Error("Couldn't find closing ')'");
+						throw new Error("Couldn't find closing 'endif/then' for 'if'");
 
 					switch(tokens[i].toLowerCase()) {
 						case "if":
@@ -502,14 +502,14 @@ forth.createFromForthTokens = function(tokens) {
 				add(new forth.BranchIf(compiledthen, compiledelse));
 				break;
 			case "begin":
-				var depth = 1
+				var depth = 1;
 
 				var current = new Array;
 				while(depth > 0) {
 					i++;
 
 					if(i >= tokens.length)
-						throw new Error("Couldn't find closing 'until'");
+						throw new Error("Couldn't find closing 'again/until' for 'begin'");
 
 					switch(tokens[i].toLowerCase()) {
 						case "begin":
@@ -544,7 +544,7 @@ forth.createFromForthTokens = function(tokens) {
 				i++;
 
 				if(i >= tokens.length)
-					throw new Error("Couldn't find closing ')'");
+					throw new Error("Couldn't find closing '\"' for 'include'");
 
 				while(tokens[i] != "\"") {
 					if(tokens[i] == "\n") {
@@ -555,7 +555,7 @@ forth.createFromForthTokens = function(tokens) {
 					i++;
 
 					if(i >= tokens.length)
-						throw new Error("Couldn't find closing ')'");
+						throw new Error("Couldn't find closing '\"' for 'include'");
 				}
 
 				var filename = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
@@ -565,7 +565,7 @@ forth.createFromForthTokens = function(tokens) {
 				i++;
 
 				if(i >= tokens.length)
-					throw new Error("Required parameter missing'");
+					throw new Error("Required parameter missing for '");
 
 				add(new forth.FunctionAddress(tokens[i]));
 				break;
@@ -589,7 +589,7 @@ forth.createFromForthTokens = function(tokens) {
 					i++;
 
 					if(i >= tokens.length)
-						throw new Error("Couldn't find closing ')'");
+						throw new Error("Couldn't find closing '}' for '{'");
 				}
 				add(new forth.ValueLocal(localvars.reverse(), comment.slice(0, comment.length-1)));
 				break;
@@ -598,7 +598,7 @@ forth.createFromForthTokens = function(tokens) {
 				i++;
 
 				if(i >= tokens.length)
-					throw new Error("Couldn't find closing ')'");
+					throw new Error("Couldn't find closing ';' for ':'");
 
 				var function_name = tokens[i];
 
@@ -616,6 +616,9 @@ forth.createFromForthTokens = function(tokens) {
 					}
 					if(depth > 0)
 						localtokens.push(tokens[i]);
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ';' for ':'");
 				}
 
 				add(new forth.FunctionForth(function_name, forth.createFromForthTokens(localtokens)));
@@ -636,7 +639,7 @@ forth.createFromForthTokens = function(tokens) {
 						localtokens.push(tokens[i]);
 
 					if(i >= tokens.length)
-						throw new Error("Couldn't find closing ';'");
+						throw new Error("Couldn't find closing ';' for ':noname'");
 				}
 
 				add(new forth.FunctionForthAnonymous(forth.createFromForthTokens(localtokens)));
@@ -835,7 +838,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				break;
 			default:
 				console.log("Unknown type=" + code_tree.type);
-				//console.log("Unknown " + JSON.stringify(code_tree, null, "\t"));
+				console.log("Unknown " + JSON.stringify(code_tree, null, "\t"));
 		}
 
 		return out;
