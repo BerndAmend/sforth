@@ -821,7 +821,6 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append("stack.push(typeof " + code_tree.name + ");");
 				break;
 			case forth.Types.Value:
-				//forth_defined[mn] = forth.types.value;
 				var name = forth.mangleName(code_tree.name);
 				append("var " + name + " = stack.pop();");
 				break;
@@ -832,7 +831,6 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			case forth.Types.ValueLocal:
 				code_tree.values.forEach(function(entry) {
 					var name = forth.mangleName(entry);
-					//forth_defined[name] = forth.types.value;
 					append("var " + name + " = stack.pop();");
 				});
 				break;
