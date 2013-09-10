@@ -45,7 +45,9 @@ function ForthStack() {
 }
 
 function forthFunctionCall(stack, func, context) {
-	if(func.forth_function) {
+	if(func == undefined) {
+		throw new Error("Can not call undefined function");
+	} else if(func.forth_function) {
 		func(stack);
 	} else if(func.forth_function_anonymous) {
 		func.execute(stack);
