@@ -719,6 +719,7 @@ forth.createFromForthTokens = function(tokens) {
 				add(new forth.Exit());
 				break;
 			case "leave":
+			case "break":
 				add(new forth.Leave());
 				break;
 
