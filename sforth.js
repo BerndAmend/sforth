@@ -798,7 +798,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			case forth.Types.FunctionJs:
 				break;
 			case forth.Types.JsCode:
-				var clean = code_tree.body.replaceAll(" ", "").replaceAll("\t", "").replaceAll("\n", "");
+				var clean = code_tree.body.replaceAll(" ", "").replaceAll("\t", "").replaceAll("\n", "").replaceAll("\r", "");
 				if(clean && clean != "")
 					append(code_tree.body + ";");
 				break;
