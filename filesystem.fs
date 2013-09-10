@@ -2,6 +2,8 @@
 : readFileSync { filename -- content } :[ Filesystem.readFileSync(filename) ]: ;
 : writeFileSync { filename data -- } :[ Filesystem.writeFileSync(filename, data) ]:d ;
 
+: readLineWise ( filename ) readFileSync { content } :[ content.toString() ]: { str } " \n " undefined str.split ;
+
 (
 
 
@@ -9,11 +11,12 @@
 
 : convert-fbv-to-fs { input_file output_file columns rows -- }
     input_file readFileSync { input_data } \ read content from file
-    [ input_data.length ] columns / { lines } \ calculate how many lines have to be read
+    :[ content.toString() ]: { content }
+    [ content.length ] columns / { lines } \ calculate how many lines have to be read
        " " \ the result string
        lines 0 ?DO
          i columns * dup columns + { pos_start pos_end }
-         [ input_data.slice(pos_start, post_end) ] " \n " + +
+         [ content.slice(pos_start, post_end) ] " \n " + +
        LOOP
 
        { result }
