@@ -966,6 +966,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				var name = forth.mangleName(code_tree.name);
 				append("stack.push(" + name + ");");
 				break;
+
 			case forth.Types.FunctionForth:
 				var name = forth.mangleName(code_tree.name);
 				append("function " + name + "(stack) {");
@@ -980,8 +981,27 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append("}");
 				append("});");
 				break;
+
 			case forth.Types.FunctionJs:
+				var name = forth.mangleName(code_tree.name);
+				var args = code_tree.args.map(forth.mangleName).join(", ");
+				append("function " + name + "(" + args + ") {");
+				append("var stack = new ForthStack();");
+				out += generateCode(code_tree.body, level);
+				if(code_tree.returnValue)
+					append(" return stack.pop();");
+				append("}");
 				break;
+			case forth.Types.FunctionJsAnonymous:
+				var args = code_tree.args.map(forth.mangleName).join(", ");
+				append("stack.push(function(" + args + ") {");
+				append("var stack = new ForthStack();");
+				out += generateCode(code_tree.body, level);
+				if(code_tree.returnValue)
+					append(" return stack.pop();");
+				append("});");
+				break;
+
 			case forth.Types.JsCode:
 				var clean = code_tree.body.replaceAll(" ", "").replaceAll("\t", "").replaceAll("\n", "").replaceAll("\r", "");
 				if(clean && clean != "")
