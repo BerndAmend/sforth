@@ -60,7 +60,7 @@ else key " \u007f " === if
 	clearCurrentLine
 	entered.length 0> if entered . endif
 	endif
-else key " \r " === if
+else key " \r " === key " \n " === or if
 	."   "
   \ TODO: add try catch
   entered cmd_history.push
