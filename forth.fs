@@ -131,6 +131,8 @@
 
 : execute { x1 -- } :[ forthFunctionCall(stack,x1) ]:d ;
 
+: see { function_object -- } function_object.toString cr . ;
+
 : create-array { num -- new Array }
     new Array { result }
     begin
