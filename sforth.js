@@ -144,6 +144,7 @@ forth.Types = {
 	CommentParentheses: "CommentParentheses",
 	Constant: "Constant",
 	ConstantValue: "ConstantValue",
+	DoLoop: "DoLoop",
 	Exit: "Exit",
 	FunctionAddress: "FunctionAddress",
 	FunctionForth: "FunctionForth",
@@ -221,6 +222,12 @@ forth.Constant = function(name) {
 forth.ConstantValue = function(value) {
 	this.type = forth.Types.ConstantValue;
 	this.value = value;
+};
+
+forth.DoLoop = function(index, body) {
+	this.type = forth.Types.DoLoop;
+	this.index = index;
+	this.body = body;
 };
 
 forth.Exit = function() {
@@ -538,6 +545,58 @@ forth.createFromForthTokens = function(tokens) {
 			case "case":
 				// TODO
 				break;
+			case "do":
+			case "?do":
+			//case "-do":
+			//case "+do":
+				// forth.DoLoop = function(index, start, end, increment, compareOp, body)
+				var depth = 1;
+
+				var start = tokens[i];
+
+				i++;
+
+				if(i >= tokens.length)
+						throw new Error("Couldn't find closing element for '" + start + "'");
+
+				var idx = tokens[i]
+
+				var current = new Array;
+				while(depth > 0) {
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing element for '" + start + "'");
+
+					switch(tokens[i].toLowerCase()) {
+						case "do":
+						case "?do":
+							//case "-do":
+							//case "+do":
+							depth++;
+							current.push(tokens[i]);
+							break;
+						case "loop":
+						//case "-loop":
+						//case "+loop":
+							depth--;
+							if(depth > 0)
+								current.push(tokens[i]);
+							break;
+						default:
+							current.push(tokens[i]);
+					}
+				}
+
+				var end = tokens[i].toLowerCase();
+				switch(end) {
+					case "loop":
+						add(new forth.DoLoop(idx, forth.createFromForthTokens(current)));
+						break;
+					default:
+						throw new Error("Internal compiler error: last closing element in a '" + start + "' loop was invalid");
+				}
+				break;
 			case "include":
 				// :( copied from the string detection
 				var str = ""
@@ -774,6 +833,17 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			case forth.Types.ConstantValue:
 				append("stack.push(" + code_tree.value + ");");
 				break;
+
+			case forth.Types.DoLoop:
+				var idx = forth.mangleName(code_tree.index);
+				append("var " + idx + "_start=stack.pop();");
+				append("var " + idx + "_end=stack.pop();");
+				append("for(var " + idx + "=" + idx + "_start; " +
+					idx + "<" + idx + "_end;" + idx + "++) {");
+				out += generateCode(code_tree.body, level);
+				append("}");
+				break;
+
 			case forth.Types.Exit:
 				append("return;");
 				break;
