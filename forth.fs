@@ -1,6 +1,9 @@
 
 0 constant nil
 
+\ dummy function
+: ok ;
+
 : clearstack ( -- ) stack.clear drop ;
 
 \ data stack operations
