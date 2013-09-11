@@ -1,7 +1,7 @@
 
 0 constant nil
 
-: clearStack ( -- ) stack.clear drop ;
+: clearstack ( -- ) stack.clear drop ;
 
 \ data stack operations
 : dup { x -- x x } x x ;

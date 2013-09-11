@@ -5,10 +5,10 @@
 : hex2str { x1 -- x2 } 16 x1.toString ;
 : hexPrint hex2str . ;
 
-: printStack
-	." < " depth . ." >  " depth dup 0
+: printstack
+	" < " depth " >  " + + . depth dup 0
 	?DO i
-		dup i - pick . ."   "
+		dup i - pick .
 	LOOP
 	drop ;
 
