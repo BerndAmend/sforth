@@ -15,6 +15,7 @@
 : type ( str -- ) . ;
 : emit ( x -- ) String.fromCharCode . ;
 
-: cr ( -- ) " \n " . ;
+: space ( -- ) ."   " ;
+: cr ( -- ) ." \n " ;
 
 : clearcurrentline ." \r\033[K " ;
