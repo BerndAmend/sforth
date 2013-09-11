@@ -1,10 +1,11 @@
 
-include console.fs "
-include forth.fs "
-include time.fs "
-include filesystem.fs "
+include " console.fs "
+include forth.fs
+include time.fs
+include filesystem.fs
+include process.fs
 
-include pdfkit.fs "
+include pdfkit.fs
 
 ." sforth, Copyright (C) 2013 Bernd Amend <bernd.amend@gmail.com>\n "
 ." Type `bye' to exit\n "

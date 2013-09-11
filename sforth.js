@@ -618,19 +618,32 @@ forth.createFromForthTokens = function(tokens) {
 				if(i >= tokens.length)
 					throw new Error("Couldn't find closing '\"' for 'include'");
 
-				while(tokens[i] != "\"") {
-					if(tokens[i] == "\n") {
-						str += " ";
-					} else {
-						str += tokens[i] + " ";
-					}
+				var filename = "";
+				if(tokens[i] == "\"") {
+					// case include " filename "
+
 					i++;
 
 					if(i >= tokens.length)
 						throw new Error("Couldn't find closing '\"' for 'include'");
+
+					while(tokens[i] != "\"") {
+						if(tokens[i] == "\n") {
+							str += " ";
+						} else {
+							str += tokens[i] + " ";
+						}
+						i++;
+
+						if(i >= tokens.length)
+							throw new Error("Couldn't find closing '\"' for 'include'");
+					}
+
+					filename = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
+				} else {
+					filename = tokens[i];
 				}
 
-				var filename = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
 				add(forth.createFromForth(Filesystem.readFileSync(filename).toString()));
 				break;
 			case "'":
