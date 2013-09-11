@@ -120,6 +120,8 @@
 : r> ( R:w -- w ) this.returnStack.pop ;
 : r@ ( -- w R: w -- w ) this.returnStack.top ;
 : rdrop ( R:w -- ) this.returnStack.pop drop ;
+: rdepth ( -- n ) this.returnStack.size ;
+: rpick ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) this.returnStack.get ;
 
 ( : 2>r       d – R:d        core-ext       “two-to-r”
 : 2r>       R:d – d        core-ext       “two-r-from”

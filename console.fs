@@ -27,6 +27,15 @@
 	LOOP
 	drop ;
 
+: print-returnstack
+	:[ if(!this.returnStack) return ]:d \ return if no return stack exists
+	this.returnStack to returnStack \ get the return stack of the caller
+	" < " rdepth " >  " + + . rdepth 1- rdepth 0
+	?DO i
+		dup i - rpick .
+	LOOP
+	drop ;
+
 : emit ( x -- ) String.fromCharCode . ;
 
 : space ( -- ) ."   " ;
