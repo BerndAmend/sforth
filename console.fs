@@ -21,7 +21,7 @@
 : hexPrint hex2str . ;
 
 : printstack
-	" < " depth " >  " + + . depth dup 0
+	" < " depth 1- " >  " + + . depth dup 0
 	?DO i
 		dup i - pick .
 	LOOP
