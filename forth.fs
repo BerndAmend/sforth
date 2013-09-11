@@ -115,6 +115,18 @@
 : 1+ ( x1 -- x2 ) 1 + ;
 : 1- ( x1 -- x2 ) 1 - ;
 
+\ return stack functions
+: >r ( w -- R:w ) :[ if(!this.returnStack) this.returnStack = new ForthStack() ]:d returnStack.push drop ;
+: r> ( R:w -- w ) this.returnStack.pop ;
+: r@ ( -- w R: w -- w ) this.returnStack.top ;
+: rdrop ( R:w -- ) this.returnStack.pop drop ;
+
+( : 2>r       d – R:d        core-ext       “two-to-r”
+: 2r>       R:d – d        core-ext       “two-r-from”
+: 2r@       R:d – R:d d        core-ext       “two-r-fetch” )
+: 2rdrop ( R:d -- ) rdrop rdrop ;
+
+
 (
 : u< { u1 u2 -- f } ![
 		var u2 = stack.d.pop();        var u1 = stack.d.pop();
