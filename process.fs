@@ -1,0 +1,1 @@
+: cd { folder } :[ process.chdir(folder) ]:d ;

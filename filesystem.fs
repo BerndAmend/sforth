@@ -4,6 +4,8 @@
 
 : readLineWise ( filename ) readFileSync { content } :[ content.toString() ]: { str } " \n " undefined str.split ;
 
+: dir ( folder -- ) Filesystem.readdirSync ;
+
 (
 
 
@@ -14,7 +16,7 @@
     :[ content.toString() ]: { content }
     [ content.length ] columns / { lines } \ calculate how many lines have to be read
        " " \ the result string
-       lines 0 ?DO
+       lines 0 ?DO i
          i columns * dup columns + { pos_start pos_end }
          [ content.slice(pos_start, post_end) ] " \n " + +
        LOOP
