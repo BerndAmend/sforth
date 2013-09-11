@@ -841,8 +841,9 @@ forth.createFromForthTokens = function(tokens) {
 				compiler_message_handler("Unexpected token " + t + " found");
 				break;
 			default:
-				if(Number.isNumeric(t)) {
-					add(new forth.Number(t));
+				var replacedcommawithperiod = t.replaceAll(",", ".");
+				if(Number.isNumeric(replacedcommawithperiod)) {
+					add(new forth.Number(replacedcommawithperiod));
 				} else if(t[0] == "'" && t.length == 2) {
 					add(new forth.Number(t.charCodeAt(1)));
 				} else {
