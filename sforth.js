@@ -1,9 +1,3 @@
-// TODO optimize functions
-String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
-    return target.split(search).join(replacement);
-};
-
 Number.isNumeric = function( obj ) {
 	return !isNaN( parseFloat(obj) ) && isFinite( obj );
 }
@@ -395,8 +389,11 @@ forth.createFromForthTokens = function(tokens) {
 			case ".":
 				add(new forth.Call("print"));
 				break;
+			case ".c":
+				add(new forth.Call("printnumberwithcomma"));
+				break;
 			case ".s":
-				add(new forth.Call("printStack"));
+				add(new forth.Call("printstack"));
 				break;
 			case "true":
 				add(new forth.ConstantValue(true));

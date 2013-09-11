@@ -84,3 +84,9 @@ function forthNew(stack, func) {
 
 // create the global stack
 var stack = new ForthStack();
+
+// TODO optimize functions
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};

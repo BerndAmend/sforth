@@ -1,7 +1,22 @@
+: printdirect { x -- }
+	x x " " === or x 0= or if
+		:[ process.stdout.write(x.toString()) ]:d
+	else
+		:[ console.log(x); ]:d
+	endif
+;
 
-\ : print { x -- }  :[ process.stdout.write(x.toString()); ]:d ;
-: print { x -- }  :[ if(x || x === "" || x == 0 ) process.stdout.write(x.toString()); else console.log(x); ]:d ;
-\ : print { x -- }  :[ if(x) console.log(x.toString()); else console.log(x); ]:d ;
+: print { x -- }
+	x printdirect
+	typeof x "number" = if space endif
+;
+
+: printnumberwithcomma { x -- }
+	typeof x "number" = if
+		:[ x.toString() ]: { y } " . " " , " y.replaceAll printdirect space
+	endif
+;
+
 : hex2str { x1 -- x2 } 16 x1.toString ;
 : hexPrint hex2str . ;
 
