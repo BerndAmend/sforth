@@ -78,7 +78,7 @@ else key " \r " === key " \n " === or if
 	} ]:d
   " " to entered
 else
-	key printdirect
+	key type
 	entered key + to entered
 endif
 endif

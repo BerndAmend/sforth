@@ -1,4 +1,4 @@
-: printdirect { x -- }
+: type { x -- }
 	x x " " === or x 0= or if
 		:[ process.stdout.write(x.toString()) ]:d
 	else
@@ -7,7 +7,7 @@
 ;
 
 : print { x -- }
-	x printdirect
+	x type
 	typeof x "number" = if space endif
 ;
 
@@ -27,7 +27,6 @@
 	LOOP
 	drop ;
 
-: type ( str -- ) . ;
 : emit ( x -- ) String.fromCharCode . ;
 
 : space ( -- ) ."   " ;

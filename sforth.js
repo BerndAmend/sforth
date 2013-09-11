@@ -383,7 +383,7 @@ forth.createFromForthTokens = function(tokens) {
 				}
 				add(new forth.String(str.slice(0,str.length-1).replace(/ \t /gm, '\t').replace(/ \r /gm, '\r')));
 				if(t == ".\"")
-					add(new forth.Call("print"));
+					add(new forth.Call("type"));
 				break;
 
 			case ".":
