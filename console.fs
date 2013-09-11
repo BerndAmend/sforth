@@ -17,4 +17,4 @@
 
 : cr ( -- ) " \n " . ;
 
-: clearCurrentLine ." \r\033[K " ;
+: clearcurrentline ." \r\033[K " ;

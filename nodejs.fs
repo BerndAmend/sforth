@@ -30,7 +30,7 @@ else 0 key.charCodeAt 27 = if
 	1 key.charCodeAt 91 = if
 		2 key.charCodeAt 65 = if \ up
 		cmd_history.size 0> if
-			clearCurrentLine
+			clearcurrentline
 			cmd_last_pos cmd_history.get dup to entered .
 		endif
 		cmd_last_pos cmd_history.size 1- < if
@@ -40,7 +40,7 @@ else 0 key.charCodeAt 27 = if
 
 		2 key.charCodeAt 66 = if \ down
 		cmd_history.size 0> if
-			clearCurrentLine
+			clearcurrentline
 			cmd_last_pos cmd_history.get dup to entered .
 		endif
 		cmd_last_pos 0> if
@@ -57,7 +57,7 @@ else key " \u007f " === if
 	\ Backspace was pressed
 	entered.length 0> if
 	0 entered.length 1- entered.substr to entered
-	clearCurrentLine
+	clearcurrentline
 	entered.length 0> if entered . endif
 	endif
 else key " \r " === key " \n " === or if
