@@ -39,10 +39,25 @@
 : roll ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove ;
 
 \ TODO: extend the compiler to detect if .add() or so has to be called
-: or { x1 x2 -- x3 } :[ x1 | x2 ]: ;
-: and { x1 x2 -- x3 } :[ x1 & x2 ]: ;
+: or { x1 x2 -- x3 }
+	:[ if (typeof(x1) == 'boolean' || typeof(x2) == 'boolean')
+		stack.push(x1 || x2);
+	else
+		stack.push(x1 | x2);
+	]:d ;
+: and { x1 x2 -- x3 }
+	:[ if (typeof(x1) == 'boolean' || typeof(x2) == 'boolean')
+		stack.push(x1 && x2);
+	else
+		stack.push(x1 & x2);
+	]:d ;
 : xor { x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
-: not { x1 -- x3 } :[ !x1 ]: ;
+: not { x1 x2 -- x3 }
+	:[ if (typeof(x1) == 'boolean')
+		stack.push(!x1);
+	else
+		stack.push(~x1);
+	]:d ;
 : invert { x1 -- x3 } :[ x1 ^ -1 ]: ;
 
 \ math operations
