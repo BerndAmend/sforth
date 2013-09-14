@@ -22,9 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
+10 value consolebase
+
 : type { x -- }
 	x x " " === or x 0= or if
-		:[ process.stdout.write(x.toString()) ]:d
+		typeof x " number " = if
+			:[ process.stdout.write(x.toString(consolebase)) ]:d
+		else
+			:[ process.stdout.write(x.toString()) ]:d
+		endif
 	else
 		:[ console.log(x); ]:d
 	endif
@@ -32,11 +38,11 @@ THE SOFTWARE.
 
 : print { x -- }
 	x type
-	typeof x "number" = if space endif
+	typeof x " number " = if space endif
 ;
 
 : printnumberwithcomma { x -- }
-	typeof x "number" = if
+	typeof x " number " = if
 		:[ x.toString() ]: { y } " . " " , " y.replaceAll printdirect space
 	endif
 ;
@@ -47,7 +53,7 @@ THE SOFTWARE.
 : printstack
 	" < " depth 1- " >  " + + . depth dup 0
 	?DO i
-		dup i - pick .
+		dup i - pick type ."   "
 	LOOP
 	drop ;
 
@@ -56,7 +62,7 @@ THE SOFTWARE.
 	this.returnStack to returnStack \ get the return stack of the caller
 	" < " rdepth " >  " + + . rdepth 1- rdepth 0
 	?DO i
-		dup i - rpick .
+		dup i - rpick type ."   "
 	LOOP
 	drop ;
 
@@ -66,3 +72,7 @@ THE SOFTWARE.
 : cr ( -- ) ." \n " ;
 
 : clearcurrentline ." \r\033[K " ;
+
+: binary ( -- ) 2 to consolebase ;
+: decimal ( -- ) 10 to consolebase ;
+: hex ( -- ) 16 to consolebase ;
