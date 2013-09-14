@@ -196,3 +196,9 @@ THE SOFTWARE.
         0=
     until
     result.reverse ;
+
+\ String functions
+
+: count { x -- } x.length ;
+
+: s>string { n -- str } :[ n.toString() ]: ;
