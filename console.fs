@@ -41,7 +41,7 @@ THE SOFTWARE.
 	endif
 ;
 
-: hex2str { x1 -- x2 } 16 x1.toString ;
+: hex2str { x1 -- x2 } " $ " 16 x1.toString + ;
 : hexPrint hex2str . ;
 
 : printstack

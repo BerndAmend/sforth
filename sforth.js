@@ -413,6 +413,9 @@ forth.createFromForthTokens = function(tokens) {
 			case ".":
 				add(new forth.Call("print"));
 				break;
+			case "hex.":
+				add(new forth.Call("hexPrint"));
+				break;
 			case ".c":
 				add(new forth.Call("printnumberwithcomma"));
 				break;
