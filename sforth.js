@@ -889,6 +889,8 @@ forth.createFromForthTokens = function(tokens) {
 					add(new forth.Number(t.charCodeAt(1)));
 				} else if(t[0] == "$" && t.length >= 2) {
 					add(new forth.Number("0x" + t.substr(1)));
+				} else if(t[0] == "%" && t.length >= 2) {
+					add(new forth.Number(parseInt(t.substr(1),2)));
 				} else {
 					add(new forth.Call(t));
 				}
