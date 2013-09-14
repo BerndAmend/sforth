@@ -482,9 +482,10 @@ forth.createFromForthTokens = function(tokens) {
 				add(new forth.New(tokens[i]));
 				break;
 			case "value":
+			case "alias":
 				i++;
 				if(i >= tokens.length)
-					throw new Error("Couldn't find value name for 'value'");
+					throw new Error("Couldn't find value name for '"+ tokens[i-1] + "'");
 				add(new forth.Value(tokens[i]));
 				break;
 			case "to":
