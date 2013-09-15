@@ -199,6 +199,6 @@ THE SOFTWARE.
 
 \ String functions
 
-: count { stringzahl -- stringzahl len } stringzahl stringzahl.length ;
+: count { str -- str len } str str.length ;
 
 : s>string { n -- str } :[ n.toString() ]: ;
