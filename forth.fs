@@ -209,6 +209,22 @@ THE SOFTWARE.
     until
     result.reverse ;
 
+: new-array { size -- } :[ new Array(size) ]: ;
+
+: new-int8-array { size -- } :[ new Int8Array(size) ]: ;
+: new-int16-array { size -- } :[ new Int16Array(size) ]: ;
+: new-int32-array { size -- } :[ new Int32Array(size) ]: ;
+
+: new-uint8-array { size -- } :[ new Uint8Array(size) ]: ;
+: new-uint16-array { size -- } :[ new Uint16Array(size) ]: ;
+: new-uint32-array { size -- } :[ new Uint32Array(size) ]: ;
+
+: new-float32-array { size -- } :[ new Float32Array(size) ]: ;
+: new-float64-array { size -- } :[ new Float64Array(size) ]: ;
+
+: ! { value index variable -- } :[ variable[index] = value ]:d ;
+: @ { index variable -- value } :[ variable[index] ]: ;
+
 \ String functions
 
 : count { str -- str len } str str.length ;
