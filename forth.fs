@@ -47,7 +47,7 @@ THE SOFTWARE.
 
 : tuck { x1 x2 -- x2 x1 x2 } x2 x1 x2 ;
 
-: nip { x1 x2 -- x1 } x1 ;
+: nip { x1 x2 -- x2 } x2 ;
 
 
 : 2dup { x1 x2 -- x1 x2 x1 x2 } x1 x2 x1 x2 ;
@@ -227,8 +227,7 @@ THE SOFTWARE.
 
 \ String functions
 
-: count { str -- str len } str str.length ;
+: count { str -- str len } str.toString { s } str s.length ;
 
-: s>string { n -- str } undefined n.toString ;
+: o>string { n -- str } undefined n.toString ;
 : /string { str n -- str } n undefined str.substr ;
-: >string { str n -- str } 0 str.length n - str.substr ;
