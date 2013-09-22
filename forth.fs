@@ -227,7 +227,7 @@ THE SOFTWARE.
 
 \ String functions
 
-: count { str -- str len } str.toString { s } str s.length ;
+: count { str -- str len } :[ str.toString() ]: { s } str s.length ;
 
-: o>string { n -- str } undefined n.toString ;
+: o>string { n -- str } :[ n.toString() ]: ;
 : /string { str n -- str } n undefined str.substr ;
