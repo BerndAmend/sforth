@@ -1058,7 +1058,8 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append("break;");
 				break;
 			case forth.Types.New:
-				append("forthNew(stack, " + code_tree.name + ");");
+				var name = forth.mangleName(code_tree.name);
+				append("forthNew(stack, " + name + ");");
 				break;
 			case forth.Types.Number:
 				append("stack.push(" + code_tree.value + ");");
