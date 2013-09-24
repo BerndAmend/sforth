@@ -124,7 +124,8 @@ forth.mangling = {
 	"(": "$$oparentheses",
 	")": "$$cparentheses",
 	"{": "$$obraces",
-	"}": "$$obraces"
+	"}": "$$obraces",
+	"·": "$$middot"
 };
 
 forth.mangleName = function(str) {
