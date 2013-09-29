@@ -417,6 +417,31 @@ forth.createFromForthTokens = function(tokens) {
 					add(new forth.Call("type"));
 				break;
 
+			case "»": // strings
+			case ".»": // print string
+				var str = "";
+				i++;
+				while(tokens[i] != "«") {
+					if(tokens[i] == "\n") {
+						str += " ";
+					} else {
+						str += tokens[i] + " ";
+					}
+					i++;
+
+					if(i >= tokens.length) {
+						if(t == "«")
+							throw new Error("Couldn't find closing '«' for '»'");
+						else
+							throw new Error("Couldn't find closing '«' for '.»'");
+					}
+				}
+				add(new forth.String(str.slice(0,str.length-1).replace(/ \t /gm, '\t').replace(/ \r /gm, '\r')));
+				if(t == ".»")
+					add(new forth.Call("type"));
+				break;
+
+
 			case ".":
 				add(new forth.Call("print"));
 				break;
