@@ -100,6 +100,8 @@ THE SOFTWARE.
 
 \ math operations
 
+: tofixed { num digits -- str } digits num.toFixed ; 
+
 : deg2rad ( x1 -- x2 ) 180 / Math.PI * ;
 : rad2deg ( x1 -- x2 ) Math.PI / 180 * ;
 
