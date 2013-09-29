@@ -22,3 +22,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 : time-in-ms ( -- x ) new Date { x } x.getTime ;
+
+: settimeout { jsfunction timeout -- } :[ setTimeout(jsfunction, timeout) ]:d ;
