@@ -34,8 +34,8 @@ THE SOFTWARE.
 } ]:d
 
 : open-serial { filename -- serial } :[ new SerialPort(filename, { baudrate: 115200 }) ]: ;
-: write { ser1 ser2 ser3 -- }
+: write-serial { ser1 ser2 ser3 ser -- }
 	3 uint16-array value arr
 	ser1 0 arr ! ser2 1 arr ! ser3 2 arr !
-	arr.buffer toBuffer undefined serialport.write
+	arr.buffer toBuffer undefined ser.write
 ;
