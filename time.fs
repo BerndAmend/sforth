@@ -23,4 +23,8 @@ THE SOFTWARE.
 )
 : time-in-ms ( -- x ) new Date { x } x.getTime ;
 
-: settimeout { jsfunction timeout -- } :[ setTimeout(jsfunction, timeout) ]:d ;
+: settimeout { jsfunction timeout -- handle } :[ setTimeout(jsfunction, timeout) ]: ;
+: cleartimeout { handle -- } :[ clearTimeout(handle) ]:d ;
+
+: setinterval { jsfunction timeout -- handle } :[ setInterval(jsfunction, timeout) ]: ;
+: clearinterval { handle } :[ clearInterval(handle) ]:d ;
