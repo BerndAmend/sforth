@@ -27,6 +27,7 @@ include forth.fs
 include time.fs
 include filesystem.fs
 include process.fs
+include serial.fs
 
 include pdfkit.fs
 

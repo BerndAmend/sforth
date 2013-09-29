@@ -1,4 +1,4 @@
-/**
+(
 The MIT License (MIT)
 
 Copyright (c) 2013 Bernd Amend <bernd.amend+sforth@gmail.com>
@@ -20,32 +20,22 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-*/
-// example app for nodejs
+)
 
-Filesystem = require('fs');
+\ prototype
 
-// has to be done in the main file :(
-PDFDocument = require("pdfkit");
+:[ function toBuffer(ab) {
+    var buffer = new Buffer(ab.byteLength);
+    var view = new Uint8Array(ab);
+    for (var i = 0; i < buffer.length; ++i) {
+        buffer[i] = view[i];
+    }
+    return buffer;
+} ]:d
 
-SerialPort = require("serialport").SerialPort;
-
-// PNG = require('pngjs').PNG;
-
-//require("./sforth.js");
-//require("./sforth-runtime.js");
-
-global.eval(Filesystem.readFileSync('sforth.js').toString());
-global.eval(Filesystem.readFileSync('sforth-runtime.js').toString());
-
-compiler_message_handler=console.log
-
-//var tokens = forth.tokenize(Filesystem.readFileSync("nodejs.fs").toString());
-//var code_tree = forth.createFromForthTokens(tokens);
-//console.log(JSON.stringify(code_tree, null, "\t"));
-//console.log(forth.generateJsCode(code_tree));
-
-var compiled_code = forth.compile(Filesystem.readFileSync("nodejs.fs").toString());
-// Filesystem.writeFileSync("compiled-nodejs.fs", compiled_code);
-// console.log(compiled_code);
-global.eval(compiled_code);
+: open-serial { filename -- serial } :[ new SerialPort(filename, { baudrate: 115200 }) ]: ;
+: write { ser1 ser2 ser3 -- }
+	3 uint16-array value arr
+	ser1 0 arr ! ser2 1 arr ! ser3 2 arr !
+	arr.buffer toBuffer undefined serialport.write
+;
