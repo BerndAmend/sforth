@@ -995,12 +995,34 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 			case forth.Types.DoLoop:
 				var idx = forth.mangleName(code_tree.index);
-				append("var " + idx + "_start=stack.pop();");
+
+				append("(function() {");
+				append("var " + idx + "_increment=stack.pop();");
 				append("var " + idx + "_end=stack.pop();");
-				append("for(var " + idx + "=" + idx + "_start; " +
-					idx + "<" + idx + "_end;" + idx + "++) {");
-				out += generateCode(code_tree.body, level);
+				append("var " + idx + "_start=stack.pop();");
+
+				append("if(" + idx + "_start == " + idx + "_end) {");
+					append("if(" + idx + "_increment == 0) {");
+						append("for(var " + idx + "=" + idx + "_start; " +
+							idx + "<" + idx + "_end;) {");
+						out += generateCode(code_tree.body, level);
+						append("}");
+					append("}");
+				append("} else if(" + idx + "_start < " + idx + "_end) {");
+					append("if(" + idx + "_increment < 0) " + idx + "_increment *= -1;");
+					append("for(var " + idx + "=" + idx + "_start; " +
+						idx + "<" + idx + "_end;" + idx + "+= " + idx + "_increment) {");
+					out += generateCode(code_tree.body, level);
+					append("}");
+				append("} else {");
+					append("if(" + idx + "_increment > 0) " + idx + "_increment *= -1;");
+					append("for(var " + idx + "=" + idx + "_start; " +
+						idx + ">" + idx + "_end;" + idx + "+= " + idx + "_increment) {");
+					out += generateCode(code_tree.body, level);
+					append("}");
 				append("}");
+
+				append("}());");
 				break;
 
 			case forth.Types.Exit:
