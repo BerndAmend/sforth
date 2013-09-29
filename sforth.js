@@ -180,6 +180,7 @@ forth.Types = {
 	TypeOf: "TypeOf",
 	Value: "Value",
 	ValueAssign: "ValueAssign",
+	ValueAssignPlus: "ValueAssignPlus",
 	ValueLocal: "ValueLocal"
 };
 
@@ -332,6 +333,11 @@ forth.Value = function(name) {
 
 forth.ValueAssign = function(name) {
 	this.type = forth.Types.ValueAssign;
+	this.name = name;
+};
+
+forth.ValueAssignPlus = function(name) {
+	this.type = forth.Types.ValueAssignPlus;
 	this.name = name;
 };
 
@@ -497,6 +503,12 @@ forth.createFromForthTokens = function(tokens) {
 				if(i >= tokens.length)
 					throw new Error("Couldn't find the value name for 'to'");
 				add(new forth.ValueAssign(tokens[i]));
+				break;
+			case "+to":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find the value name for '+to'");
+				add(new forth.ValueAssignPlus(tokens[i]));
 				break;
 			case "constant":
 				i++;
@@ -1100,6 +1112,10 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			case forth.Types.ValueAssign:
 				var name = forth.mangleName(code_tree.name);
 				append(name + " = stack.pop();");
+				break;
+			case forth.Types.ValueAssignPlus:
+				var name = forth.mangleName(code_tree.name);
+				append(name + " += stack.pop();");
 				break;
 			case forth.Types.ValueLocal:
 				code_tree.values.forEach(function(entry) {
