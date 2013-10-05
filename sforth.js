@@ -902,6 +902,8 @@ forth.createFromForthTokens = function(tokens) {
 					add(new forth.Number(replacedcommawithperiod));
 				} else if(t[0] == "'" && t.length == 2) {
 					add(new forth.Number(t.charCodeAt(1)));
+				} else if(t[0] == "\"" && t.length >= 2) {
+					add(new forth.String(t.substr(1)));
 				} else if(t[0] == "»") {
 					var str = "";
 					if(tokens[i].substr(tokens[i].length-1) == "«"
