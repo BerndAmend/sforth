@@ -26,7 +26,7 @@ THE SOFTWARE.
 
 : type { x -- }
 	x x " " === or x 0= or if
-		typeof x " number " = if
+		typeof x "number = if
 			:[ process.stdout.write(x.toString(consolebase)) ]:d
 		else
 			:[ process.stdout.write(x.toString()) ]:d
@@ -38,40 +38,46 @@ THE SOFTWARE.
 
 : print { x -- }
 	x type
-	typeof x " number " = if space endif
+	typeof x "number = if space endif
 ;
 
 : printnumberwithcomma { x -- }
-	typeof x " number " = if
-		:[ x.toString() ]: { y } " . " " , " y.replaceAll printdirect space
+	typeof x "number = if
+		:[ x.toString() ]: { y } ". ", y.replaceAll printdirect space
 	endif
 ;
 
-: hex2str { x1 -- x2 } " $ " 16 x1.toString + ;
+: hex2str { x1 -- x2 } "$ 16 x1.toString + ;
 : hexPrint hex2str . ;
 
 : printstack
-	" < " depth 1- " >  " + + . depth dup 0 swap 1
+	"< depth 1- »> « + + . depth dup 0 swap 1
 	?DO i
-		dup i - pick type ."   "
+		dup i - pick { e }
+		typeof e "string = if
+			"» e "« + +
+		else
+			e
+		endif
+		type space
 	LOOP
 	drop ;
 
 : print-returnstack
 	:[ if(!this.returnStack) return ]:d \ return if no return stack exists
 	this.returnStack to returnStack \ get the return stack of the caller
-	" < " rdepth " >  " + + . rdepth 1- rdepth 0 swap 1
+	"< rdepth »> « + + . rdepth 1- rdepth 0 swap 1
 	?DO i
-		dup i - rpick type ."   "
+		dup i - rpick type space
 	LOOP
 	drop ;
 
 : emit ( x -- ) String.fromCharCode . ;
 
-: space ( -- ) ."   " ;
-: cr ( -- ) ." \n " ;
+: space ( -- ) » « . ;
+: cr ( -- ) "\n . ;
 
-: clearcurrentline ." \r\033[K " ;
+: clearcurrentline »\r\033[K« . ;
 
 : binary ( -- ) 2 to consolebase ;
 : decimal ( -- ) 10 to consolebase ;

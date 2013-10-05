@@ -46,7 +46,7 @@ process.stdin.resume drop
 0 value cmd_last_pos
 new ForthStack value cmd_history
 
-"data"
+"data
 :jsnoname { key }
 \ 0 key.charCodeAt . key.length .
 key " \u0003 " === if
@@ -98,7 +98,7 @@ else key " \r " === key " \n " === or if
 	stack.push(" ok\n");
 	print(stack);
 	} catch(e) {
-		console.error(e.stack);
+		console.error("\n" + e.stack);
 	} ]:d
   " " to entered
 else

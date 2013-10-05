@@ -73,14 +73,14 @@ THE SOFTWARE.
 : || { x1 x2 -- x3 } :[ x1 || x2 ]: ;
 
 : or { x1 x2 -- x3 }
-	typeof x1 "boolean" = typeof x2 "boolean" = || if
+	typeof x1 "boolean = typeof x2 "boolean = || if
 		x1 x2 ||
 	else
 		x1 x2 |
 	endif
 ;
 : and { x1 x2 -- x3 }
-	typeof x1 "boolean" = typeof x2 "boolean" = || if
+	typeof x1 "boolean = typeof x2 "boolean = || if
 		x1 x2 &&
 	else
 		x1 x2 &
@@ -89,7 +89,7 @@ THE SOFTWARE.
 
 : xor { x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
 : not { x1 -- x2 }
-	typeof x1 "boolean" = if
+	typeof x1 "boolean = if
 		:[ !x1 ]:
 	else
 		:[ ~x1 ]:
@@ -100,7 +100,7 @@ THE SOFTWARE.
 
 \ math operations
 
-: tofixed { num digits -- str } digits num.toFixed ; 
+: tofixed { num digits -- str } num 0= IF 1e-323 else num endif { num } digits num.toFixed ;
 
 : deg2rad ( x1 -- x2 ) 180 / Math.PI * ;
 : rad2deg ( x1 -- x2 ) Math.PI / 180 * ;
