@@ -67,9 +67,9 @@ function ForthStack() {
 	this.toString=function() {return this.stac;}
 }
 
-function forthFunctionCall(stack, func, context) {
+function forthFunctionCall(stack, func, context, name) {
 	if(func == undefined) {
-		throw new Error("Can not call undefined function");
+		throw new Error("Can not call undefined function (func = undefined name=" + name + ")");
 	} else if(func.forth_function) {
 		func(stack);
 	} else if(func.forth_function_anonymous) {
@@ -89,7 +89,7 @@ function forthFunctionCall(stack, func, context) {
 					stack.push(func.apply(this, args));
 				break;
 			case 'undefined':
-				throw new Error("Can not call undefined function");
+				throw new Error("Can not call undefined function (typeof func = 'undefined' name=" + name + ")");
 				break;
 			default:
 				stack.push(func);

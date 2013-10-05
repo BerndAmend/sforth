@@ -1027,9 +1027,9 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				var splitted = name.split(".");
 				var ctxt = splitted.slice(0, splitted.length-1).join(".");
 				if(ctxt && ctxt != "") {
-					append("forthFunctionCall(stack," + name + ", " + ctxt + ");");
+					append("forthFunctionCall(stack," + name + ", " + ctxt + ", \"" + name + "\");");
 				} else {
-					append("forthFunctionCall(stack," + name + ");");
+					append("forthFunctionCall(stack," + name + ", \"" + name + "\");");
 				}
 				break;
 
