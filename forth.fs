@@ -227,6 +227,8 @@ THE SOFTWARE.
 : ! { value index variable -- } :[ variable[index] = value ]:d ;
 : @ { index variable -- value } :[ variable[index] ]: ;
 
+: store-in-array { arr -- } arr.length 1- -1 1 do i i arr ! loop ;
+
 \ String functions
 
 : count { str -- str len } :[ str.toString() ]: { s } str s.length ;
