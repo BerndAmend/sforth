@@ -524,12 +524,14 @@ forth.createFromForthTokens = function(tokens) {
 				add(new forth.Value(tokens[i]));
 				break;
 			case "to":
+			case "=!":
 				i++;
 				if(i >= tokens.length)
 					throw new Error("Couldn't find the value name for 'to'");
 				add(new forth.ValueAssign(tokens[i]));
 				break;
 			case "+to":
+			case "+=!":
 				i++;
 				if(i >= tokens.length)
 					throw new Error("Couldn't find the value name for '+to'");
