@@ -417,31 +417,6 @@ forth.createFromForthTokens = function(tokens) {
 					add(new forth.Call("type"));
 				break;
 
-			case "»": // strings
-			case ".»": // print string
-				var str = "";
-				i++;
-				while(tokens[i] != "«") {
-					if(tokens[i] == "\n") {
-						str += " ";
-					} else {
-						str += tokens[i] + " ";
-					}
-					i++;
-
-					if(i >= tokens.length) {
-						if(t == "«")
-							throw new Error("Couldn't find closing '«' for '»'");
-						else
-							throw new Error("Couldn't find closing '«' for '.»'");
-					}
-				}
-				add(new forth.String(str.slice(0,str.length-1).replace(/ \t /gm, '\t').replace(/ \r /gm, '\r')));
-				if(t == ".»")
-					add(new forth.Call("type"));
-				break;
-
-
 			case ".":
 				add(new forth.Call("print"));
 				break;
@@ -927,6 +902,43 @@ forth.createFromForthTokens = function(tokens) {
 					add(new forth.Number(replacedcommawithperiod));
 				} else if(t[0] == "'" && t.length == 2) {
 					add(new forth.Number(t.charCodeAt(1)));
+				} else if(t[0] == "»") {
+					var str = "";
+					if(tokens[i].substr(tokens[i].length-1) == "«"
+						&& tokens[i].substr(tokens[i].length-2) != "\\«"
+					) {
+						str = tokens[i].substr(1,tokens[i].length-1);
+					} else {
+						str = tokens[i].substr(1) + " ";
+						i++;
+						while(true) {
+							if(tokens[i].substr(tokens[i].length-1) == "«"
+								&& tokens[i].substr(tokens[i].length-2) != "\\«"
+							) {
+								if(tokens[i].length == 1)
+									str += " ";
+								else
+									str += tokens[i];
+								break;
+							} else if(tokens[i] == "\n") {
+								str += "\n";
+							} else {
+								str += tokens[i] + " ";
+							}
+							i++;
+
+							if(i >= tokens.length)
+								throw new Error("Couldn't find closing '«' for '»'");
+						}
+					}
+
+					add(new forth.String(str.slice(0,str.length-1)
+											.replace(/ \t /gm, '\t')
+											.replace(/ \r /gm, '\r')
+											.replaceAll("\"", "\\\"")
+											.replaceAll("\\»", "»")
+											.replaceAll("\\«", "«")
+								  ));
 				} else if(t[0] == "$" && t.length >= 2) {
 					add(new forth.Number("0x" + t.substr(1)));
 				} else if(t[0] == "%" && t.length >= 2) {
