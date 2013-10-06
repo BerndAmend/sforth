@@ -71,9 +71,16 @@ function forthFunctionCall(stack, func, context, name) {
 	if(func == undefined) {
 		throw new Error("Can not call undefined function (func = undefined name=" + name + ")");
 	} else if(func.forth_function) {
-		func(stack);
+		if(context) {
+			func.apply(context, stack);
+		} else {
+			func(stack);
+		}
 	} else if(func.forth_function_anonymous) {
-		func.execute(stack);
+		if(context)
+			func.execute.apply(context, stack);
+		else
+			func.execute(stack);
 	} else {
 		var type = typeof func;
 		switch(type) {

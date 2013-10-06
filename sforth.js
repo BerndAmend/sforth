@@ -1029,7 +1029,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				if(ctxt && ctxt != "") {
 					append("forthFunctionCall(stack," + name + ", " + ctxt + ", \"" + name + "\");");
 				} else {
-					append("forthFunctionCall(stack," + name + ", \"" + name + "\");");
+					append("forthFunctionCall(stack," + name + ", undefined, \"" + name + "\");");
 				}
 				break;
 
