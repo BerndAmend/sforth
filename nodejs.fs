@@ -46,11 +46,20 @@ process.stdin.resume drop
 0 value cmd_last_pos
 new ForthStack value cmd_history
 
+: forthconsole ;
+null to forthconsole.onKey
+
 "data
 :jsnoname { key }
+
 \ 0 key.charCodeAt . key.length .
 key " \u0003 " === if
 	\ Control-C was pressed
+	\ restore console handler
+	null to forthconsole.onKey
+else
+:[ forthconsole.onKey != null ]: if
+	key forthconsole.onKey
 else 0 key.charCodeAt 27 = if
 	1 key.charCodeAt 91 = if
 		2 key.charCodeAt 65 = if \ up
@@ -104,6 +113,7 @@ else key " \r " === key " \n " === or if
 else
 	key type
 	entered key + to entered
+endif
 endif
 endif
 endif
