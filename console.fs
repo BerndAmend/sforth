@@ -25,7 +25,7 @@ THE SOFTWARE.
 10 value consolebase
 
 : type { x -- }
-	x x " " === or x 0= or if
+	x x »« === or x 0= or if
 		typeof x "number = if
 			:[ process.stdout.write(x.toString(consolebase)) ]:d
 		else

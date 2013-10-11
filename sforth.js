@@ -394,29 +394,6 @@ forth.createFromForthTokens = function(tokens) {
 				}
 				add(new forth.CommentLine(str.slice(0,str.length-1)));
 				break;
-			case "\"": // strings
-			case ".\"": // print string
-				var str = "";
-				i++;
-				while(tokens[i] != "\"") {
-					if(tokens[i] == "\n") {
-						str += " ";
-					} else {
-						str += tokens[i] + " ";
-					}
-					i++;
-
-					if(i >= tokens.length) {
-						if(t == "\"")
-							throw new Error("Couldn't find closing '\"' for '\"'");
-						else
-							throw new Error("Couldn't find closing '\"' for '.\"'");
-					}
-				}
-				add(new forth.String(str.slice(0,str.length-1).replace(/ \t /gm, '\t').replace(/ \r /gm, '\r')));
-				if(t == ".\"")
-					add(new forth.Call("type"));
-				break;
 			case "true":
 				add(new forth.ConstantValue(true));
 				break;

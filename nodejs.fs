@@ -31,16 +31,16 @@ include serial.fs
 
 include pdfkit.fs
 
-." sforth, Copyright (C) 2013 Bernd Amend <bernd.amend@gmail.com>\n "
-." Type `bye' to exit\n "
+»sforth, Copyright (C) 2013 Bernd Amend <bernd.amend@gmail.com>\n« .
+»Type `bye' to exit\n« .
 
 true process.stdin.setRawMode drop
 process.stdin.resume drop
-" utf8 " process.stdin.setEncoding drop
+"utf8 process.stdin.setEncoding drop
 
 : bye ( -- ) 0 process.exit drop ;
 
-" " value entered
+»« value entered
 
 \ TODO: load and save cmd_history
 0 value cmd_last_pos
@@ -53,7 +53,7 @@ null to forthconsole.onKey
 :jsnoname { key }
 
 \ 0 key.charCodeAt . key.length .
-key " \u0003 " === if
+key "\u0003 === if
 	\ Control-C was pressed
 	\ restore console handler
 	null to forthconsole.onKey
@@ -87,15 +87,15 @@ else 0 key.charCodeAt 27 = if
 		2 key.charCodeAt 67 = if \ right
 		endif
 	endif
-else key " \u007f " === if
+else key "\u007f === if
 	\ Backspace was pressed
 	entered.length 0> if
 	0 entered.length 1- entered.substr to entered
 	clearcurrentline
 	entered.length 0> if entered . endif
 	endif
-else key " \r " === key " \n " === or if
-	."   "
+else key "\r === key "\n === or if
+	» « type
   \ TODO: add try catch
   entered cmd_history.push
   0 to cmd_last_pos
@@ -105,11 +105,11 @@ else key " \r " === key " \n " === or if
 	entered = "";
 	jseval(stack);
 	stack.push(" ok\n");
-	print(stack);
+	$$dot(stack);
 	} catch(e) {
 		console.error("\n" + e.stack);
 	} ]:d
-  " " to entered
+  »« to entered
 else
 	key type
 	entered key + to entered
