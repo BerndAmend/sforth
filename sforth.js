@@ -33,64 +33,6 @@ function cloneMap(other) {
 	return result;
 }
 
-// Defining a value
-// { <var1> <var2 <var3 ... -- <comment> }
-// Value <name>
-// e.g. 90 Value blobvar
-
-// Assign something to a value
-// to <name>
-// e.g. 34 to blobvar
-
-// forth functions
-// : function-name ( stack-comment ) body ;
-//  e.g : 2* ( x -- x ) 2 * ;
-
-// anonymous forth functions
-// a reference to the created function is pushed on the stack
-// :noname ( stack-comment ) body ;
-//  e.g :noname ( x -- x ) 2 * ;
-
-// javascript functions
-// :js { parameters } body ;
-// :js { parameters } body return;
-
-//  anonymous javascript functions
-// :jsnoname { parameters } body ;
-// :jsnoname { parameters } body return;
-
-// Mapping of forth functions to javascript functions
-// a pure forth function like
-// If you want to write the following javascript function in forth
-//   function mul2(num1, num2) {
-//     return num1 * num2;
-//   }
-// you can do that by writing
-//   :ps test2 { num1 num2 } num1 num2 * return; // :ps enforces that there is no stack parameter
-// which results in the following javascript code
-//   function gff_test2(num1, num2) {
-//     var stack = new DefaultStacks();
-//     stack.d.push(num1);
-//     stack.d.push(num2);
-//     gff_$times(stack);
-//     return stack.d.pop();
-//   }
-
-// if you call javascript functions from forth they will take required number of parameters from the data stack
-// and place the result on the stack
-
-// 42 Constant THEANSWER
-//var THEANSWER = 42;
-
-//var x1 = stack.d.pop();
-//var x2 = stack.d.pop();
-//var x3 = stack.d.pop();
-
-
-// the stack comment is not really a stack comment,
-// the compiler uses it to
-// :js function { a b c -- } ( code ) return;
-
 var forth = forth = forth || {};
 
 forth.compiler_message_handler = function(str) {};
