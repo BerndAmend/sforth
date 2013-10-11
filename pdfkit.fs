@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 \ This example requires npm install pdfkit
+\ http://pdfkit.org/index.html
 
 new PDFDocument value doc
 
