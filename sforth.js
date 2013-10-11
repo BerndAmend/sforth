@@ -416,19 +416,6 @@ forth.createFromForthTokens = function(tokens) {
 				if(t == ".\"")
 					add(new forth.Call("type"));
 				break;
-
-			case ".":
-				add(new forth.Call("print"));
-				break;
-			case "hex.":
-				add(new forth.Call("hexPrint"));
-				break;
-			case ".c":
-				add(new forth.Call("printnumberwithcomma"));
-				break;
-			case ".s":
-				add(new forth.Call("printstack"));
-				break;
 			case "true":
 				add(new forth.ConstantValue(true));
 				break;
@@ -946,6 +933,10 @@ forth.createFromForthTokens = function(tokens) {
 				} else if(t[0] == "%" && t.length >= 2) {
 					add(new forth.Number(parseInt(t.substr(1),2)));
 				} else {
+					if(t[0] == ".")
+						t = "$$dot" + t.substr(1);
+					if(t[t.length-1] == ".")
+						t = "$$dot" + t.substr(0, t.length-1);
 					add(new forth.Call(t));
 				}
 		}

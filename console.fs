@@ -36,21 +36,21 @@ THE SOFTWARE.
 	endif
 ;
 
-: print { x -- }
+: . { x -- }
 	x type
 	typeof x "number = if space endif
 ;
 
-: printnumberwithcomma { x -- }
+: .c { x -- }
 	typeof x "number = if
-		:[ x.toString() ]: { y } ". ", y.replaceAll printdirect space
+		:[ x.toString() ]: { y } ". ", y.replaceAll type space
 	endif
 ;
 
 : hex2str { x1 -- x2 } "$ 16 x1.toString + ;
-: hexPrint hex2str . ;
+: hex. hex2str . ;
 
-: printstack
+: .s
 	"< depth 1- »> « + + . depth dup 0 swap 1
 	?DO i
 		dup i - pick { e }
