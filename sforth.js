@@ -118,6 +118,7 @@ forth.Types = {
 	JsCodeWithReturn: "JsCodeWithReturn",
 	Leave: "Leave",
 	New: "New",
+	Macro: "Macro",
 	Number: "Number",
 	String: "String",
 	TypeOf: "TypeOf",
@@ -143,9 +144,10 @@ forth.BeginWhileRepeat = function(condition, body) {
 	this.body = body;
 };
 
-forth.BranchCase = function() {
+forth.BranchCase = function(body, defaultOf) {
 	this.type = forth.Types.BranchCase;
-	this.body = new Array;
+	this.body = body;
+	this.defaultOf = defaultOf;
 };
 
 forth.BranchCaseOf = function(condition, body) {
@@ -254,6 +256,13 @@ forth.New = function(name) {
 	this.name = name;
 };
 
+forth.Macro = function(name, args, body, returnValue) {
+	this.type = forth.Types.Macro;
+	this.name = name;
+	this.args = args;
+	this.body = body;
+ };
+
 forth.Number = function(value) {
 	this.type = forth.Types.Number;
 	this.value = value;
@@ -302,20 +311,15 @@ forth.tokenize = function(code) {
 	// tokenize code
 	var tokens=clean_code.split(" ");
 
-	return tokens;
-}
-
-forth.createFromForthTokens = function(tokens) {
-	var out = new forth.Body();
+	// merge tokens
+	var merged_tokens = new Array();
 
 	function add(something) {
-		out.body.push(something);
+		merged_tokens.push(something);
 	}
 
 	for( var i = 0 ; i < tokens.length; i++ ) {
 		var t = tokens[i];
-
-
 
 		switch (t.toLowerCase()) {
 			case "": // ignore empty/whitespace tokens
@@ -323,6 +327,32 @@ forth.createFromForthTokens = function(tokens) {
 			case "\t":
 			case "\r":
 				break;
+
+			// move into macro definition
+			case "true":
+				add(new forth.ConstantValue(true));
+				break;
+			case "false":
+				add(new forth.ConstantValue(false));
+				break;
+			case "undefined":
+				add(new forth.ConstantValue(undefined));
+				break;
+			case "null":
+				add(new forth.ConstantValue(null));
+				break;
+			case "continue":
+				add(new forth.Continue());
+				break;
+			case "exit":
+				add(new forth.Exit());
+				break;
+			case "leave":
+			case "break":
+				add(new forth.Leave());
+				break;
+			// move into macro definition end
+
 			case "\\": // line comments
 				var str = "";
 				while(tokens[i] != "\n") {
@@ -336,25 +366,6 @@ forth.createFromForthTokens = function(tokens) {
 				}
 				add(new forth.CommentLine(str.slice(0,str.length-1)));
 				break;
-			case "true":
-				add(new forth.ConstantValue(true));
-				break;
-			case "false":
-				add(new forth.ConstantValue(false));
-				break;
-			case "undefined":
-				add(new forth.ConstantValue(undefined));
-				break;
-			case "null":
-				add(new forth.ConstantValue(null));
-				break;
-			case "typeof":
-				i++;
-				if(i >= tokens.length)
-					throw new Error("Couldn't find parameter for 'typeof'");
-				add(new forth.TypeOf(tokens[i]));
-				break;
-
 			case "(": // comment start
 				var str = ""
 				var depth = 1;
@@ -391,220 +402,6 @@ forth.createFromForthTokens = function(tokens) {
 				else // if(tokens[i] == "]:d")
 					add(new forth.JsCode(localjscode));
 				break;
-
-			case "new":
-				i++;
-				if(i >= tokens.length)
-					throw new Error("Couldn't find object name to create a new instance");
-				add(new forth.New(tokens[i]));
-				break;
-			case "value":
-			case "alias":
-				i++;
-				if(i >= tokens.length)
-					throw new Error("Couldn't find value name for '"+ tokens[i-1] + "'");
-				add(new forth.Value(tokens[i]));
-				break;
-			case "to":
-			case "=!":
-				i++;
-				if(i >= tokens.length)
-					throw new Error("Couldn't find the value name for 'to'");
-				add(new forth.ValueAssign(tokens[i]));
-				break;
-			case "+to":
-			case "+=!":
-				i++;
-				if(i >= tokens.length)
-					throw new Error("Couldn't find the value name for '+to'");
-				add(new forth.ValueAssignPlus(tokens[i]));
-				break;
-			case "constant":
-				i++;
-				if(i >= tokens.length)
-					throw new Error("Couldn't find the constant name for 'constant'");
-				add(new forth.Constant(tokens[i]));
-				break;
-			case "if":
-				var depth = 1;
-
-				var thenstr = null;
-				var current = new Array;
-				while(depth > 0) {
-					i++;
-
-					if(i >= tokens.length)
-						throw new Error("Couldn't find closing 'endif/then' for 'if'");
-
-					switch(tokens[i].toLowerCase()) {
-						case "if":
-							depth++;
-							current.push(tokens[i]); // + " ";
-							break;
-						case "else":
-							if(depth == 1) {
-								thenstr = current;
-								current = new Array;
-							} else {
-								current.push(tokens[i]); + " ";
-							}
-							break;
-						case "then":
-						case "endif":
-							depth--;
-							if(depth > 0)
-								current.push(tokens[i]); // + " ";
-							break;
-						default:
-							current.push(tokens[i]); // + " ";
-					}
-					//i++;
-				}
-
-				var compiledthen = null;
-				var compiledelse = null;
-				if(thenstr) {
-					compiledthen = forth.createFromForthTokens(thenstr);
-					compiledelse = forth.createFromForthTokens(current);
-				} else {
-					compiledthen = forth.createFromForthTokens(current);
-				}
-				add(new forth.BranchIf(compiledthen, compiledelse));
-				break;
-			case "begin":
-				var depth = 1;
-
-				var current = new Array;
-				while(depth > 0) {
-					i++;
-
-					if(i >= tokens.length)
-						throw new Error("Couldn't find closing 'again/until' for 'begin'");
-
-					switch(tokens[i].toLowerCase()) {
-						case "begin":
-							depth++;
-							current.push(tokens[i]);
-							break;
-						case "until":
-						case "again":
-							depth--;
-							if(depth > 0)
-								current.push(tokens[i]);
-							break;
-						default:
-							current.push(tokens[i]);
-					}
-				}
-
-				var ltoken = tokens[i].toLowerCase();
-				if(ltoken.toLowerCase() == "until")
-					add(new forth.BeginUntil(forth.createFromForthTokens(current)));
-				else if(ltoken == "again")
-					add(new forth.BeginAgain(forth.createFromForthTokens(current)));
-				else
-					throw new Error("Internal compiler error: last closing element in a begin loop was invalid");
-				break;
-			case "case":
-				// TODO
-				break;
-			case "do":
-			case "?do":
-			//case "-do":
-			//case "+do":
-				// forth.DoLoop = function(index, start, end, increment, compareOp, body)
-				var depth = 1;
-
-				var start = tokens[i];
-
-				i++;
-
-				if(i >= tokens.length)
-						throw new Error("Couldn't find closing element for '" + start + "'");
-
-				var idx = tokens[i]
-
-				var current = new Array;
-				while(depth > 0) {
-					i++;
-
-					if(i >= tokens.length)
-						throw new Error("Couldn't find closing element for '" + start + "'");
-
-					switch(tokens[i].toLowerCase()) {
-						case "do":
-						case "?do":
-							//case "-do":
-							//case "+do":
-							depth++;
-							current.push(tokens[i]);
-							break;
-						case "loop":
-						//case "-loop":
-						//case "+loop":
-							depth--;
-							if(depth > 0)
-								current.push(tokens[i]);
-							break;
-						default:
-							current.push(tokens[i]);
-					}
-				}
-
-				var end = tokens[i].toLowerCase();
-				switch(end) {
-					case "loop":
-						add(new forth.DoLoop(idx, forth.createFromForthTokens(current)));
-						break;
-					default:
-						throw new Error("Internal compiler error: last closing element in a '" + start + "' loop was invalid");
-				}
-				break;
-			case "include":
-				// :( copied from the string detection
-				var str = ""
-				i++;
-
-				if(i >= tokens.length)
-					throw new Error("Couldn't find closing '\"' for 'include'");
-
-				var filename = "";
-				if(tokens[i] == "\"") {
-					// case include " filename "
-
-					i++;
-
-					if(i >= tokens.length)
-						throw new Error("Couldn't find closing '\"' for 'include'");
-
-					while(tokens[i] != "\"") {
-						if(tokens[i] == "\n") {
-							str += " ";
-						} else {
-							str += tokens[i] + " ";
-						}
-						i++;
-
-						if(i >= tokens.length)
-							throw new Error("Couldn't find closing '\"' for 'include'");
-					}
-
-					filename = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
-				} else {
-					filename = tokens[i];
-				}
-
-				add(forth.createFromForth(Filesystem.readFileSync(filename).toString()));
-				break;
-			case "'":
-				i++;
-
-				if(i >= tokens.length)
-					throw new Error("Required parameter missing for '");
-
-				add(new forth.FunctionAddress(tokens[i]));
-				break;
-
 			case "{": // local variable start
 				var done = false;
 				var localvars = new Array;
@@ -627,181 +424,6 @@ forth.createFromForthTokens = function(tokens) {
 						throw new Error("Couldn't find closing '}' for '{'");
 				}
 				add(new forth.ValueLocal(localvars.reverse(), comment.slice(0, comment.length-1)));
-				break;
-			case ":": // function definition
-				var depth = 1;
-				i++;
-
-				if(i >= tokens.length)
-					throw new Error("Couldn't find closing ';' for ':'");
-
-				var function_name = tokens[i];
-
-				if(function_name.indexOf(".") != -1)
-					throw new Error("Function names can not contain .");
-
-				var localtokens = new Array;
-
-				while(depth > 0) {
-					i++;
-					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
-						depth++;
-					} else if(tokens[i] == ";" || tokens[i] == "return;") {
-						depth--;
-					}
-					if(depth > 0)
-						localtokens.push(tokens[i]);
-
-					if(i >= tokens.length)
-						throw new Error("Couldn't find closing ';' for ':'");
-				}
-
-				add(new forth.FunctionForth(function_name, forth.createFromForthTokens(localtokens)));
-				break;
-			case ":noname": // function definition
-				var depth = 1;
-
-				var localtokens = new Array;
-
-				while(depth > 0) {
-					i++;
-					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
-						depth++;
-					} else if(tokens[i] == ";" || tokens[i] == "return;") {
-						depth--;
-					}
-					if(depth > 0)
-						localtokens.push(tokens[i]);
-
-					if(i >= tokens.length)
-						throw new Error("Couldn't find closing ';' for ':noname'");
-				}
-
-				add(new forth.FunctionForthAnonymous(forth.createFromForthTokens(localtokens)));
-				break;
-			case ":js": // function definition
-				i++;
-				if(i >= tokens.length)
-					throw new Error("Couldn't find closing ';/return;' for ':js'");
-
-				var function_name = tokens[i];
-
-				if(function_name.indexOf(".") != -1)
-					throw new Error("Function names can not contain .");
-
-				var depth = 1;
-
-				var localtokens = new Array;
-
-				var returnValue = false;
-
-				while(depth > 0) {
-					i++;
-					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
-						depth++;
-					} else if(tokens[i] == ";" || tokens[i] == "return;") {
-						depth--;
-					}
-					if(depth > 0)
-						localtokens.push(tokens[i]);
-
-					if(i >= tokens.length)
-						throw new Error("Couldn't find closing ';/return;' for ':js'");
-				}
-
-				if(tokens[i] == ";")
-					returnValue = false;
-				else if(tokens[i] == "return;")
-					returnValue = true;
-				else
-					throw new Error("something went wrong ':js'");
-
-				var localtree = forth.createFromForthTokens(localtokens);
-				var args = null;
-
-				if(localtree.body.length > 0) {
-					var values = localtree.body[0];
-					if(values.type != forth.Types.ValueLocal)
-						throw new Error(":js requires { <args> -- <comment> } after the function name");
-
-					values.type = forth.Types.CommentParentheses;
-					args = values.values.reverse();
-				}
-
-				var func = new forth.FunctionJs(function_name, args, localtree, returnValue);
-				add(func);
-				break;
-			case ":jsnoname": // function definition
-				var depth = 1;
-
-				var localtokens = new Array;
-
-				var returnValue = false;
-
-				while(depth > 0) {
-					i++;
-					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
-						depth++;
-					} else if(tokens[i] == ";" || tokens[i] == "return;") {
-						depth--;
-					}
-					if(depth > 0)
-						localtokens.push(tokens[i]);
-
-					if(i >= tokens.length)
-						throw new Error("Couldn't find closing ';/return;' for ':jsnoname'");
-				}
-
-				if(tokens[i] == ";")
-					returnValue = false;
-				else if(tokens[i] == "return;")
-					returnValue = true;
-				else
-					throw new Error("something went wrong ':jsnoname'");
-
-				var localtree = forth.createFromForthTokens(localtokens);
-				var args = null;
-
-				if(localtree.body.length > 0) {
-					var values = localtree.body[0];
-					if(values.type != forth.Types.ValueLocal)
-						throw new Error(":jsnoname requires { <args> -- <comment> } after :jsnoname");
-
-					values.type = forth.Types.CommentParentheses;
-					args = values.values.reverse();
-				}
-
-				var func = new forth.FunctionJsAnonymous(args, localtree, returnValue);
-				add(func);
-				break;
-
-			// The following functions have to check if they are called in the correct scope
-			// Question: Should this be done after the code_tree is build?
-			case "continue":
-				add(new forth.Continue());
-				break;
-			case "exit":
-				add(new forth.Exit());
-				break;
-			case "leave":
-			case "break":
-				add(new forth.Leave());
-				break;
-
-			// forbidden tokens
-			case ")": // comment end
-			case "]:": // execute js code end
-			case "]:d": // execute js code end
-			case "else":
-			case "then":
-			case "endif":
-			case "endcase":
-			case "of":
-			case "endof":
-			case ";":
-			case "return;":
-			case "}": // local variable end
-				compiler_message_handler("Unexpected token " + t + " found");
 				break;
 			default:
 				var replacedcommawithperiod = t.replaceAll(",", ".");
@@ -853,12 +475,509 @@ forth.createFromForthTokens = function(tokens) {
 				} else if(t[0] == "%" && t.length >= 2) {
 					add(new forth.Number(parseInt(t.substr(1),2)));
 				} else {
-					if(t[0] == ".")
-						t = "$$dot" + t.substr(1);
-					if(t[t.length-1] == ".")
-						t = "$$dot" + t.substr(0, t.length-1);
-					add(new forth.Call(t));
+					add(t);
 				}
+		}
+	}
+
+	return merged_tokens;
+}
+
+forth.createFromForthTokens = function(tokens, context) {
+	if(!context)
+		context = new Object();
+
+	var out = new forth.Body();
+
+	function add(something) {
+		out.body.push(something);
+	}
+
+	for( var i = 0 ; i < tokens.length; i++ ) {
+		var t = tokens[i];
+
+		var token_handled = false;
+
+		switch(t.type) {
+			case forth.Types.CommentLine:
+			case forth.Types.CommentParentheses:
+			case forth.Types.JsCodeWithReturn:
+			case forth.Types.JsCode:
+			case forth.Types.ValueLocal:
+			case forth.Types.Number:
+			case forth.Types.String:
+			case forth.Types.ConstantValue:
+			case forth.Types.Continue:
+			case forth.Types.Exit:
+			case forth.Types.Leave:
+				add(t);
+				token_handled = true;
+				break;
+		}
+
+		if(token_handled)
+			continue;
+
+		switch (t.toLowerCase()) {
+			case "typeof":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find parameter for 'typeof'");
+				add(new forth.TypeOf(tokens[i]));
+				break;
+
+			case "new":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find object name to create a new instance");
+				add(new forth.New(tokens[i]));
+				break;
+			case "value":
+			case "alias":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find value name for '"+ tokens[i-1] + "'");
+				add(new forth.Value(tokens[i]));
+				break;
+			case "to":
+			case "=!":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find the value name for 'to'");
+				add(new forth.ValueAssign(tokens[i]));
+				break;
+			case "+to":
+			case "+=!":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find the value name for '+to'");
+				add(new forth.ValueAssignPlus(tokens[i]));
+				break;
+			case "constant":
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find the constant name for 'constant'");
+				add(new forth.Constant(tokens[i]));
+				break;
+			case "if":
+				var depth = 1;
+
+				var thenstr = null;
+				var current = new Array;
+				while(depth > 0) {
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing 'endif/then' for 'if'");
+
+					if(tokens[i].type) {
+						current.push(tokens[i]);
+						continue;
+					}
+
+					switch(tokens[i].toLowerCase()) {
+						case "if":
+							depth++;
+							current.push(tokens[i]);
+							break;
+						case "else":
+							if(depth == 1) {
+								thenstr = current;
+								current = new Array;
+							} else {
+								current.push(tokens[i]);
+							}
+							break;
+						case "then":
+						case "endif":
+							depth--;
+							if(depth > 0)
+								current.push(tokens[i]);
+							break;
+						default:
+							current.push(tokens[i]);
+					}
+				}
+
+				var compiledthen = null;
+				var compiledelse = null;
+				if(thenstr) {
+					compiledthen = forth.createFromForthTokens(thenstr, context);
+					compiledelse = forth.createFromForthTokens(current, context);
+				} else {
+					compiledthen = forth.createFromForthTokens(current, context);
+				}
+				add(new forth.BranchIf(compiledthen, compiledelse));
+				break;
+			case "begin":
+				var depth = 1;
+
+				var current = new Array;
+				while(depth > 0) {
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing 'again/until' for 'begin'");
+
+					if(tokens[i].type) {
+						current.push(tokens[i]);
+						continue;
+					}
+
+					switch(tokens[i].toLowerCase()) {
+						case "begin":
+							depth++;
+							current.push(tokens[i]);
+							break;
+						case "until":
+						case "again":
+							depth--;
+							if(depth > 0)
+								current.push(tokens[i]);
+							break;
+						default:
+							current.push(tokens[i]);
+					}
+				}
+
+				var ltoken = tokens[i].toLowerCase();
+				if(ltoken.toLowerCase() == "until")
+					add(new forth.BeginUntil(forth.createFromForthTokens(current, context)));
+				else if(ltoken == "again")
+					add(new forth.BeginAgain(forth.createFromForthTokens(current, context)));
+				else
+					throw new Error("Internal compiler error: last closing element in a begin loop was invalid");
+				break;
+			case "case":
+				var depth = 1;
+
+				var current = new Array;
+				var defaultOf = null;
+				while(depth > 0) {
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing 'endcase' for 'case'");
+
+					if(tokens[i].type) {
+						current.push(tokens[i]);
+						continue;
+					}
+
+					switch(tokens[i].toLowerCase()) {
+						case "case":
+							depth++;
+							current.push(tokens[i]);
+							break;
+						case "endcase":
+							depth--;
+							if(depth > 0)
+								current.push(tokens[i]);
+							break;
+						default:
+							current.push(tokens[i]);
+					}
+				}
+
+				// parse of endof
+
+				//add(new forth.BranchCase(forth.createFromForthTokens(current, context), defaultOf)));
+				break;
+			case "do":
+			case "?do":
+				// forth.DoLoop = function(index, start, end, increment, compareOp, body)
+				var depth = 1;
+
+				var start = tokens[i];
+
+				i++;
+
+				if(i >= tokens.length)
+						throw new Error("Couldn't find closing element for '" + start + "'");
+
+				var idx = tokens[i]
+
+				var current = new Array;
+				while(depth > 0) {
+					i++;
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing element for '" + start + "'");
+
+					if(tokens[i].type) {
+						current.push(tokens[i]);
+						continue;
+					}
+
+					switch(tokens[i].toLowerCase()) {
+						case "do":
+						case "?do":
+							depth++;
+							current.push(tokens[i]);
+							break;
+						case "loop":
+							depth--;
+							if(depth > 0)
+								current.push(tokens[i]);
+							break;
+						default:
+							current.push(tokens[i]);
+					}
+				}
+
+				var end = tokens[i].toLowerCase();
+				switch(end) {
+					case "loop":
+						add(new forth.DoLoop(idx, forth.createFromForthTokens(current, context)));
+						break;
+					default:
+						throw new Error("Internal compiler error: last closing element in a '" + start + "' loop was invalid");
+				}
+				break;
+			case "include":
+				// :( copied from the string detection
+				var str = ""
+				i++;
+
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing '\"' for 'include'");
+				if(tokens[i].type == forth.Types.String) {
+					add(forth.createFromForth(Filesystem.readFileSync(tokens[i].value).toString()));
+				} else {
+					add(forth.createFromForth(Filesystem.readFileSync(tokens[i]).toString()));
+				}
+				break;
+			case "'":
+				i++;
+
+				if(i >= tokens.length)
+					throw new Error("Required parameter missing for '");
+
+				add(new forth.FunctionAddress(tokens[i]));
+				break;
+
+			case ":": // function definition
+				var depth = 1;
+				i++;
+
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ';' for ':'");
+
+				var function_name = tokens[i];
+
+				if(function_name[0] == ".")
+					function_name = "$$dot" + function_name.substr(1);
+				if(function_name[function_name.length-1] == ".")
+					function_name = "$$dot" + function_name.substr(0, function_name.length-1);
+
+				if(function_name.indexOf(".") != -1)
+					throw new Error("Function names can not contain .");
+
+				var localtokens = new Array;
+
+				while(depth > 0) {
+					i++;
+					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+						depth++;
+					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+						depth--;
+					}
+					if(depth > 0)
+						localtokens.push(tokens[i]);
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ';' for ':'");
+				}
+
+				add(new forth.FunctionForth(function_name, forth.createFromForthTokens(localtokens, context)));
+				break;
+			case ":noname": // function definition
+				var depth = 1;
+
+				var localtokens = new Array;
+
+				while(depth > 0) {
+					i++;
+					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+						depth++;
+					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+						depth--;
+					}
+					if(depth > 0)
+						localtokens.push(tokens[i]);
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ';' for ':noname'");
+				}
+
+				add(new forth.FunctionForthAnonymous(forth.createFromForthTokens(localtokens, context)));
+				break;
+			case ":js": // function definition
+				i++;
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ';/return;' for ':js'");
+
+				var function_name = tokens[i];
+
+				if(function_name.indexOf(".") != -1)
+					throw new Error("Function names can not contain .");
+
+				var depth = 1;
+
+				var localtokens = new Array;
+
+				var returnValue = false;
+
+				while(depth > 0) {
+					i++;
+					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+						depth++;
+					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+						depth--;
+					}
+					if(depth > 0)
+						localtokens.push(tokens[i]);
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ';/return;' for ':js'");
+				}
+
+				if(tokens[i] == ";")
+					returnValue = false;
+				else if(tokens[i] == "return;")
+					returnValue = true;
+				else
+					throw new Error("something went wrong ':js'");
+
+				var localtree = forth.createFromForthTokens(localtokens, context);
+				var args = null;
+
+				if(localtree.body.length > 0) {
+					var values = localtree.body[0];
+					if(values.type != forth.Types.ValueLocal)
+						throw new Error(":js requires { <args> -- <comment> } after the function name");
+
+					values.type = forth.Types.CommentParentheses;
+					args = values.values.reverse();
+				}
+
+				var func = new forth.FunctionJs(function_name, args, localtree, returnValue);
+				add(func);
+				break;
+			case ":jsnoname": // function definition
+				var depth = 1;
+
+				var localtokens = new Array;
+
+				var returnValue = false;
+
+				while(depth > 0) {
+					i++;
+					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+						depth++;
+					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+						depth--;
+					}
+					if(depth > 0)
+						localtokens.push(tokens[i]);
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ';/return;' for ':jsnoname'");
+				}
+
+				if(tokens[i] == ";")
+					returnValue = false;
+				else if(tokens[i] == "return;")
+					returnValue = true;
+				else
+					throw new Error("something went wrong ':jsnoname'");
+
+				var localtree = forth.createFromForthTokens(localtokens, context);
+				var args = null;
+
+				if(localtree.body.length > 0) {
+					var values = localtree.body[0];
+					if(values.type != forth.Types.ValueLocal)
+						throw new Error(":jsnoname requires { <args> -- <comment> } after :jsnoname");
+
+					values.type = forth.Types.CommentParentheses;
+					args = values.values.reverse();
+				}
+
+				var func = new forth.FunctionJsAnonymous(args, localtree, returnValue);
+				add(func);
+				break;
+
+			// The following functions have to check if they are called in the correct scope
+			// Question: Should this be done after the code_tree is build?
+
+			case ":macro": // macro definition
+				var depth = 1;
+				i++;
+
+				if(i >= tokens.length)
+					throw new Error("Couldn't find closing ';' for ':'");
+
+				var function_name = tokens[i];
+
+				//console.log("function_name = " + JSON.stringify(function_name, null, "\t"));
+
+				if(function_name.indexOf(".") != -1)
+					throw new Error("Function names can not contain .");
+
+				var localtokens = new Array;
+
+				while(depth > 0) {
+					i++;
+					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+						depth++;
+					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+						depth--;
+					}
+					if(depth > 0)
+						localtokens.push(tokens[i]);
+
+					if(i >= tokens.length)
+						throw new Error("Couldn't find closing ';' for ':'");
+				}
+
+				var localtree = forth.createFromForthTokens(localtokens, context);
+				var args = null;
+
+				/*if(localtree.body.length > 0) {
+					var values = localtree.body[0];
+					//if(values.type != forth.Types.ValueLocal)
+					//	throw new Error(":js requires { <args> -- <comment> } after the function name");
+
+					values.type = forth.Types.CommentParentheses;
+					args = values.values.reverse();
+				}*/
+
+				var func = new forth.Macro(function_name, args, localtree, returnValue);
+				add(func);
+				break;
+
+			// forbidden tokens
+			case ")": // comment end
+			case "]:": // execute js code end
+			case "]:d": // execute js code end
+			case "else":
+			case "then":
+			case "endif":
+			case "endcase":
+			case "of":
+			case "endof":
+			case ";":
+			case "return;":
+			case "}": // local variable end
+				compiler_message_handler("Unexpected token " + t + " found");
+				break;
+			default:
+				if(t[0] == ".")
+					t = "$$dot" + t.substr(1);
+				if(t[t.length-1] == ".")
+					t = "$$dot" + t.substr(0, t.length-1);
+				add(new forth.Call(t));
 		}
 	}
 
@@ -914,7 +1033,20 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append("} while(true);");
 				break;
 			case forth.Types.BranchCase:
+				append("switch(stack.pop()) {");
+				code_tree.body.forEach(function(entry) {
+					out += generateCode(entry, level+1);
+				});
+				if(code_tree.defaultOf) {
+					append("default:");
+					out += generateCode(code_tree.defaultOf, level);
+				}
+				append("}");
+				break;
 			case forth.Types.BranchCaseOf:
+				append("case " + code_tree.condition + ":");
+				out += generateCode(entry, level+1);
+				append("break;");
 				break;
 			case forth.Types.BranchIf:
 				append("if(stack.pop()) {");
@@ -1047,6 +1179,8 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				var name = forth.mangleName(code_tree.name);
 				append("forthNew(stack, " + name + ");");
 				break;
+			case forth.Types.Macro:
+				break;
 			case forth.Types.Number:
 				append("stack.push(" + code_tree.value + ");");
 				break;
@@ -1088,7 +1222,10 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 forth.compile = function(code) {
 	var tokens = forth.tokenize(code)
+	//Filesystem.writeFileSync("generated-tokens.fs", JSON.stringify(tokens, null, "\t"));
 	var code_tree = forth.createFromForthTokens(tokens);
+	//Filesystem.writeFileSync("generated-code_tree.fs", JSON.stringify(code_tree, null, "\t"));
 	var generated_code = forth.generateJsCode(code_tree);
+	//Filesystem.writeFileSync("generated-generated_code.fs", generated_code);
 	return generated_code;
 }

@@ -21,6 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+
+// TODO optimize functions
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
+
 function ForthStack() {
 	this.stac=new Array();
 
@@ -104,6 +111,7 @@ function forthFunctionCall(stack, func, context, name) {
 	}
 }
 
+// TODO: move into a macro
 function forthNew(stack, func) {
 	if(func.forth_function) {
 		stack.push(new func(stack));
@@ -112,11 +120,16 @@ function forthNew(stack, func) {
 	}
 }
 
+function forthDefineMacro(name, args, code, context) {
+	if(!context)
+		context = this;
+	if(!this.forth_macros)
+		this.forth_macros = new Object();
+	if(this.forth_macros[name])
+		throw new Error("A macro with the name '" + name + "' is already defined");
+	this.forth_macros[name] = { args: args, code: code };
+}
+
 // create the global stack
 var stack = new ForthStack();
 
-// TODO optimize functions
-String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
-    return target.split(search).join(replacement);
-};
