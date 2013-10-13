@@ -25,19 +25,29 @@ THE SOFTWARE.
 10 value consolebase
 
 : type { x -- }
-	x x »« === or x 0= or if
-		typeof x "number = if
-			:[ process.stdout.write(x.toString(consolebase)) ]:d
-		else
-			:[ process.stdout.write(x.toString()) ]:d
-		endif
+	typeof x { typeof-x }
+	typeof-x "function = if
+		:[ process.stdout.write("function") ]:d
 	else
-		:[ console.log(x); ]:d
+		x x »« === or x 0= or if
+			typeof-x "number = if
+				:[ process.stdout.write(x.toString(consolebase)) ]:d
+			else
+				:[ process.stdout.write(x.toString()) ]:d
+			endif
+		else
+			:[ console.log(x); ]:d
+		endif
 	endif
 ;
 
 : . { x -- }
-	x type
+	typeof x { typeof-x }
+	typeof-x "function = if
+		' x type
+	else
+		x type
+	endif
 	typeof x "number = if space endif
 ;
 
@@ -54,10 +64,15 @@ THE SOFTWARE.
 	"< depth 1- »> « + + . depth dup 0 swap 1
 	?DO i
 		dup i - pick { e }
-		typeof e "string = if
+		typeof e { typeof-e }
+		typeof-e "string = if
 			"» e "« + +
 		else
-			e
+			typeof-e "function = if
+				' e
+			else
+				e
+			endif
 		endif
 		type space
 	LOOP
