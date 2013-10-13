@@ -82,6 +82,11 @@ forth.mangleName = function(str) {
 		result = result.replaceAll(s, forth.mangling[s]);
 	}
 
+	if(result[0] == ".")
+		result = "$$dot" + result.substr(1);
+	if(result[result.length-1] == ".")
+		result = "$$dot" + result.substr(0, result.length-1);
+
 	return result;
 }
 
@@ -765,14 +770,6 @@ forth.createFromForthTokens = function(tokens, context) {
 
 				var function_name = tokens[i];
 
-				if(function_name[0] == ".")
-					function_name = "$$dot" + function_name.substr(1);
-				if(function_name[function_name.length-1] == ".")
-					function_name = "$$dot" + function_name.substr(0, function_name.length-1);
-
-				if(function_name.indexOf(".") != -1)
-					throw new Error("Function names can not contain .");
-
 				var localtokens = new Array;
 
 				while(depth > 0) {
@@ -818,9 +815,6 @@ forth.createFromForthTokens = function(tokens, context) {
 					throw new Error("Couldn't find closing ';/return;' for ':js'");
 
 				var function_name = tokens[i];
-
-				if(function_name.indexOf(".") != -1)
-					throw new Error("Function names can not contain .");
 
 				var depth = 1;
 
@@ -919,11 +913,6 @@ forth.createFromForthTokens = function(tokens, context) {
 					throw new Error("Couldn't find closing ';' for ':'");
 
 				var function_name = tokens[i];
-
-				//console.log("function_name = " + JSON.stringify(function_name, null, "\t"));
-
-				if(function_name.indexOf(".") != -1)
-					throw new Error("Function names can not contain .");
 
 				var localtokens = new Array;
 
@@ -1131,6 +1120,8 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 			case forth.Types.FunctionForth:
 				var name = forth.mangleName(code_tree.name);
+				if(name.indexOf(".") != -1)
+					throw new Error("Function names can not contain .");
 				append("function " + name + "(stack) {");
 				out += generateCode(code_tree.body, level);
 				append("}");
@@ -1146,6 +1137,8 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 			case forth.Types.FunctionJs:
 				var name = forth.mangleName(code_tree.name);
+				if(name.indexOf(".") != -1)
+					throw new Error("Function names can not contain .");
 				var args = code_tree.args.map(forth.mangleName).join(", ");
 				append("function " + name + "(" + args + ") {");
 				append("var stack = new ForthStack();");
@@ -1180,6 +1173,8 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append("forthNew(stack, " + name + ");");
 				break;
 			case forth.Types.Macro:
+				if(name.indexOf(".") != -1)
+					throw new Error("Macros names can not contain .");
 				break;
 			case forth.Types.Number:
 				append("stack.push(" + code_tree.value + ");");
