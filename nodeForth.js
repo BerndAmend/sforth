@@ -26,9 +26,9 @@ THE SOFTWARE.
 Filesystem = require('fs');
 
 // has to be done in the main file :(
-PDFDocument = require("pdfkit");
+//PDFDocument = require("pdfkit");
 
-SerialPort = require("serialport").SerialPort;
+//SerialPort = require("serialport").SerialPort;
 
 // PNG = require('pngjs').PNG;
 

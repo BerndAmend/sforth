@@ -41,7 +41,6 @@ THE SOFTWARE.
 				:[ process.stdout.write(x.toString()) ];
 			endif
 		else
-			:[ console.log(":(") ];
 			:[ console.log(x) ];
 		endif
 	endif

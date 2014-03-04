@@ -27,9 +27,9 @@ include »console.fs«
 include time.fs
 include filesystem.fs
 include process.fs
-include serial.fs
+\ include serial.fs
 
-include pdfkit.fs
+\ include pdfkit.fs
 
 »sforth, Copyright (C) 2013-2014 Bernd Amend <bernd.amend+sforth@gmail.com>\n«
 »Type `bye' to exit\n« + .
