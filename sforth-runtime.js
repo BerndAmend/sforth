@@ -101,6 +101,17 @@ function ForthStack() {
 	this.toString=function() {
 		return this.stac;
 	}
+
+	this.toJSON=function() {
+		return JSON.stringify(this.stac);
+	}
+
+	this.fromJSON=function(str) {
+		var l = JSON.parse(str);
+		this.clear();
+		for(var i=0;i<l.length;++i)
+			this.push(l[i]);
+	}
 }
 
 // We could optimize away many forthFunctionCall calls

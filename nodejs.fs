@@ -38,13 +38,27 @@ true process.stdin.setRawMode drop
 process.stdin.resume drop
 "utf8 process.stdin.setEncoding drop
 
-: bye ( -- ) 0 process.exit drop ;
+2000 to cmd_history_save_size
+
+: bye ( -- )
+	\ save the cmd_history
+	\ this won't handle concurrent instances
+	cmd_history.size cmd_history_save_size - { remove_element_count }
+	0> if
+		:[ cmd_history.stac.splice(0, remove_element_count) ];
+	endif
+	".sforth_history cmd_history.toJSON writeFileSync
+	0 process.exit drop ;
 
 »« value entered
 
-\ TODO: load and save cmd_history
 0 value cmd_last_pos
 new ForthStack value cmd_history
+
+try
+	".sforth_history readFileSync cmd_history.fromJSON
+catch err
+endtry
 
 : forthconsole ;
 null to forthconsole.onKey
