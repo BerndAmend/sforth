@@ -35,10 +35,10 @@ THE SOFTWARE.
 :macro constant { name } value name ;
 
 :macro to { name } :[ name = stack.pop() ]; ;
-:macro =! { name } to name ;
+:macro !> { name } to name ;
 
 :macro +to { name } :[ name += stack.pop() ]; ;
-:macro +=! { name } +to name ;
+:macro +!> { name } +to name ;
 
 :macro continue {} :[ continue ]; ;
 :macro break {} :[ break ]; ;
