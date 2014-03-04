@@ -1,7 +1,7 @@
 (
 The MIT License (MIT)
 
-Copyright (c) 2013 Bernd Amend <bernd.amend+sforth@gmail.com>
+Copyright (c) 2013-2014 Bernd Amend <bernd.amend+sforth@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,8 +31,8 @@ include serial.fs
 
 include pdfkit.fs
 
-»sforth, Copyright (C) 2013 Bernd Amend <bernd.amend@gmail.com>\n« .
-»Type `bye' to exit\n« .
+»sforth, Copyright (C) 2013-2014 Bernd Amend <bernd.amend+sforth@gmail.com>\n«
+»Type `bye' to exit\n« + .
 
 true process.stdin.setRawMode drop
 process.stdin.resume drop
