@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
-include »console.fs«
 include "forth.fs
+include »console.fs«
 include time.fs
 include filesystem.fs
 include process.fs
