@@ -1005,7 +1005,8 @@ forth.createFromForthTokens = function(tokens, context) {
 							i++;
 							//console.log("replace " + macro.args[k] + " with " + tokens[i]);
 							//console.log("before = " + JSON.stringify(macro.body));
-							gcode.forEach(function(entry) {
+							for(var n=0; n<gcode.length;++n) {
+								var entry = gcode[n];
 								if(typeof entry.type != "undefined") {
 									switch(entry.type) {
 										case forth.Types.JsCodeDirect:
@@ -1033,11 +1034,11 @@ forth.createFromForthTokens = function(tokens, context) {
 									}
 								} else {
 									if(entry == macro.args[k]) {
-										entry = tokens[i];
-										throw new Error("unknown token: " + JSON.stringify(entry) + " in " + JSON.stringify(gcode));
+										gcode[n] = tokens[i];
+										//throw new Error("unknown token: " + JSON.stringify(entry) + " in " + JSON.stringify(gcode));
 									}
 								}
-							});
+							}
 							//console.log("after = " + JSON.stringify(gcode));
 						}
 
