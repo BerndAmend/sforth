@@ -94,15 +94,14 @@ THE SOFTWARE.
 
 \ TODO: extend the compiler to detect if .add() or so has to be called
 
-:macro forthoperator { op } ( x1 x2 -- x3 ) { forthoperator_temp_var_1 forthoperator_temp_var_2 } :[ forthoperator_temp_var_1 op forthoperator_temp_var_2 ]: ;
 
-: & {} ( x1 x2 -- x3 ) forthoperator & ;
+: & { x1 x2 -- x3 } :[ x1 & x2 ]: ;
 
-: && {} ( x1 x2 -- x3 ) forthoperator && ;
+: && { x1 x2 -- x3 } :[ x1 &&x2 ]: ;
 
-: | {} ( x1 x2 -- x3 ) forthoperator | ;
+: | { x1 x2 -- x3 } :[ x1 | x2 ]: ;
 
-: || {} ( x1 x2 -- x3 ) forthoperator || ;
+: || { x1 x2 -- x3 } :[ x1 || x2 ]: ;
 
 : or { x1 x2 -- x3 }
 	typeof x1 "boolean = typeof x2 "boolean = || if
@@ -119,7 +118,7 @@ THE SOFTWARE.
 	endif
 ;
 
-: xor {} ( x1 x2 -- x3 ) forthoperator ^ ;
+: xor { x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
 
 : not { x1 -- x2 }
 	typeof x1 "boolean = if
@@ -162,20 +161,20 @@ THE SOFTWARE.
 : sindeg {} ( x1 -- x2 ) deg2rad sin ;
 : tandeg {} ( x1 -- x2 ) deg2rad tan ;
 
-: + {} ( x1 x2 -- x3 ) forthoperator + ;
-: - {} ( x1 x2 -- x3 ) forthoperator - ;
-: * {} ( x1 x2 -- x3 ) forthoperator * ;
-: / {} ( x1 x2 -- x3 ) forthoperator / ;
-: mod {} ( x1 x2 -- x3 ) forthoperator % ;
+: + { x1 x2 -- x3 } :[ x1 + x2 ]: ;
+: - { x1 x2 -- x3 } :[ x1 - x2 ]: ;
+: * { x1 x2 -- x3 } :[ x1 * x2 ]: ;
+: / { x1 x2 -- x3 } :[ x1 / x2 ]: ;
+: mod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
 : /mod { x1 x2 -- x3 } :[ x1 % x2 ]: x1 x2 / floor ;
 
-: = {} ( x1 x2 -- f ) forthoperator == ;
-: === {} ( x1 x2 -- f ) forthoperator === ;
-: <> {} ( x1 x2 -- f ) forthoperator != ;
-: > {} ( x1 x2 -- f ) forthoperator > ;
-: >= {} ( x1 x2 -- f ) forthoperator >= ;
-: < {} ( x1 x2 -- f ) forthoperator < ;
-: <= {} ( x1 x2 -- f ) forthoperator <= ;
+: = { x1 x2 -- f } :[ x1 == x2 ]: ;
+: === { x1 x2 -- f } :[ x1 === x2 ]: ;
+: <> { x1 x2 -- f } :[ x1 != x2 ]: ;
+: > { x1 x2 -- f } :[ x1 > x2 ]: ;
+: >= { x1 x2 -- f } :[ x1 >= x2 ]: ;
+: < { x1 x2 -- f } :[ x1 < x2 ]: ;
+: <= { x1 x2 -- f } :[ x1 <= x2 ]: ;
 
 \ we provide a faster implementation for important functions
 : 0= {} ( x1 -- f ) :[ stack.pop() == 0 ]: ;
