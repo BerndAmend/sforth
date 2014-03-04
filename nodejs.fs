@@ -44,7 +44,7 @@ process.stdin.resume drop
 	\ save the cmd_history
 	\ this won't handle concurrent instances
 	cmd_history.size cmd_history_save_size - { remove_element_count }
-	0> if
+	remove_element_count 0> if
 		:[ cmd_history.stac.splice(0, remove_element_count) ];
 	endif
 	".sforth_history cmd_history.toJSON writeFileSync
