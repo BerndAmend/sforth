@@ -1028,7 +1028,8 @@ forth.createFromForthTokens = function(tokens, context) {
 														throw new Error("I don't know what I should do with " + JSON.stringify(tokens[i]) + " as a macro argument");
 												}
 											} else {
-												entry.body = entry.body.replaceWholeWord(macro.args[k], tokens[i]);
+												// TODO: mangeling should only be done in the generateJsCode function
+												entry.body = entry.body.replaceWholeWord(macro.args[k], forth.mangleName(tokens[i]));
 											}
 											break;
 									}
