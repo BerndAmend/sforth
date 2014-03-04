@@ -188,7 +188,7 @@ THE SOFTWARE.
 : 1- {} ( x1 -- x2 ) 1 - ;
 
 \ return stack functions
-: >r {} ( w -- R:w ) ' this.returnStack not if new ForthStack to this.returnStack endif this.returnStack.push drop ;
+: >r {} ( w -- R:w ) :[ if(!this.returnStack) this.returnStack = new ForthStack() ]; this.returnStack.push drop ;
 : r> {} ( R:w -- w ) this.returnStack.pop ;
 : r@ {} ( -- w R: w -- w ) this.returnStack.top ;
 : rdrop {} ( R:w -- ) this.returnStack.pop drop ;
