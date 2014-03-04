@@ -26,29 +26,38 @@ THE SOFTWARE.
 
 : type { x -- }
 	typeof x { typeof-x }
-	typeof-x "function = if
-		:[ process.stdout.write("function") ]:d
+	typeof-x "function = typeof-x "undefined = || if
+		:[ process.stdout.write(typeof-x) ];
 	else
-		x x »« === or x 0= or if
+		x
+		x »« ===
+		x 0=
+		||
+		||
+		if
 			typeof-x "number = if
-				:[ process.stdout.write(x.toString(consolebase)) ]:d
+				:[ process.stdout.write(x.toString(consolebase)) ];
 			else
-				:[ process.stdout.write(x.toString()) ]:d
+				:[ process.stdout.write(x.toString()) ];
 			endif
 		else
-			:[ console.log(x); ]:d
+			:[ console.log(":(") ];
+			:[ console.log(x) ];
 		endif
 	endif
 ;
 
 : . { x -- }
 	typeof x { typeof-x }
-	typeof-x "function = if
+	typeof-x "function =
+	typeof-x "undefined =
+	||
+	if
 		' x type
 	else
 		x type
 	endif
-	typeof x "number = if space endif
+	typeof-x "number = if space endif
 ;
 
 : .c { x -- }
@@ -68,7 +77,7 @@ THE SOFTWARE.
 		typeof-e "string = if
 			"» e "« + +
 		else
-			typeof-e "function = if
+			typeof-e "function = typeof-e "undefined = || if
 				' e
 			else
 				e
@@ -79,7 +88,7 @@ THE SOFTWARE.
 	drop ;
 
 : print-returnstack
-	:[ if(!this.returnStack) return ]:d \ return if no return stack exists
+	:[ if(!this.returnStack) return ]; \ return if no return stack exists
 	this.returnStack to returnStack \ get the return stack of the caller
 	"< rdepth »> « + + . rdepth 1- rdepth 0 swap 1
 	?DO i

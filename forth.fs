@@ -22,18 +22,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
-0 constant nil
+\ base functions
+:macro true {} :[ true ]: ;
+:macro false {} :[ false ]: ;
+:macro undefined {} :[ undefined ]: ;
+:macro null {} :[ null ]: ;
+
+:macro new { name } :[ name .forth_function ]: if :[ new name (stack) ]: else :[ new name () ]: endif ;
+
+:macro value { name } :[ var name = stack.pop() ]; ;
+:macro alias { name } value name ;
+:macro constant { name } value name ;
+
+:macro to { name } :[ name = stack.pop() ]; ;
+:macro =! { name } to name ;
+
+:macro +to { name } :[ name += stack.pop() ]; ;
+:macro +=! { name } +to name ;
+
+:macro continue {} :[ continue ]; ;
+:macro break {} :[ break ]; ;
+:macro leave {} :[ break ]; ;
+:macro exit {} :[ return ]; ;
+
+\ TODO: fix the case handling
+:macro of { key } :[ case key : ]:d ;
+:macro endof {} :[ break ]; ;
+:macro default {} :[ default: ]:d ;
+
+:macro ' { name } :[ name ]: ;
+
+:macro typeof { name } :[ typeof name ]: ;
 
 \ dummy function
-: ok ;
+:macro ok {} ;
 
+: output-stack-info { id -- only debugging } :[ console.log(id + ": stack size=" + stack.size() + " content=" + JSON.stringify(stack.stac)) ]; ;
 : clearstack ( -- ) stack.clear drop ;
 
 \ data stack operations
 : dup { x -- x x } x x ;
-
-\ the following code accesses the javascript variable stack.d and calls the function is Empty
-: ?dup ( x -- 0 | x x ) :[ !stack.isEmpty() ]: if dup endif ;
 
 : drop { x } ;
 
@@ -58,19 +86,23 @@ THE SOFTWARE.
 
 : 2over { x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2 } x1 x2 x3 x4 x1 x2 ;
 
-: depth ( -- n ) stack.size ;
+: depth {} ( -- n ) stack.size ;
 
-: pick ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get ;
+: pick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get ;
 
-: roll ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove ;
+: roll {} ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove ;
 
 \ TODO: extend the compiler to detect if .add() or so has to be called
 
-: & { x1 x2 -- x3 } :[ x1 & x2 ]: ;
-: && { x1 x2 -- x3 } :[ x1 && x2 ]: ;
+:macro forthoperator { op } ( x1 x2 -- x3 ) { forthoperator_temp_var_1 forthoperator_temp_var_2 } :[ forthoperator_temp_var_1 op forthoperator_temp_var_2 ]: ;
 
-: | { x1 x2 -- x3 } :[ x1 | x2 ]: ;
-: || { x1 x2 -- x3 } :[ x1 || x2 ]: ;
+: & {} ( x1 x2 -- x3 ) forthoperator & ;
+
+: && {} ( x1 x2 -- x3 ) forthoperator && ;
+
+: | {} ( x1 x2 -- x3 ) forthoperator | ;
+
+: || {} ( x1 x2 -- x3 ) forthoperator || ;
 
 : or { x1 x2 -- x3 }
 	typeof x1 "boolean = typeof x2 "boolean = || if
@@ -87,7 +119,8 @@ THE SOFTWARE.
 	endif
 ;
 
-: xor { x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
+: xor {} ( x1 x2 -- x3 ) forthoperator ^ ;
+
 : not { x1 -- x2 }
 	typeof x1 "boolean = if
 		:[ !x1 ]:
@@ -96,72 +129,72 @@ THE SOFTWARE.
 	endif
 ;
 
-: invert { x1 -- x3 } :[ x1 ^ -1 ]: ;
+: invert {} ( x1 -- x3 ) :[ stack.pop() ^ -1 ]: ;
 
 \ math operations
 
 : tofixed { num digits -- str } num 0= IF 1e-323 else num endif { num } digits num.toFixed ;
 
-: deg2rad ( x1 -- x2 ) 180 / Math.PI * ;
-: rad2deg ( x1 -- x2 ) Math.PI / 180 * ;
+: deg2rad {} ( x1 -- x2 ) 180 / Math.PI * ;
+: rad2deg {} ( x1 -- x2 ) Math.PI / 180 * ;
 
-: abs ( x1 -- x2 )  Math.abs ;
-: acos ( x1 -- x2 ) Math.acos ;
-: asin ( x1 -- x2 ) Math.asin ;
-: atan ( x1 -- x2 ) Math.atan ;
-: atan2 ( y x -- x2 ) Math.atan2 ;
-: ceil ( x1 -- x2 ) Math.ceil ;
-: cos ( x1 -- x2 ) Math.cos ;
-: exp ( x1 -- x2 ) Math.exp ;
-: floor ( x1 -- x2 ) Math.floor ;
-: log ( x1 -- x2 ) Math.log ;
-: pow ( x1 x2 -- x3 ) Math.pow ;
-: random ( -- x ) Math.random ;
-: round ( x1 -- x2 ) Math.round ;
-: sin ( x1 -- x2 ) Math.sin ;
-: sqrt ( x1 -- x2 ) Math.sqrt ;
-: tan ( x1 -- x2 ) Math.tan ;
+:macro abs {} ( x1 -- x2 ) Math.abs ;
+:macro acos {} ( x1 -- x2 ) Math.acos ;
+:macro asin {} ( x1 -- x2 ) Math.asin ;
+:macro atan {} ( x1 -- x2 ) Math.atan ;
+:macro atan2 {} ( y x -- x2 ) Math.atan2 ;
+:macro ceil {} ( x1 -- x2 ) Math.ceil ;
+:macro cos {} ( x1 -- x2 ) Math.cos ;
+:macro exp {} ( x1 -- x2 ) Math.exp ;
+:macro floor {} ( x1 -- x2 ) Math.floor ;
+:macro log {} ( x1 -- x2 ) Math.log ;
+:macro pow {} ( x1 x2 -- x3 ) Math.pow ;
+:macro random {} ( -- x ) Math.random ;
+:macro round {} ( x1 -- x2 ) Math.round ;
+:macro sin {} ( x1 -- x2 ) Math.sin ;
+:macro sqrt {} ( x1 -- x2 ) Math.sqrt ;
+:macro tan {} ( x1 -- x2 ) Math.tan ;
 
-: acosdeg ( x1 -- x2 ) acos rad2deg ;
-: asindeg ( x1 -- x2 ) asin rad2deg ;
-: atandeg ( x1 -- x2 ) atan rad2deg ;
-: cosdeg ( x1 -- x2 ) deg2rad cos ;
-: sindeg ( x1 -- x2 ) deg2rad sin ;
-: tandeg ( x1 -- x2 ) deg2rad tan ;
+: acosdeg {} ( x1 -- x2 ) acos rad2deg ;
+: asindeg {} ( x1 -- x2 ) asin rad2deg ;
+: atandeg {} ( x1 -- x2 ) atan rad2deg ;
+: cosdeg {} ( x1 -- x2 ) deg2rad cos ;
+: sindeg {} ( x1 -- x2 ) deg2rad sin ;
+: tandeg {} ( x1 -- x2 ) deg2rad tan ;
 
-: + { x1 x2 -- x3 } :[ x1 + x2 ]: ;
-: - { x1 x2 -- x3 } :[ x1 - x2 ]: ;
-: * { x1 x2 -- x3 } :[ x1 * x2 ]: ;
-: / { x1 x2 -- x3 } :[ x1 / x2 ]: ;
-: mod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
+: + {} ( x1 x2 -- x3 ) forthoperator + ;
+: - {} ( x1 x2 -- x3 ) forthoperator - ;
+: * {} ( x1 x2 -- x3 ) forthoperator * ;
+: / {} ( x1 x2 -- x3 ) forthoperator / ;
+: mod {} ( x1 x2 -- x3 ) forthoperator % ;
 : /mod { x1 x2 -- x3 } :[ x1 % x2 ]: x1 x2 / floor ;
 
-: = { x1 x2 -- f } :[ x1 == x2 ]: ;
-: === { x1 x2 -- f } :[ x1 === x2 ]: ;
-: <> { x1 x2 -- f } :[ x1 != x2 ]: ;
-: > { x1 x2 -- f } :[ x1 > x2 ]: ;
-: >= { x1 x2 -- f } :[ x1 >= x2 ]: ;
-: < { x1 x2 -- f } :[ x1 < x2 ]: ;
-: <= { x1 x2 -- f } :[ x1 <= x2 ]: ;
+: = {} ( x1 x2 -- f ) forthoperator == ;
+: === {} ( x1 x2 -- f ) forthoperator === ;
+: <> {} ( x1 x2 -- f ) forthoperator != ;
+: > {} ( x1 x2 -- f ) forthoperator > ;
+: >= {} ( x1 x2 -- f ) forthoperator >= ;
+: < {} ( x1 x2 -- f ) forthoperator < ;
+: <= {} ( x1 x2 -- f ) forthoperator <= ;
 
 \ we provide a faster implementation for important functions
-: 0= { x1 -- f } :[ x1 == 0 ]: ;
-: 0<> { x1 -- f } :[ x1 != 0 ]: ;
-: 0> { x1 -- f } :[ x1 > 0 ]: ;
-: 0>= { x1 -- f } :[ x1 >= 0 ]: ;
-: 0< { x1 -- f } :[ x1 < 0 ]: ;
-: 0<= { x1 -- f } :[ x1 <= 0 ]: ;
+: 0= {} ( x1 -- f ) :[ stack.pop() == 0 ]: ;
+: 0<> {} ( x1 -- f ) :[ stack.pop() != 0 ]: ;
+: 0> {} ( x1 -- f ) :[ stack.pop() > 0 ]: ;
+: 0>= {} ( x1 -- f ) :[ stack.pop() >= 0 ]: ;
+: 0< {} ( x1 -- f ) :[ stack.pop() < 0 ]: ;
+: 0<= {} ( x1 -- f ) :[ stack.pop() <= 0 ]: ;
 
-: 1+ ( x1 -- x2 ) 1 + ;
-: 1- ( x1 -- x2 ) 1 - ;
+: 1+ {} ( x1 -- x2 ) 1 + ;
+: 1- {} ( x1 -- x2 ) 1 - ;
 
 \ return stack functions
-: >r ( w -- R:w ) :[ if(!this.returnStack) this.returnStack = new ForthStack() ]:d returnStack.push drop ;
-: r> ( R:w -- w ) this.returnStack.pop ;
-: r@ ( -- w R: w -- w ) this.returnStack.top ;
-: rdrop ( R:w -- ) this.returnStack.pop drop ;
-: rdepth ( -- n ) this.returnStack.size ;
-: rpick ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) this.returnStack.get ;
+:macro >r {} ( w -- R:w ) ' returnStack not if new ForthStack to returnStack endif returnStack.push drop ;
+:macro r> {} ( R:w -- w ) returnStack.pop ;
+:macro r@ {} ( -- w R: w -- w ) returnStack.top ;
+:macro rdrop {} ( R:w -- ) returnStack.pop drop ;
+:macro rdepth {} ( -- n ) returnStack.size ;
+:macro rpick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) returnStack.get ;
 
 ( : 2>r       d – R:d        core-ext       “two-to-r”
 : 2r>       R:d – d        core-ext       “two-r-from”
@@ -191,14 +224,13 @@ THE SOFTWARE.
 : assert { flag text -- } flag not if text . endif ;
 
 \ Exceptions
-\ TODO: allow forth local words
-: throwError { message -- } :[ throw new Error(message) ]:d ;
+:macro throw { obj -- } :[ throw obj ]; ;
 
-: jseval ( str -- ) eval drop ;
+: jseval {} ( str -- ) eval drop ;
 
-: compile ( x1 -- ) forth.compile ;
+:macro compile {} ( x1 -- ) forth.compile ;
 
-: execute { x1 -- } :[ forthFunctionCall(stack,x1) ]:d ;
+: execute { x1 -- } :[ forthFunctionCall(stack,x1) ]; ;
 
 : see { function_object -- } function_object.toString cr . ;
 
@@ -224,7 +256,7 @@ THE SOFTWARE.
 : new-float32-array { size -- } :[ new Float32Array(size) ]: ;
 : new-float64-array { size -- } :[ new Float64Array(size) ]: ;
 
-: ! { value index variable -- } :[ variable[index] = value ]:d ;
+: ! { value index variable -- } :[ variable[index] = value ]; ;
 : @ { index variable -- value } :[ variable[index] ]: ;
 
 : store-in-array { arr -- } arr.length 1- -1 1 do i i arr ! loop ;

@@ -51,72 +51,68 @@ null to forthconsole.onKey
 
 "data
 :jsnoname { key }
+	key "\u0003 === if
+		\ Control-C was pressed
+		\ restore console handler
+		null to forthconsole.onKey
+	elseif ' forthconsole.onKey null <> if
+		key forthconsole.onKey
+	elseif key "\u007f === if
+		\ Backspace was pressed
+		entered.length 0> if
+			0 entered.length 1- entered.substr to entered
+		clearcurrentline
+			entered.length 0> if entered . endif
+		endif
+	elseif key "\r === key "\n === || if
+		» « type
+		entered cmd_history.push
+		0 to cmd_last_pos
+		entered
 
-\ 0 key.charCodeAt . key.length .
-key "\u0003 === if
-	\ Control-C was pressed
-	\ restore console handler
-	null to forthconsole.onKey
-else
-:[ forthconsole.onKey != null ]: if
-	key forthconsole.onKey
-else 0 key.charCodeAt 27 = if
-	1 key.charCodeAt 91 = if
-		2 key.charCodeAt 65 = if \ up
-		cmd_history.size 0> if
-			clearcurrentline
-			cmd_last_pos cmd_history.get dup to entered .
-		endif
-		cmd_last_pos cmd_history.size 1- < if
-			cmd_last_pos 1+ to cmd_last_pos
-		endif
-		endif
+		try
+			compile
+			»« to entered
+			eval
+			» ok\n« type
+		catch e
+			"\n  e.stack + .
+		endtry
 
-		2 key.charCodeAt 66 = if \ down
-		cmd_history.size 0> if
-			clearcurrentline
-			cmd_last_pos cmd_history.get dup to entered .
-		endif
-		cmd_last_pos 0> if
-			cmd_last_pos 1- to cmd_last_pos
-		endif
-		endif
+	elseif 0 key.charCodeAt 27 = if
+		1 key.charCodeAt 91 = if
+			2 key.charCodeAt case
+				of 65 \ up
+					cmd_history.size 0> if
+						clearcurrentline
+						cmd_last_pos cmd_history.get dup to entered .
+					endif
+					cmd_last_pos cmd_history.size 1- < if
+						cmd_last_pos 1+ to cmd_last_pos
+					endif
+				endof
 
-		2 key.charCodeAt 68 = if \ left
+				of 66 \ down
+					cmd_history.size 0> if
+						clearcurrentline
+						cmd_last_pos cmd_history.get dup to entered .
+					endif
+					cmd_last_pos 0> if
+						cmd_last_pos 1- to cmd_last_pos
+					endif
+				endof
+
+				of 68 \ left
+				of 67 \ right
+				endof
+
+				default
+			endcase
 		endif
-		2 key.charCodeAt 67 = if \ right
-		endif
+	else
+		key type
+		entered key + to entered
 	endif
-else key "\u007f === if
-	\ Backspace was pressed
-	entered.length 0> if
-	0 entered.length 1- entered.substr to entered
-	clearcurrentline
-	entered.length 0> if entered . endif
-	endif
-else key "\r === key "\n === or if
-	» « type
-  \ TODO: add try catch
-  entered cmd_history.push
-  0 to cmd_last_pos
-  entered
-  :[ try {
-	compile(stack);
-	entered = "";
-	jseval(stack);
-	stack.push(" ok\n");
-	$$dot(stack);
-	} catch(e) {
-		console.error("\n" + e.stack);
-	} ]:d
-  »« to entered
-else
-	key type
-	entered key + to entered
-endif
-endif
-endif
-endif
-endif
 ;
 process.stdin.on drop \ register the key handling function
+

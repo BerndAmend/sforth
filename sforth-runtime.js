@@ -28,6 +28,33 @@ String.prototype.replaceAll = function(search, replacement) {
     return target.split(search).join(replacement);
 };
 
+// TODO. ugly hack
+String.prototype.replaceWholeWord = function(search, replacement, ch) {
+    var target = this;
+	ch = ch || [" ", "\t", "\n"];
+	for(var i=0;i<ch.length;++i)
+		for(var j=0;j<ch.length;++j)
+			target = target.split(ch[i] + search + ch[j]).join(ch[i] + replacement + ch[j]);
+
+	// handle the case where the search word is at the beginning
+	if(target.substr(0, search.length) == search)
+		target = replacement + target.substr(search.length);
+
+	// or the end
+	if(target.substr(target.length - search.length) == search)
+		target = target.substr(0, target.length - search.length) + replacement;
+
+	return target;
+};
+
+Number.isNumeric = function( obj ) {
+	return !isNaN( parseFloat(obj) ) && isFinite( obj );
+}
+
+function forthClone(other) {
+	return JSON.parse(JSON.stringify(other));
+}
+
 function ForthStack() {
 	this.stac=new Array();
 
@@ -37,20 +64,20 @@ function ForthStack() {
 		return this.stac.pop();
 	}
 
-	this.size=function() {
-		return this.stac.length;
-	}
-
 	this.push=function(item) {
 		this.stac.push(item);
 	}
 
-	this.top=function() {
-		return this.get(0);
-	}
-
 	this.isEmpty=function() {
 		return this.stac.length == 0;
+	}
+
+	this.size=function() {
+		return this.stac.length;
+	}
+
+	this.top=function() {
+		return this.get(0);
 	}
 
 	this.get=function(pos) {
@@ -71,12 +98,22 @@ function ForthStack() {
 		this.stac = new Array();
 	}
 
-	this.toString=function() {return this.stac;}
+	this.toString=function() {
+		return this.stac;
+	}
 }
 
+// We could optimize away many forthFunctionCall calls
+// by keeping tracking how to call a function/value/constant
+// in practice this is much harder than it looks since
+// every variable in javascript that gets a function assigned
+// behaves like a function
 function forthFunctionCall(stack, func, context, name) {
 	if(func == undefined) {
-		throw new Error("Can not call undefined function (func = undefined name=" + name + ")");
+		//if(name == "undefined")
+		stack.push(undefined);
+		//else
+		//throw new Error("Can not call undefined function (func = undefined name=" + name + ")");
 	} else if(func.forth_function) {
 		if(context) {
 			func.apply(context, stack);
@@ -111,25 +148,6 @@ function forthFunctionCall(stack, func, context, name) {
 	}
 }
 
-// TODO: move into a macro
-function forthNew(stack, func) {
-	if(func.forth_function) {
-		stack.push(new func(stack));
-	} else {
-		stack.push(new func());
-	}
-}
-
-function forthDefineMacro(name, args, code, context) {
-	if(!context)
-		context = this;
-	if(!this.forth_macros)
-		this.forth_macros = new Object();
-	if(this.forth_macros[name])
-		throw new Error("A macro with the name '" + name + "' is already defined");
-	this.forth_macros[name] = { args: args, code: code };
-}
-
 // create the global stack
 var stack = new ForthStack();
-
+var forth_macros = forth_macros || {};

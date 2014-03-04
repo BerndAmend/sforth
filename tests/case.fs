@@ -1,8 +1,16 @@
 
 : test  ( n -- )
  CASE
-   14 OF cr ." vierzehn" ENDOF
-   17 OF cr ." siebzehn" ENDOF
-   ." kein Treffer"           \ n kann mit dup hinter ENDCASE gebracht werden
+   OF 14 cr »vierzehn« . ENDOF
+   OF 17 cr »siebzehn« . ENDOF
+   »kein Treffer« .
  ENDCASE ;
 
+case
+	of 12
+		break
+	of 13
+	of 14
+		break
+	default
+endcase
