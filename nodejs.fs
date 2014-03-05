@@ -117,6 +117,8 @@ null to forthconsole.onKey
 				endof
 
 				of 68 \ left
+				endof
+
 				of 67 \ right
 				endof
 
@@ -124,7 +126,9 @@ null to forthconsole.onKey
 			endcase
 		endif
 	else
-		key type
+		// If a user copies a string with new lines into the repl we are
+		// only called once.
+		"\r "\n key.replaceAll type
 		entered key + to entered
 	endif
 ;

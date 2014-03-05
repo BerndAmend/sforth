@@ -260,7 +260,7 @@ forth.tokenize = function(code) {
 	var clean_code = code.replace(/\r\n/gm, '\n')
 		.replace(/\n/gm, ' \n ')
 		.replace(/\t/gm, ' \t ')
-		.replace(/\r/gm, ' \r ');
+		.replace(/\r/gm, ' \n ');
 
 	// tokenize code
 	var tokens=clean_code.split(" ");
