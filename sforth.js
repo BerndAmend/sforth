@@ -1296,10 +1296,10 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 forth.compile = function(code) {
 	var tokens = forth.tokenize(code)
-	//Filesystem.writeFileSync("generated-tokens.fs", JSON.stringify(tokens, null, "\t"));
+	Filesystem.writeFileSync("generated-tokens.json", JSON.stringify(tokens, null, "\t"));
 	var code_tree = forth.createFromForthTokens(tokens);
-	//Filesystem.writeFileSync("generated-code_tree.fs", JSON.stringify(code_tree, null, "\t"));
+	Filesystem.writeFileSync("generated-code_tree.json", JSON.stringify(code_tree, null, "\t"));
 	var generated_code = forth.generateJsCode(code_tree);
-	//Filesystem.writeFileSync("generated-generated_code.fs", generated_code);
+	Filesystem.writeFileSync("generated-code.js", generated_code);
 	return generated_code;
 }
