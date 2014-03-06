@@ -1036,7 +1036,6 @@ forth.createFromForthTokens = function(tokens, context) {
 								} else {
 									if(entry == macro.args[k]) {
 										gcode[n] = tokens[i];
-										//throw new Error("unknown token: " + JSON.stringify(entry) + " in " + JSON.stringify(gcode));
 									}
 								}
 							}
@@ -1046,6 +1045,7 @@ forth.createFromForthTokens = function(tokens, context) {
 						//console.log("gcode = " + JSON.stringify(gcode));
 						var cgcode = forth.createFromForthTokens(gcode, context);
 						//console.log("cgcode = " + JSON.stringify(gcode));
+						cgcode.extendedMacro=t;
 						add(cgcode);
 					}
 					//console.log(t + " is a macro : " + JSON.stringify(context.macro[t]));
