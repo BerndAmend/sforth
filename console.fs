@@ -27,7 +27,7 @@ THE SOFTWARE.
 : type { x -- }
 	typeof x { typeof-x }
 	typeof-x "function = typeof-x "undefined = || if
-		:[ process.stdout.write(typeof-x) ];
+		:[ process.stdout.write(typeof$$minusx) ];
 	else
 		x
 		x »« ===
