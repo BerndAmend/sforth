@@ -56,7 +56,7 @@ process.stdin.resume drop
 new ForthStack value cmd_history
 
 try
-	".sforth_history readFileSync cmd_history.fromJSON
+	".sforth_history readFileSync cmd_history.fromJSON drop
 catch err
 endtry
 
