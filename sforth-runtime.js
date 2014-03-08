@@ -159,6 +159,44 @@ function forthFunctionCall(stack, func, context, name) {
 	}
 }
 
+function forthNew(stack, func, name) {
+	if(func == undefined) {
+		throw new Error("Can not create the object (typeof func = 'undefined' name=" + name + ")");
+	} else if(func.forth_function) {
+		return new func(stack);
+	} else if(func.forth_function_anonymous) {
+			return new func.execute(stack); // TODO: This breaks the instanceof operator
+	} else {
+		var type = typeof func;
+		switch(type) {
+			case 'function':
+				var args = new Array;
+				for(var i=0;i<func.length; ++i) {
+					args.push(stack.pop());
+				}
+				args.reverse();
+				// TODO: fix this ugly hack
+				switch(func.length) {
+					case 0: return new func();
+					case 1: return new func(args[0]);
+					case 2: return new func(args[0], args[1]);
+					case 3: return new func(args[0], args[1], args[2]);
+					case 4: return new func(args[0], args[1], args[2], args[3]);
+					case 5: return new func(args[0], args[1], args[2], args[3], args[4]);
+					case 6: return new func(args[0], args[1], args[2], args[3], args[4], args[5]);
+					case 7: return new func(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+					case 8: return new func(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+					default:
+						throw new Error("The forthNew function should be revised, it can not handle ctors with more than 8 arguments");
+				}
+				break;
+			default:
+				throw new Error("Can not create the object (typeof func = 'undefined' name=" + name + ")");
+				break;
+		}
+	}
+}
+
 // create the global stack
 var stack = new ForthStack();
 var forth_macros = forth_macros || {};

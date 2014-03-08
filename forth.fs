@@ -28,7 +28,7 @@ THE SOFTWARE.
 :macro undefined {} :[ undefined ]: ;
 :macro null {} :[ null ]: ;
 
-:macro new { name } :[ name .forth_function ]: if :[ new name (stack) ]: else :[ new name () ]: endif ;
+:macro new { name } stack ' name #name forthNew ;
 
 :macro value { name } :[ var name = stack.pop() ]; ;
 :macro alias { name } value name ;
