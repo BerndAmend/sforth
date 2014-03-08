@@ -224,7 +224,7 @@ THE SOFTWARE.
 : assert { flag text -- } flag not if text . endif ;
 
 \ Exceptions
-:macro throw { obj -- } :[ throw obj ]; ;
+:macro throw {} ( obj -- ) :[ throw stack.pop() ]; ;
 
 : jseval {} ( str -- ) eval drop ;
 
