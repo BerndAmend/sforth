@@ -216,8 +216,8 @@ THE SOFTWARE.
 
 \ : within { x1 x2 x3 -- f } ![ if (x1 < x2 && x2 <= x3) return 0; else return -1; ]! ;
 
-: min { n1 n2 -- n3 } n1 n2 < if n1 else n2 endif ;
-: max { n1 n2 -- n3 } n1 n2 > if n1 else n2 endif ;
+: min ( n1 n2 -- n3 ) Math.min ;
+: max ( n1 n2 -- n3 ) Math.max ;
 
 : assert { flag text -- } flag not if text . endif ;
 
