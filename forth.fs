@@ -230,7 +230,7 @@ THE SOFTWARE.
 
 : execute { x1 -- } :[ forthFunctionCall(stack,x1) ]; ;
 
-: see { function_object -- } function_object.toString cr . ;
+:macro see { function_object -- } :[ #function_object.toString() ]: cr . ;
 
 : create-array { num -- new Array }
     new Array { result }
