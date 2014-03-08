@@ -53,6 +53,7 @@ THE SOFTWARE.
 :macro ' { name } :[ name ]: ;
 
 :macro typeof { name } :[ typeof name ]: ;
+:macro instanceof { name } { sforth_instanceof_helper_variable_42 } :[ sforth_instanceof_helper_variable_42 instanceof name ]: ;
 
 \ dummy function
 :macro ok {} ;
