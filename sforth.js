@@ -1039,13 +1039,15 @@ forth.createFromForthTokens = function(tokens, context) {
 												}
 											} else {
 												// TODO: mangeling should only be done in the generateJsCode function
-												entry.body = entry.body.replaceWholeWord(macro.args[k], forth.mangleName(tokens[i]));
+												entry.body = entry.body.replaceWholeWord(macro.args[k], forth.mangleName(tokens[i])).replaceAll("#" + macro.args[k], forth.mangleName(tokens[i]));
 											}
 											break;
 									}
 								} else {
 									if(entry == macro.args[k]) {
 										gcode[n] = tokens[i];
+									} else if(entry == ("#" + macro.args[k])) {
+										gcode[n] = new forth.String(tokens[i]);
 									}
 								}
 							}
