@@ -93,8 +93,6 @@ THE SOFTWARE.
 
 : roll {} ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove ;
 
-\ TODO: extend the compiler to detect if .add() or so has to be called
-
 
 : & { x1 x2 -- x3 } :[ x1 & x2 ]: ;
 
@@ -226,9 +224,9 @@ THE SOFTWARE.
 \ Exceptions
 :macro throw {} ( obj -- ) :[ throw stack.pop() ]; ;
 
-: jseval {} ( str -- ) eval drop ;
+: jseval ( str -- ) eval drop ;
 
-:macro compile {} ( x1 -- ) forth.compile ;
+: compile ( x1 -- ) forth.compile ;
 
 : execute { x1 -- } :[ forthFunctionCall(stack,x1) ]; ;
 
