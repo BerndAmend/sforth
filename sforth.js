@@ -282,6 +282,16 @@ forth.tokenize = function(code) {
 			case "\r":
 				break;
 
+			case "\\\\":
+				var str = ""
+				i++;
+				while(i < tokens.length) {
+					str += tokens[i] + " ";
+					i++;
+				}
+				add(new forth.CommentParentheses(str.slice(0, str.length-1)));
+				break;
+
 			case "\\": // line comments
 			case "//":
 				var str = "";
