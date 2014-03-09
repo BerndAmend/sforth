@@ -59,7 +59,7 @@ THE SOFTWARE.
 :macro ok {} ;
 
 : output-stack-info { id -- only debugging } :[ console.log(id + ": stack size=" + stack.size() + " content=" + JSON.stringify(stack.stac)) ]; ;
-: clearstack ( -- ) stack.clear drop ;
+: clearstack ( -- ) stack.clear ;
 
 \ data stack operations
 : dup { x -- x x } x x ;
@@ -187,7 +187,7 @@ THE SOFTWARE.
 : 1- {} ( x1 -- x2 ) 1 - ;
 
 \ return stack functions
-: >r {} ( w -- R:w ) :[ if(!this.returnStack) this.returnStack = new ForthStack() ]; this.returnStack.push drop ;
+: >r {} ( w -- R:w ) :[ if(!this.returnStack) this.returnStack = new ForthStack() ]; this.returnStack.push ;
 : r> {} ( R:w -- w ) this.returnStack.pop ;
 : r@ {} ( -- w R: w -- w ) this.returnStack.top ;
 : rdrop {} ( R:w -- ) this.returnStack.pop drop ;
@@ -224,7 +224,7 @@ THE SOFTWARE.
 \ Exceptions
 :macro throw {} ( obj -- ) :[ throw stack.pop() ]; ;
 
-: jseval ( str -- ) eval drop ;
+: jseval ( str -- ) eval ;
 
 : compile ( x1 -- ) forth.compile ;
 

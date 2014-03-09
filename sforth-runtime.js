@@ -145,10 +145,15 @@ function forthFunctionCall(stack, func, context, name) {
 					args.push(stack.pop());
 				}
 				args.reverse();
-				if(context)
-					stack.push(func.apply(context, args));
-				else
-					stack.push(func.apply(this, args));
+				if(context) {
+					var r = func.apply(context, args)
+					if(r != undefined)
+						stack.push(r);
+				} else {
+					var r = func.apply(this, args);
+					if(r != undefined)
+					stack.push(r);
+				}
 				break;
 			case 'undefined':
 				throw new Error("Can not call undefined function (typeof func = 'undefined' name=" + name + ")");

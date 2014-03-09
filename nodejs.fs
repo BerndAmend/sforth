@@ -34,9 +34,9 @@ include process.fs
 »sforth, Copyright (C) 2013-2014 Bernd Amend <bernd.amend+sforth@gmail.com>\n«
 »Type `bye' to exit\n« + .
 
-true process.stdin.setRawMode drop
-process.stdin.resume drop
-"utf8 process.stdin.setEncoding drop
+true process.stdin.setRawMode
+process.stdin.resume
+"utf8 process.stdin.setEncoding
 
 2000 to cmd_history_save_size
 
@@ -48,7 +48,7 @@ process.stdin.resume drop
 		:[ cmd_history.stac.splice(0, remove_element_count) ];
 	endif
 	".sforth_history cmd_history.toJSON writeFileSync
-	0 process.exit drop ;
+	0 process.exit ;
 
 »« value entered
 
@@ -56,7 +56,7 @@ process.stdin.resume drop
 new ForthStack value cmd_history
 
 try
-	".sforth_history readFileSync cmd_history.fromJSON drop
+	".sforth_history readFileSync cmd_history.fromJSON
 catch err
 endtry
 
@@ -133,4 +133,3 @@ null to forthconsole.onKey
 	endif
 ;
 process.stdin.on drop \ register the key handling function
-
