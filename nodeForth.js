@@ -40,7 +40,7 @@ global.eval(Filesystem.readFileSync('sforth-runtime.js').toString());
 
 compiler_message_handler=console.log
 
-var compiled_code = forth.compile(Filesystem.readFileSync("nodejs.fs").toString());
+var compiled_code = forth.compile(Filesystem.readFileSync("repl.fs").toString());
 //Filesystem.writeFileSync("compiled-nodejs.fs", compiled_code);
 //console.log(compiled_code);
 global.eval(compiled_code);
