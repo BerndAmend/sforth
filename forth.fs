@@ -31,7 +31,6 @@ THE SOFTWARE.
 :macro new { name } stack ' name #name forthNew ;
 
 :macro value { name } :[ var name = stack.pop() ]; ;
-:macro alias { name } value name ;
 :macro constant { name } value name ;
 
 :macro to { name } :[ name = stack.pop() ]; ;
@@ -39,6 +38,8 @@ THE SOFTWARE.
 
 :macro +to { name } :[ name += stack.pop() ]; ;
 :macro +!> { name } +to name ;
+
+:macro alias { name } to name ;
 
 :macro continue {} :[ continue ]; ;
 :macro break {} :[ break ]; ;
