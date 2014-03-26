@@ -233,7 +233,7 @@ THE SOFTWARE.
 
 : compile ( x1 -- ) forth.compile ;
 
-: execute { x1 -- } :[ forthFunctionCall(stack,x1) ]; ;
+: execute { x1 -- } x1 ;
 
 :macro see { function_object -- } :[ #function_object.toString() ]: cr . ;
 
