@@ -55,6 +55,14 @@ function forthClone(other) {
 	return JSON.parse(JSON.stringify(other));
 }
 
+function forthCreateArgumentsArray(stack, count) {
+	var args = new Array;
+	for(var i=0;i<count; ++i)
+		args.push(stack.pop());
+	args.reverse();
+	return args;
+}
+
 function ForthStack() {
 	this.stac=new Array();
 
@@ -66,6 +74,11 @@ function ForthStack() {
 
 	this.push=function(item) {
 		this.stac.push(item);
+	}
+
+	this.pushIfNotUndefined=function(item) {
+		if(item != undefined)
+			this.stac.push(item);
 	}
 
 	this.isEmpty=function() {
@@ -111,56 +124,6 @@ function ForthStack() {
 		this.clear();
 		for(var i=0;i<l.length;++i)
 			this.push(l[i]);
-	}
-}
-
-// We could optimize away many forthFunctionCall calls
-// by keeping tracking how to call a function/value/constant
-// in practice this is much harder than it looks since
-// every variable in javascript that gets a function assigned
-// behaves like a function
-function forthFunctionCall(stack, func, context, name) {
-	if(func == undefined) {
-		//if(name == "undefined")
-		stack.push(undefined);
-		//else
-		//throw new Error("Can not call undefined function (func = undefined name=" + name + ")");
-	} else if(func.forth_function) {
-		if(context) {
-			func.apply(context, stack);
-		} else {
-			func(stack);
-		}
-	} else if(func.forth_function_anonymous) {
-		if(context)
-			func.execute.apply(context, stack);
-		else
-			func.execute(stack);
-	} else {
-		var type = typeof func;
-		switch(type) {
-			case 'function':
-				var args = new Array;
-				for(var i=0;i<func.length; ++i) {
-					args.push(stack.pop());
-				}
-				args.reverse();
-				if(context) {
-					var r = func.apply(context, args)
-					if(r != undefined)
-						stack.push(r);
-				} else {
-					var r = func.apply(this, args);
-					if(r != undefined)
-					stack.push(r);
-				}
-				break;
-			case 'undefined':
-				throw new Error("Can not call undefined function (typeof func = 'undefined' name=" + name + ")");
-				break;
-			default:
-				stack.push(func);
-		}
 	}
 }
 

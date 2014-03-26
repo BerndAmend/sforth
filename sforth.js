@@ -1164,13 +1164,20 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 			case forth.Types.Call:
 				var name = forth.mangleName(code_tree.name);
-				var splitted = name.split(".");
+				var splitted = name.split(".")
 				var ctxt = splitted.slice(0, splitted.length-1).join(".");
-				if(ctxt && ctxt != "") {
-					append("forthFunctionCall(stack," + name + ", " + ctxt + ", \"" + name + "\");");
-				} else {
-					append("forthFunctionCall(stack," + name + ", undefined, \"" + name + "\");");
-				}
+				if(ctxt == "")
+					ctxt = "this";
+				append("switch(typeof " + name + ") {");
+				append("	case 'function':");
+				append("		if(" + name + ".forth_function) { " + name + "(stack); }");
+				append("		else if(" + name + ".forth_function_anonymous) { " + name + ".execute.apply(" + ctxt + ", stack); }");
+				append("		else { stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", forthCreateArgumentsArray(stack, " + name + ".length))); }");
+				append("		break;");
+				//append("	case 'undefined': throw new Error('Can not call undefined');");
+				append("	default: stack.push(" + name + ");");
+				append("}");
+
 				break;
 
 			// we ignore CommentLines and CommentParentheses
