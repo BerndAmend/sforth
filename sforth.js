@@ -1168,15 +1168,10 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				var ctxt = splitted.slice(0, splitted.length-1).join(".");
 				if(ctxt == "")
 					ctxt = "this";
-				append("switch(typeof " + name + ") {");
-				append("	case 'function':");
-				append("		if(" + name + ".forth_function) { " + name + "(stack); }");
-				append("		else if(" + name + ".forth_function_anonymous) { " + name + ".execute.apply(" + ctxt + ", stack); }");
-				append("		else { stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", forthCreateArgumentsArray(stack, " + name + ".length))); }");
-				append("		break;");
-				//append("	case 'undefined': throw new Error('Can not call undefined');");
-				append("	default: stack.push(" + name + ");");
-				append("}");
+				append("if(typeof " + name + " == 'function') {");
+				append("if(" + name + ".forth_function) { " + name + "(stack); }");
+				append("else { stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", forthCreateArgumentsArray(stack, " + name + ".length))); }");
+				append("} else { stack.push(" + name + ");}");
 
 				break;
 
@@ -1227,11 +1222,11 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append(name + ".forth_function=true;\n");
 				break;
 			case forth.Types.FunctionForthAnonymous:
-				append("stack.push({forth_function_anonymous: true,");
-				append("execute: function(stack) {");
+				append("var temp_forth_function_anonymous = function(stack) {");
 				out += generateCode(code_tree.body, level);
 				append("}");
-				append("});");
+				append("temp_forth_function_anonymous.forth_function=true;");
+				append("stack.push(temp_forth_function_anonymous);\n");
 				break;
 
 			case forth.Types.FunctionJs:
