@@ -29,7 +29,27 @@ THE SOFTWARE.
 :macro null {} :[ null ]: ;
 :macro Infinity {} :[ Infinity ]: ;
 
-:macro new { name } stack ' name #name forthNew ;
+:macro new { name }
+	:[
+		if( name .forth_function) {
+			stack.push(new name (stack));
+		} else {
+			var args_for_new = forthCreateArgumentsArray(stack, name .length);
+			switch( name .length) {
+				case 0: stack.push(new name ()); break;
+				case 1: stack.push(new name (args_for_new[0])); break;
+				case 2: stack.push(new name (args_for_new[0], args_for_new[1])); break;
+				case 3: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2])); break;
+				case 4: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3])); break;
+				case 5: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4])); break;
+				case 6: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5])); break;
+				case 7: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5], args_for_new[6])); break;
+				case 8: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5], args_for_new[6], args_for_new[7])); break;
+				default: throw new Error("new should be revised, it can not handle ctors with more than 8 arguments");
+			}
+		}
+	];
+;
 
 :macro value { name } :[ var name = stack.pop() ]; ;
 :macro constant { name } value name ;
