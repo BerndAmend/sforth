@@ -1183,7 +1183,6 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			case forth.Types.DoLoop:
 				var idx = forth.mangleName(code_tree.index);
 
-				append("(function() {");
 				append("var " + idx + "_increment=stack.pop();");
 				append("var " + idx + "_end=stack.pop();");
 				append("var " + idx + "_start=stack.pop();");
@@ -1209,7 +1208,6 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 					append("}");
 				append("}");
 
-				append("}());");
 				break;
 
 			case forth.Types.FunctionForth:
