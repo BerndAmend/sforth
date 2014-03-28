@@ -31,7 +31,7 @@ Filesystem = require('fs');
 
 //SerialPort = require("serialport").SerialPort;
 
-// PNG = require('pngjs').PNG;
+PNG = require('pngjs').PNG;
 
 //require("./sforth.js");
 //require("./sforth-runtime.js");
