@@ -25,33 +25,19 @@ THE SOFTWARE.
 10 value consolebase
 
 : type { x -- }
-	typeof x { typeof-x }
-	typeof-x "function = typeof-x "undefined = || if
-		:[ process.stdout.write(typeof$$minusx) ];
+	typeof x "number = if
+		:[ process.stdout.write(x.toString(consolebase)) ];
 	else
-		x
-		x »« ===
-		x 0=
-		||
-		||
-		if
-			typeof-x "number = if
-				:[ process.stdout.write(x.toString(consolebase)) ];
-			else
-				:[ process.stdout.write(x.toString()) ];
-			endif
-		else
-			:[ console.log(x) ];
-		endif
+		:[ process.stdout.write(util.format(x)) ];
 	endif
 ;
 
 : . { x -- }
 	typeof x { typeof-x }
+
 	typeof-x "function =
 	typeof-x "undefined =
-	||
-	if
+	|| if
 		' x type
 	else
 		x type

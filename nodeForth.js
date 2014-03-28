@@ -23,6 +23,7 @@ THE SOFTWARE.
 */
 // example app for nodejs
 
+util = require('util');
 Filesystem = require('fs');
 
 // has to be done in the main file :(
