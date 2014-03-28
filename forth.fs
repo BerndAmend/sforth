@@ -27,6 +27,7 @@ THE SOFTWARE.
 :macro false {} :[ false ]: ;
 :macro undefined {} :[ undefined ]: ;
 :macro null {} :[ null ]: ;
+:macro Infinity {} :[ Infinity ]: ;
 
 :macro new { name } stack ' name #name forthNew ;
 
