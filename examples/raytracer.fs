@@ -1,3 +1,7 @@
+' PNG null = if
+	»The node.js module pngjs is required, use sudo npm install pngjs to install it« new Error throw
+endif
+
 : Color { r g b }
 	r to this.r
 	g to this.g
@@ -41,6 +45,8 @@
 1.0 1.0 1.0 new Color  to Color.white
 0.5 0.5 0.5 new Color  to Color.grey
 0.0 0.0 0.0 new Color  to Color.black
+1.0 0.0 0.0 new Color  to Color.red
+1.0 1.0 0.0 new Color  to Color.yellow
 Color.black to Color.background
 Color.black to Color.defaultColor
 
@@ -169,6 +175,19 @@ Color.black to Color.defaultColor
 var Surfaces;
 
 (function (Surfaces) {
+    Surfaces.shiny2 = {
+        diffuse: function (pos) {
+            return Color.red;
+        },
+        specular: function (pos) {
+            return Color.yellow;
+        },
+        reflect: function (pos) {
+            return 0.7;
+        },
+        roughness: 250
+    };
+
     Surfaces.shiny = {
         diffuse: function (pos) {
             return Color.white;
@@ -340,7 +359,7 @@ var Surfaces;
                 :[ { start: scene.camera.pos, dir: p } ]: scene 0 this.traceRay { color }
                 color.toDrawingColor { c }
 
-                :[ (png.width * y + x) << 2 ]: { idx }
+                png.width y * x + 2 << { idx }
 
                 c.r idx png.data !
 				c.g idx 1 + png.data !
@@ -359,9 +378,9 @@ var Surfaces;
 : default-scene {}
 	:[ {} ]: { result }
 
-	  0.0 1.0  0.0  new Vector  0.0  Surfaces.checkerboard  new Plane
-	  0.0 1.0 -0.25 new Vector  1.0  Surfaces.shiny         new Sphere
-	 -1.0 0.5  1.5  new Vector  0.5  Surfaces.shiny         new Sphere
+	 0.0 1.0  0.0  new Vector  0.0  Surfaces.checkerboard  new Plane
+	 0.0 1.0 -0.25 new Vector  1.0  Surfaces.shiny         new Sphere
+	-1.0 0.5  1.5  new Vector  0.5  Surfaces.shiny         new Sphere
 	3 create-array to result.things
 
 	-2.0 2.5  0.0 new Vector  0.49 0.07 0.07  new Color  create-light
@@ -380,8 +399,8 @@ var Surfaces;
 
 : drawToPNG {}
 	:[ {
-		width: 1024,
-		height: 1024,
+		width: 640,
+		height: 480,
 		filterType: -1
 	} ]: new PNG { png }
 	
