@@ -23,15 +23,26 @@ THE SOFTWARE.
 */
 // example app for nodejs
 
-util = require('util');
-Filesystem = require('fs');
-
 // has to be done in the main file :(
-//PDFDocument = require("pdfkit");
+try {
+	util = require('util');
+} catch(e) {}
 
-//SerialPort = require("serialport").SerialPort;
+try {
+	Filesystem = require('fs');
+} catch(e) {}
 
-PNG = require('pngjs').PNG;
+try {
+	PDFDocument = require("pdfkit");
+} catch(e) {}
+
+try {
+	SerialPort = require("serialport").SerialPort;
+} catch(e) {}
+
+try {
+	PNG = require('pngjs').PNG;
+} catch(e) {}
 
 //require("./sforth.js");
 //require("./sforth-runtime.js");
@@ -39,9 +50,6 @@ PNG = require('pngjs').PNG;
 global.eval(Filesystem.readFileSync('sforth.js').toString());
 global.eval(Filesystem.readFileSync('sforth-runtime.js').toString());
 
-compiler_message_handler=console.log
+forth.compiler_message_handler=console.log
 
-var compiled_code = forth.compile(Filesystem.readFileSync("repl.fs").toString());
-//Filesystem.writeFileSync("compiled-nodejs.fs", compiled_code);
-//console.log(compiled_code);
-global.eval(compiled_code);
+global.eval(forth.compile(Filesystem.readFileSync("repl.fs").toString()));
