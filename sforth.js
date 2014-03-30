@@ -327,6 +327,7 @@ forth.tokenize = function(code) {
 				add(new forth.CommentParentheses(str.slice(0, str.length-1)));
 				break;
 			case "/*": // comment start
+			case "/**":
 				var str = ""
 				var depth = 1;
 				while(depth > 0) {
@@ -335,7 +336,7 @@ forth.tokenize = function(code) {
 					if(i >= tokens.length)
 						throw new Error("Couldn't find closing '*/'");
 
-					if(tokens[i] == "/*")
+					if(tokens[i] == "/*" || tokens[i] == "/**")
 						depth++;
 					else if(tokens[i] == "*/") {
 						depth--;
