@@ -207,8 +207,10 @@ THE SOFTWARE.
 : 0< {} ( x1 -- f ) :[ stack.pop() < 0 ]: ;
 : 0<= {} ( x1 -- f ) :[ stack.pop() <= 0 ]: ;
 
-: 1+ {} ( x1 -- x2 ) 1 + ;
-: 1- {} ( x1 -- x2 ) 1 - ;
+: 1+ ( x1 -- x2 ) 1 + ;
+: 1- ( x1 -- x2 ) 1 - ;
+: 2* ( x1 -- x2 ) 2 * ;
+: 2/ ( x1 -- x2 ) 2 / ;
 
 \ return stack functions
 : >r {} ( w -- R:w ) :[ if(!this.returnStack) this.returnStack = new ForthStack() ]; this.returnStack.push ;
