@@ -84,30 +84,30 @@ THE SOFTWARE.
 : clearstack ( -- ) stack.clear ;
 
 \ data stack operations
-: dup { x -- x x } x x ;
+: dup { x -- x x } ' x ' x ;
 
 : drop { x } ;
 
-: swap { x1 x2 -- x2 x1 } x2 x1 ;
+: swap { x1 x2 -- x2 x1 } ' x2 ' x1 ;
 
-: over { x1 x2 -- x1 x2 x1 } x1 x2 x1 ;
+: over { x1 x2 -- x1 x2 x1 } ' x1 ' x2 ' x1 ;
 
-: rot { x1 x2 x3 -- x2 x3 x1 } x2 x3 x1 ;
+: rot { x1 x2 x3 -- x2 x3 x1 } ' x2 ' x3 ' x1 ;
 
-: -rot { x1 x2 x3 -- x3 x1 x2 } x3 x1 x2 ;
+: -rot { x1 x2 x3 -- x3 x1 x2 } ' x3 ' x1 ' x2 ;
 
-: tuck { x1 x2 -- x2 x1 x2 } x2 x1 x2 ;
+: tuck { x1 x2 -- x2 x1 x2 } ' x2 ' x1 ' x2 ;
 
-: nip { x1 x2 -- x2 } x2 ;
+: nip { x1 x2 -- x2 } ' x2 ;
 
 
-: 2dup { x1 x2 -- x1 x2 x1 x2 } x1 x2 x1 x2 ;
+: 2dup { x1 x2 -- x1 x2 x1 x2 } ' x1 ' x2 ' x1 ' x2 ;
 
 : 2drop { x1 x2 -- } ;
 
-: 2swap { x1 x2 x3 x4 -- x3 x4 x1 x2 } x3 x4 x1 x2 ;
+: 2swap { x1 x2 x3 x4 -- x3 x4 x1 x2 } ' x3 ' x4 ' x1 ' x2 ;
 
-: 2over { x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2 } x1 x2 x3 x4 x1 x2 ;
+: 2over { x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2 } ' x1 ' x2 ' x3 ' x4 ' x1 ' x2 ;
 
 : depth {} ( -- n ) stack.size ;
 
