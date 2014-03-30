@@ -139,17 +139,12 @@ THE SOFTWARE.
 	endif
 ;
 
-: xor { x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
+: xor ( x1 x2 -- x3 ) :[ stack.pop() ^ stack.pop() ]: ;
 
-: not { x1 -- x2 }
-	typeof x1 "boolean = if
-		:[ !x1 ]:
-	else
-		:[ ~x1 ]:
-	endif
-;
+: not ( x1 -- x2 ) :[ ! stack.pop() ]: ;
 
-: invert {} ( x1 -- x3 ) :[ stack.pop() ^ -1 ]: ;
+: invert ( x1 -- x2 ) :[ ~stack.pop() ]: ;
+
 
 \ math operations
 
