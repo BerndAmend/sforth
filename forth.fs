@@ -145,6 +145,7 @@ THE SOFTWARE.
 
 : invert ( x1 -- x2 ) :[ ~stack.pop() ]: ;
 
+: negate  ( n -- -n ) -1 * ;
 
 \ math operations
 
