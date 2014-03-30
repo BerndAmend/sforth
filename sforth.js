@@ -990,7 +990,7 @@ forth.createFromForthTokens = function(tokens, context) {
 			case ";":
 			case "return;":
 			case "}": // local variable end
-				compiler_message_handler("Unexpected token " + t + " found");
+				forth.compiler_message_handler("Unexpected token " + t + " found");
 				break;
 			default:
 				var mangledT = forth.mangleName(t);
