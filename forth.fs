@@ -213,7 +213,7 @@ THE SOFTWARE.
 : 2/ ( x1 -- x2 ) 2 / ;
 
 \ return stack functions
-: >r {} ( w -- R:w ) :[ if(!this.returnStack) this.returnStack = new ForthStack() ]; this.returnStack.push ;
+: >r {} ( w -- R:w ) ' this.returnStack not if new ForthStack to this.returnStack endif this.returnStack.push ;
 : r> {} ( R:w -- w ) this.returnStack.pop ;
 : r@ {} ( -- w R: w -- w ) this.returnStack.top ;
 : rdrop {} ( R:w -- ) this.returnStack.pop drop ;
