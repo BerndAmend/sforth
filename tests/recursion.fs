@@ -11,5 +11,5 @@
  : fac ( n -- n! )
 	 1 swap fac-rec ;
 	 
-4 fac 24 = " fac didn't return the correct result " assert
+4 fac 24 = »fac didn't return the correct result« assert
 

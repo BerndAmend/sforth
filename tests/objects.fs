@@ -1,11 +1,11 @@
-clearStack
+clearstack
 
 new ForthStack value stack2
 
-2 stack2.push drop
+2 stack2.push
 
-clearStack
+clearstack
 
 stack2.pop
 
-2 = " pushing and getting an element to/from a new forth stack didn't work " assert
+2 = »pushing and getting an element to/from a new forth stack didn't work« assert

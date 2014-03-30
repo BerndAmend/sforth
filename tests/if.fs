@@ -31,6 +31,6 @@
 	then
 ;
 
-false true false if-test-1 4 = " if didn't behave as expected 1 " assert
-false false false if-test-1 8 = " if didn't behave as expected 2 " assert
-true true true if-test-1 1 = " if didn't behave as expected 3 " assert
+false true false if-test-1 6 = »if didn't behave as expected 1« assert
+false false false if-test-1 8 = »if didn't behave as expected 2« assert
+true true true if-test-1 1 = »if didn't behave as expected 3« assert
