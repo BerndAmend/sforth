@@ -222,26 +222,6 @@ THE SOFTWARE.
 : rdepth {} ( -- n ) this.returnStack.size ;
 : rpick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) this.returnStack.get ;
 
-( : 2>r       d – R:d        core-ext       “two-to-r”
-: 2r>       R:d – d        core-ext       “two-r-from”
-: 2r@       R:d – R:d d        core-ext       “two-r-fetch” )
-: 2rdrop ( R:d -- ) rdrop rdrop ;
-
-
-(
-: u< { u1 u2 -- f } ![
-		var u2 = stack.d.pop();        var u1 = stack.d.pop();
-		if (u1<0)    u1 += 0x100000000 ; if (u2<0)    u2 += 0x100000000 ;
-		stack.d.push(-(u1<u2));
-	]! ;
-
-: u> { u1 u2 -- f } ![
-		var u2 = stack.d.pop();        var u1 = stack.d.pop();
-		if (u1<0)    u1 += 0x100000000 ; if (u2<0)    u2 += 0x100000000 ;
-		stack.d.push(-(u1>u2));
-	]! ;
-)
-
 \ : within { x1 x2 x3 -- f } ![ if (x1 < x2 && x2 <= x3) return 0; else return -1; ]! ;
 
 : min ( n1 n2 -- n3 ) Math.min ;
