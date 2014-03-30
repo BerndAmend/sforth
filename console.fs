@@ -84,6 +84,7 @@ THE SOFTWARE.
 : emit ( x -- ) String.fromCharCode . ;
 
 : space ( -- ) » « . ;
+: spaces { n -- } »« 0 n 0 max 1 do i » « + loop type ;
 : cr ( -- ) "\n . ;
 
 : clearcurrentline »\r\033[K« . ;
