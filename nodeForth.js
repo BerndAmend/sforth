@@ -50,6 +50,4 @@ try {
 global.eval(Filesystem.readFileSync('sforth.js').toString());
 global.eval(Filesystem.readFileSync('sforth-runtime.js').toString());
 
-forth.compiler_message_handler=console.log
-
 global.eval(forth.compile(Filesystem.readFileSync("repl.fs").toString()));

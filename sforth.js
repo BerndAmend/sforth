@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 var forth = forth || {};
 
-forth.compiler_message_handler = function(str) {};
+forth.compiler_message_handler = forth.compiler_message_handler || console.log;
 
 // We don't allow . in function names
 // if you use $ ensure that you don't write one of the following strings
