@@ -1,4 +1,4 @@
-' PNG null = if
+typeof PNG "undefined = if
 	»The node.js module pngjs is required, use sudo npm install pngjs to install it« new Error throw
 endif
 
