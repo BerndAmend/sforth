@@ -64,29 +64,32 @@ function forthCreateArgumentsArray(stack, count) {
 }
 
 function ForthStack() {
-	this.stac=new Array();
+	var intial_stack_size = 32;
+	this.stac=new Array(intial_stack_size);
+	this.pos = -1;
 
 	this.pop=function() {
-		if(this.isEmpty())
+		if(this.pos == -1)
 			throw new Error("Stack underflow");
-		return this.stac.pop();
+		return this.stac[this.pos--];
 	}
 
 	this.push=function(item) {
-		this.stac.push(item);
+		// TODO: should we throw an overflow?
+		this.stac[++this.pos] = item;
 	}
 
 	this.pushIfNotUndefined=function(item) {
 		if(item != undefined)
-			this.stac.push(item);
+			this.stac[++this.pos] = item;
 	}
 
 	this.isEmpty=function() {
-		return this.stac.length == 0;
+		return this.pos == -1;
 	}
 
 	this.size=function() {
-		return this.stac.length;
+		return this.pos+1;
 	}
 
 	this.top=function() {
@@ -94,29 +97,34 @@ function ForthStack() {
 	}
 
 	this.get=function(pos) {
-		var realpos = this.stac.length-1-pos;
+		var realpos = this.pos-pos;
 		if(realpos < 0)
 			throw new Error("Stack underflow"); //?
 		return this.stac[realpos];
 	}
 
 	this.remove=function(pos) {
-		var realpos = this.stac.length-1-pos;
+		var realpos = this.pos-pos;
 		if(realpos < 0)
 			throw new Error("Stack underflow"); //?
 		return this.stac.splice(realpos, 1);
 	}
 
 	this.clear=function() {
-		this.stac = new Array();
+		this.stac = new Array(intial_stack_size);
+		this.pos = -1;
+	}
+
+	this.getArray=function() {
+		return this.stac.slice(0,Math.max(this.pos,0));
 	}
 
 	this.toString=function() {
-		return this.stac;
+		return this.getArray().toString();
 	}
 
 	this.toJSON=function() {
-		return JSON.stringify(this.stac);
+		return JSON.stringify(this.getArray());
 	}
 
 	this.fromJSON=function(str) {
