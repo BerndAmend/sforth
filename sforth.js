@@ -1311,10 +1311,12 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 forth.compile = function(code) {
 	var tokens = forth.tokenize(code)
-	Filesystem.writeFileSync("generated-tokens.json", JSON.stringify(tokens, null, "\t"));
+	//Filesystem.writeFileSync("generated-tokens.json", JSON.stringify(tokens, null, "\t"));
 	var code_tree = forth.createFromForthTokens(tokens);
-	Filesystem.writeFileSync("generated-code_tree.json", JSON.stringify(code_tree, null, "\t"));
-	var generated_code = forth.generateJsCode(code_tree);
-	Filesystem.writeFileSync("generated-code.js", generated_code);
+	//Filesystem.writeFileSync("generated-code_tree.json", JSON.stringify(code_tree, null, "\t"));
+	var optimized_code_tree = forth.optimizeCodeTree(code_tree);
+	//Filesystem.writeFileSync("optimized-code_tree.json", JSON.stringify(optimized_code_tree, null, "\t"));
+	var generated_code = forth.generateJsCode(optimized_code_tree);
+	//Filesystem.writeFileSync("generated-code.js", generated_code);
 	return generated_code;
 }
