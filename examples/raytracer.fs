@@ -400,7 +400,7 @@ var Surfaces;
 : drawToPNG {}
 	:[ {
 		width: 640,
-		height: 480,
+		height: 640,
 		filterType: -1
 	} ]: new PNG { png }
 	
