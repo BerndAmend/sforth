@@ -1163,7 +1163,10 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				break;
 			case forth.Types.Body:
 				code_tree.body.forEach(function(entry) {
-					out += generateCode(entry, level+1);
+					var l = level;
+					if(!entry.extendedMacro)
+						l++;
+					out += generateCode(entry, l);
 				});
 				break;
 
