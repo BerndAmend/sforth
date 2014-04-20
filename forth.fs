@@ -31,23 +31,25 @@ THE SOFTWARE.
 
 :macro new { name }
 	:[
+		var sforth_new_helper_variable_42 = null;
 		if( name .forth_function) {
-			stack.push(new name (stack));
+			sforth_new_helper_variable_42 = new name (stack);
 		} else {
 			var args_for_new = forthCreateArgumentsArray(stack, name .length);
 			switch( name .length) {
-				case 0: stack.push(new name ()); break;
-				case 1: stack.push(new name (args_for_new[0])); break;
-				case 2: stack.push(new name (args_for_new[0], args_for_new[1])); break;
-				case 3: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2])); break;
-				case 4: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3])); break;
-				case 5: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4])); break;
-				case 6: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5])); break;
-				case 7: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5], args_for_new[6])); break;
-				case 8: stack.push(new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5], args_for_new[6], args_for_new[7])); break;
+				case 0: sforth_new_helper_variable_42 = new name (); break;
+				case 1: sforth_new_helper_variable_42 = new name (args_for_new[0]); break;
+				case 2: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1]); break;
+				case 3: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2]); break;
+				case 4: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3]); break;
+				case 5: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4]); break;
+				case 6: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5]); break;
+				case 7: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5], args_for_new[6]); break;
+				case 8: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5], args_for_new[6], args_for_new[7]); break;
 				default: throw new Error("new should be revised, it can not handle ctors with more than 8 arguments");
 			}
 		}
+		stack.push(sforth_new_helper_variable_42);
 	];
 ;
 
