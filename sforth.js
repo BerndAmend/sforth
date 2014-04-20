@@ -1269,7 +1269,6 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 				var name = forth.mangleName(code_tree.name);
 
-				append("if(forth_macros[\"" + name + "\"]) throw new Error(\"A macro with the name " + code_tree.name + " is already defined\");");
 				append("forth_macros[\"" + name + "\"] = " + JSON.stringify(code_tree) + ";\n");
 
 				break;
