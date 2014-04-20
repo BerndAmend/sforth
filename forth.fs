@@ -124,20 +124,6 @@ THE SOFTWARE.
 
 : || { x1 x2 -- x3 } :[ x1 || x2 ]: ;
 
-: or { x1 x2 -- x3 }
-	typeof x1 "boolean = typeof x2 "boolean = || if
-		x1 x2 ||
-	else
-		x1 x2 |
-	endif
-;
-: and { x1 x2 -- x3 }
-	typeof x1 "boolean = typeof x2 "boolean = || if
-		x1 x2 &&
-	else
-		x1 x2 &
-	endif
-;
 
 : xor ( x1 x2 -- x3 ) :[ stack.pop() ^ stack.pop() ]: ;
 
