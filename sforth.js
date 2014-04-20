@@ -1012,7 +1012,7 @@ forth.createFromForthTokens = function(tokens, context) {
 						add(gcode);
 					} else {
 						var gcode = forthClone(macro.body);
-						for(var k=0;k<macro.args.length;++k) {
+						for(var k=macro.args.length-1;k>=0;--k) {
 							i++;
 							//forth.compiler_message_handler("replace " + macro.args[k] + " with " + tokens[i]);
 							//forth.compiler_message_handler("before = " + JSON.stringify(macro.body));
