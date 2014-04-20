@@ -172,6 +172,12 @@ THE SOFTWARE.
 : mod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
 : /mod { x1 x2 -- x3 } :[ x1 % x2 ]: x1 x2 / floor ;
 
+:macro m+ { x1 x2 -- x3 } :[ x1 + x2 ]: ;
+:macro m- { x1 x2 -- x3 } :[ x1 - x2 ]: ;
+:macro m* { x1 x2 -- x3 } :[ x1 * x2 ]: ;
+:macro m/ { x1 x2 -- x3 } :[ x1 / x2 ]: ;
+:macro mmod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
+
 : << { x1 x2 -- x3 } :[ x1 << x2 ]: ;
 : >> { x1 x2 -- x3 } :[ x1 >> x2 ]: ;
 : >>> { x1 x2 -- x3 } :[ x1 >>> x2 ]: ;
@@ -249,6 +255,9 @@ THE SOFTWARE.
 
 : ! { value index variable -- } :[ variable[index] = value ]; ;
 : @ { index variable -- value } :[ variable[index] ]: ;
+
+:macro m! { variable index value -- } :[ variable [ index ] = value ]; ;
+:macro m@ { variable index -- value } :[ variable [ index ] ]: ;
 
 : store-in-array { arr -- } arr.length 1- -1 1 do i i arr ! loop ;
 
