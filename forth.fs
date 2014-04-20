@@ -136,7 +136,7 @@ THE SOFTWARE.
 
 \ math operations
 
-: tofixed { num digits -- str } num 0= IF 1e-323 else num endif { num } digits num.toFixed ;
+: tofixed { num digits -- str } num 0= if 1e-323 else num endif { num } digits num.toFixed ;
 
 : deg2rad {} ( x1 -- x2 ) 180 / Math.PI * ;
 : rad2deg {} ( x1 -- x2 ) Math.PI / 180 * ;
