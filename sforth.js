@@ -771,15 +771,19 @@ forth.createFromForthTokens = function(tokens, context) {
 				}
 				break;
 			case "include":
-				var str = ""
-				i++;
+				if(typeof Filesystem != "undefined") {
+					var str = ""
+					i++;
 
-				if(i >= tokens.length)
-					throw new Error("Couldn't find closing '\"' for 'include'");
-				if(tokens[i].type == forth.Types.String) {
-					add(forth.createFromForth(Filesystem.readFileSync(tokens[i].value).toString(), context));
+					if(i >= tokens.length)
+						throw new Error("Couldn't find requirement argument for 'include'");
+					if(tokens[i].type == forth.Types.String) {
+						add(forth.createFromForth(Filesystem.readFileSync(tokens[i].value).toString(), context));
+					} else {
+						add(forth.createFromForth(Filesystem.readFileSync(tokens[i]).toString(), context));
+					}
 				} else {
-					add(forth.createFromForth(Filesystem.readFileSync(tokens[i]).toString(), context));
+					throw new Error("Include is not available e.g. if used inside a web browser");
 				}
 				break;
 
