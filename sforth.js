@@ -1097,9 +1097,14 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 		for(var i = 0; i < level; i++)
 			lp += indent_characters;
 
-		function append(str) {
+		function append(str, add_level) {
+			if(add_level == undefined)
+				add_level = 0;
+			var tlp = lp;
+			for(var i = 0; i < add_level; i++)
+			tlp += indent_characters;
 			if(str && str != "")
-				out += lp + str + "\n";
+				out += tlp + str + "\n";
 		}
 
 		switch(code_tree.type) {
@@ -1195,25 +1200,16 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append("var " + idx + "_end=stack.pop();");
 				append("var " + idx + "_start=stack.pop();");
 
-				append("if(" + idx + "_start == " + idx + "_end) {");
-					append("if(" + idx + "_increment == 0) {");
-						append("for(var " + idx + "=" + idx + "_start; " +
-							idx + "<" + idx + "_end;) {");
-						out += generateCode(code_tree.body, level);
-						append("}");
-					append("}");
-				append("} else if(" + idx + "_start < " + idx + "_end) {");
-					append("if(" + idx + "_increment < 0) " + idx + "_increment *= -1;");
-					append("for(var " + idx + "=" + idx + "_start; " +
-						idx + "<" + idx + "_end;" + idx + "+= " + idx + "_increment) {");
-					out += generateCode(code_tree.body, level);
-					append("}");
+				append("if(" + idx + "_start <= " + idx + "_end) {");
+					append("if(" + idx + "_increment < 0) throw new Error(\"Increment doesn't match the sign assument by the start/end\");",1);
+					append("for(var " + idx + "=" + idx + "_start; " + idx + "<" + idx + "_end;" + idx + "+= " + idx + "_increment) {",1);
+						out += generateCode(code_tree.body, level+1);
+					append("}",1);
 				append("} else {");
-					append("if(" + idx + "_increment > 0) " + idx + "_increment *= -1;");
-					append("for(var " + idx + "=" + idx + "_start; " +
-						idx + ">" + idx + "_end;" + idx + "+= " + idx + "_increment) {");
-					out += generateCode(code_tree.body, level);
-					append("}");
+					append("if(" + idx + "_increment > 0) throw new Error(\"Increment doesn't match the sign assument by the start/end\");",1);
+					append("for(var " + idx + "=" + idx + "_start; " + idx + ">" + idx + "_end;" + idx + "+= " + idx + "_increment) {",1);
+						out += generateCode(code_tree.body, level+1);
+					append("}",1);
 				append("}");
 
 				break;
