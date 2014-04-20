@@ -493,7 +493,7 @@ forth.createFromForthTokens = function(tokens, context) {
 					i++;
 
 					if(i >= tokens.length) {
-						console.log("tokens=" + JSON.stringify(tokens));
+						forth.compiler_message_handler("tokens=" + JSON.stringify(tokens));
 						throw new Error("Couldn't find closing 'endif/then' for 'if'");
 					}
 
@@ -520,7 +520,7 @@ forth.createFromForthTokens = function(tokens, context) {
 								while(true) {
 									i++;
 									if(i >= tokens.length) {
-										console.log("tokens=" + JSON.stringify(tokens));
+										forth.compiler_message_handler("tokens=" + JSON.stringify(tokens));
 										throw new Error("Couldn't find closing 'if' for 'elseif'");
 									}
 									if(!tokens[i].type && tokens[i].toLowerCase() == "if")
@@ -530,7 +530,7 @@ forth.createFromForthTokens = function(tokens, context) {
 								}
 
 								current = elseIf.body;
-								//console.log("current=" + JSON.stringify(elseIf));
+								//forth.compiler_message_handler("current=" + JSON.stringify(elseIf));
 							} else {
 								current.push(tokens[i]);
 							}
@@ -589,7 +589,7 @@ forth.createFromForthTokens = function(tokens, context) {
 					i++;
 
 					if(i >= tokens.length) {
-						console.log("tokens=" + JSON.stringify(tokens));
+						forth.compiler_message_handler("tokens=" + JSON.stringify(tokens));
 						throw new Error("Couldn't find 'endtry' for 'try'");
 					}
 
@@ -1006,16 +1006,16 @@ forth.createFromForthTokens = function(tokens, context) {
 
 				if(macro) {
 					if(macro.args.length == 0) {
-						//console.log(t + " insert code");
+						//forth.compiler_message_handler(t + " insert code");
 						var gcode = forth.createFromForthTokens(macro.body, context);
-						//console.log(t + " = " + JSON.stringify(gcode));
+						//forth.compiler_message_handler(t + " = " + JSON.stringify(gcode));
 						add(gcode);
 					} else {
 						var gcode = forthClone(macro.body);
 						for(var k=0;k<macro.args.length;++k) {
 							i++;
-							//console.log("replace " + macro.args[k] + " with " + tokens[i]);
-							//console.log("before = " + JSON.stringify(macro.body));
+							//forth.compiler_message_handler("replace " + macro.args[k] + " with " + tokens[i]);
+							//forth.compiler_message_handler("before = " + JSON.stringify(macro.body));
 							for(var n=0; n<gcode.length;++n) {
 								var entry = gcode[n];
 								if(typeof entry.type != "undefined") {
@@ -1023,9 +1023,9 @@ forth.createFromForthTokens = function(tokens, context) {
 										case forth.Types.JsCodeDirect:
 										case forth.Types.JsCode:
 										case forth.Types.JsCodeWithReturn:
-											//console.log("token: " + JSON.stringify(tokens[i]));
+											//forth.compiler_message_handler("token: " + JSON.stringify(tokens[i]));
 											if(typeof tokens[i] == "undefined") {
-												console.log("Can not find required macro argument for " + macro.name);
+												forth.compiler_message_handler("Can not find required macro argument for " + macro.name);
 											}
 											if(typeof tokens[i].type != "undefined") {
 												switch(tokens[i].type) {
@@ -1052,19 +1052,19 @@ forth.createFromForthTokens = function(tokens, context) {
 									}
 								}
 							}
-							//console.log("after = " + JSON.stringify(gcode));
+							//forth.compiler_message_handler("after = " + JSON.stringify(gcode));
 						}
 
-						//console.log("gcode = " + JSON.stringify(gcode));
+						//forth.compiler_message_handler("gcode = " + JSON.stringify(gcode));
 						var cgcode = forth.createFromForthTokens(gcode, context);
-						//console.log("cgcode = " + JSON.stringify(gcode));
+						//forth.compiler_message_handler("cgcode = " + JSON.stringify(gcode));
 						cgcode.extendedMacro=t;
 						add(cgcode);
 					}
-					//console.log(t + " is a macro : " + JSON.stringify(context.macro[t]));
+					//forth.compiler_message_handler(t + " is a macro : " + JSON.stringify(context.macro[t]));
 				} else {
 					if(t == "typeof")
-						console.log(":( try to call typeof: " + JSON.stringify(context));
+						forth.compiler_message_handler(":( try to call typeof: " + JSON.stringify(context));
 					add(new forth.Call(t));
 				}
 		}
@@ -1297,8 +1297,8 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				});
 				break;
 			default:
-				console.log("Unknown type=" + code_tree.type);
-				console.log("Unknown " + JSON.stringify(code_tree, null, "\t"));
+				forth.compiler_message_handler("Unknown type=" + code_tree.type);
+				forth.compiler_message_handler("Unknown " + JSON.stringify(code_tree, null, "\t"));
 		}
 
 		return out;
