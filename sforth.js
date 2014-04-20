@@ -29,7 +29,7 @@ forth.compiler_message_handler = forth.compiler_message_handler || console.log;
 // We don't allow . in function names
 // if you use $ ensure that you don't write one of the following strings
 forth.mangling = {
-	"€": "$$euro",
+	"\u20ac": "$$euro",
 	"=": "$$eq",
 	">": "$$greater",
 	"<": "$$less",
@@ -56,7 +56,7 @@ forth.mangling = {
 	")": "$$cparentheses",
 	"{": "$$obraces",
 	"}": "$$obraces",
-	"·": "$$middot",
+	"\u00b7": "$$middot",
 	"\"": "$$quotationmark"
 };
 
@@ -399,18 +399,18 @@ forth.tokenize = function(code) {
 					add(new forth.Number(t.charCodeAt(1)));
 				} else if(t[0] == "\"" && t.length >= 2) {
 					add(new forth.String(t.substr(1)));
-				} else if(t[0] == "»") {
+				} else if(t[0] == "\u00bb") { // »
 					var str = "";
-					if(tokens[i].substr(tokens[i].length-1) == "«"
-						&& tokens[i].substr(tokens[i].length-2) != "\\«"
+					if(tokens[i].substr(tokens[i].length-1) == "\u00ab" // «
+						&& tokens[i].substr(tokens[i].length-2) != "\\\u00ab" // «
 					) {
 						str = tokens[i].substr(1,tokens[i].length-1);
 					} else {
 						str = tokens[i].substr(1) + " ";
 						i++;
 						while(true) {
-							if(tokens[i].substr(tokens[i].length-1) == "«"
-								&& tokens[i].substr(tokens[i].length-2) != "\\«"
+							if(tokens[i].substr(tokens[i].length-1) == "\u00ab" // «
+								&& tokens[i].substr(tokens[i].length-2) != "\\\u00ab" // «
 							) {
 								if(tokens[i].length == 1)
 									str += " ";
@@ -425,7 +425,7 @@ forth.tokenize = function(code) {
 							i++;
 
 							if(i >= tokens.length)
-								throw new Error("Couldn't find closing '«' for '»'");
+								throw new Error("Couldn't find closing '\u00ab' for '\u00bb'");
 						}
 					}
 
@@ -433,8 +433,8 @@ forth.tokenize = function(code) {
 											.replace(/ \t /gm, '\t')
 											.replace(/ \r /gm, '\r')
 											.replaceAll("\"", "\\\"")
-											.replaceAll("\\»", "»")
-											.replaceAll("\\«", "«")
+											.replaceAll("\\\u00bb", "\u00bb")
+											.replaceAll("\\\u00ab", "\u00ab")
 								  ));
 				} else if(t[0] == "$" && t.length >= 2) {
 					add(new forth.Number("0x" + t.substr(1)));
