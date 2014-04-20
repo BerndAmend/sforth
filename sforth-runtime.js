@@ -63,78 +63,82 @@ function forthCreateArgumentsArray(stack, count) {
 	return args;
 }
 
-function ForthStack() {
-	var intial_stack_size = 32;
-	this.stac=new Array(intial_stack_size);
-	this.pos = -1;
+var ForthStack = (function () {
+	function ForthStack() {
+		this.stac=new Array(32);
+		this.pos = -1;
+	}
 
-	this.pop=function() {
+	ForthStack.prototype.pop=function() {
 		if(this.pos == -1)
 			throw new Error("Stack underflow");
 		return this.stac[this.pos--];
 	}
 
-	this.push=function(item) {
+	ForthStack.prototype.push=function(item) {
 		// TODO: should we throw an overflow?
 		this.stac[++this.pos] = item;
 	}
 
-	this.pushIfNotUndefined=function(item) {
+	ForthStack.prototype.pushIfNotUndefined=function(item) {
 		if(item != undefined)
 			this.stac[++this.pos] = item;
 	}
 
-	this.isEmpty=function() {
+	ForthStack.prototype.isEmpty=function() {
 		return this.pos == -1;
 	}
 
-	this.size=function() {
+	ForthStack.prototype.size=function() {
 		return this.pos+1;
 	}
 
-	this.top=function() {
+	ForthStack.prototype.top=function() {
 		return this.get(0);
 	}
 
-	this.get=function(pos) {
+	ForthStack.prototype.get=function(pos) {
 		var realpos = this.pos-pos;
 		if(realpos < 0)
 			throw new Error("Stack underflow"); //?
 		return this.stac[realpos];
 	}
 
-	this.remove=function(pos) {
+	ForthStack.prototype.remove=function(pos) {
 		var realpos = this.pos-pos;
 		if(realpos < 0)
 			throw new Error("Stack underflow"); //?
+		--this.pos;
 		return this.stac.splice(realpos, 1);
 	}
 
-	this.clear=function() {
-		this.stac = new Array(intial_stack_size);
+	ForthStack.prototype.clear=function() {
+		this.stac = new Array(32);
 		this.pos = -1;
 	}
 
-	this.getArray=function() {
+	ForthStack.prototype.getArray=function() {
 		return this.stac.slice(0,Math.max(this.pos,0));
 	}
 
-	this.toString=function() {
+	ForthStack.prototype.toString=function() {
 		return this.getArray().toString();
 	}
 
-	this.toJSON=function() {
+	ForthStack.prototype.toJSON=function() {
 		return JSON.stringify(this.getArray());
 	}
 
-	this.fromJSON=function(str) {
+	ForthStack.prototype.fromJSON=function(str) {
 		var l = JSON.parse(str);
 		this.clear();
 		for(var i=0;i<l.length;++i)
 			this.push(l[i]);
 	}
-}
+
+    return ForthStack;
+})();
 
 // create the global stack
-var stack = new ForthStack();
+var stack = stack || new ForthStack();
 var forth_macros = forth_macros || {};
