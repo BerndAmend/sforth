@@ -116,22 +116,21 @@ THE SOFTWARE.
 : roll {} ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove ;
 
 
-: & { x1 x2 -- x3 } :[ x1 & x2 ]: ;
+:macro & {} ( x1 x2 -- x3 ) :[ stack.pop() & stack.pop() ]: ;
 
-: && { x1 x2 -- x3 } :[ x1 &&x2 ]: ;
+:macro && {} ( x1 x2 -- x3 ) :[ stack.pop() && stack.pop() ]: ;
 
-: | { x1 x2 -- x3 } :[ x1 | x2 ]: ;
+:macro | {} ( x1 x2 -- x3 ) :[ stack.pop() | stack.pop() ]: ;
 
-: || { x1 x2 -- x3 } :[ x1 || x2 ]: ;
+:macro || {} ( x1 x2 -- x3 ) :[ stack.pop() || stack.pop() ]: ;
 
+:macro xor {} ( x1 x2 -- x3 ) :[ stack.pop() ^ stack.pop() ]: ;
 
-: xor ( x1 x2 -- x3 ) :[ stack.pop() ^ stack.pop() ]: ;
+:macro not {} ( x1 -- x2 ) :[ !stack.pop() ]: ;
 
-: not ( x1 -- x2 ) :[ ! stack.pop() ]: ;
+:macro invert {} ( x1 -- x2 ) :[ ~stack.pop() ]: ;
 
-: invert ( x1 -- x2 ) :[ ~stack.pop() ]: ;
-
-: negate  ( n -- -n ) -1 * ;
+:macro negate {} ( n -- -n ) -1 * ;
 
 \ math operations
 
@@ -177,26 +176,26 @@ THE SOFTWARE.
 : lshift << ;
 : rshift >>> ;
 
-: = { x1 x2 -- f } :[ x1 == x2 ]: ;
-: === { x1 x2 -- f } :[ x1 === x2 ]: ;
-: <> { x1 x2 -- f } :[ x1 != x2 ]: ;
-: > { x1 x2 -- f } :[ x1 > x2 ]: ;
-: >= { x1 x2 -- f } :[ x1 >= x2 ]: ;
-: < { x1 x2 -- f } :[ x1 < x2 ]: ;
-: <= { x1 x2 -- f } :[ x1 <= x2 ]: ;
+:macro = {} ( x1 x2 -- f ) :[ stack.pop() == stack.pop() ]: ;
+:macro === {} ( x1 x2 -- f ) :[ stack.pop() === stack.pop() ]: ;
+:macro <> {} ( x1 x2 -- f ) :[ stack.pop() != stack.pop() ]: ;
+:macro > {} ( x1 x2 -- f ) :[ stack.pop() < stack.pop() ]: ;
+:macro >= {} ( x1 x2 -- f ) :[ stack.pop() <= stack.pop() ]: ;
+:macro < {} ( x1 x2 -- f ) :[ stack.pop() > stack.pop() ]: ;
+:macro <= {} ( x1 x2 -- f ) :[ stack.pop() >= stack.pop() ]: ;
 
 \ we provide a faster implementation for important functions
-: 0= {} ( x1 -- f ) :[ stack.pop() == 0 ]: ;
-: 0<> {} ( x1 -- f ) :[ stack.pop() != 0 ]: ;
-: 0> {} ( x1 -- f ) :[ stack.pop() > 0 ]: ;
-: 0>= {} ( x1 -- f ) :[ stack.pop() >= 0 ]: ;
-: 0< {} ( x1 -- f ) :[ stack.pop() < 0 ]: ;
-: 0<= {} ( x1 -- f ) :[ stack.pop() <= 0 ]: ;
+:macro 0= {} ( x1 -- f ) :[ stack.pop() == 0 ]: ;
+:macro 0<> {} ( x1 -- f ) :[ stack.pop() != 0 ]: ;
+:macro 0> {} ( x1 -- f ) :[ stack.pop() > 0 ]: ;
+:macro 0>= {} ( x1 -- f ) :[ stack.pop() >= 0 ]: ;
+:macro 0< {} ( x1 -- f ) :[ stack.pop() < 0 ]: ;
+:macro 0<= {} ( x1 -- f ) :[ stack.pop() <= 0 ]: ;
 
-: 1+ ( x1 -- x2 ) 1 + ;
-: 1- ( x1 -- x2 ) 1 - ;
-: 2* ( x1 -- x2 ) 2 * ;
-: 2/ ( x1 -- x2 ) 2 / ;
+:macro 1+ {} ( x1 -- x2 ) 1 + ;
+:macro 1- {} ( x1 -- x2 ) 1 - ;
+:macro 2* {} ( x1 -- x2 ) 2 * ;
+:macro 2/ {} ( x1 -- x2 ) 2 / ;
 
 \ return stack functions
 : >r {} ( w -- R:w ) ' this.returnStack not if new ForthStack to this.returnStack endif this.returnStack.push ;
