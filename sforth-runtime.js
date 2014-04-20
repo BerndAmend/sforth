@@ -55,14 +55,6 @@ function forthClone(other) {
 	return JSON.parse(JSON.stringify(other));
 }
 
-function forthCreateArgumentsArray(stack, count) {
-	var args = new Array;
-	for(var i=0;i<count; ++i)
-		args.push(stack.pop());
-	args.reverse();
-	return args;
-}
-
 var ForthStack = (function () {
 	function ForthStack() {
 		this.stac=new Array(32);
@@ -102,6 +94,14 @@ var ForthStack = (function () {
 		if(realpos < 0)
 			throw new Error("Stack underflow"); //?
 		return this.stac[realpos];
+	}
+
+	ForthStack.prototype.getTopElements=function(count) {
+		var realpos = this.pos-count+1;
+		if(realpos < 0)
+			throw new Error("Stack underflow");
+		this.pos -= count;
+		return this.stac.slice(realpos, count);
 	}
 
 	ForthStack.prototype.remove=function(pos) {

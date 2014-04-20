@@ -35,7 +35,7 @@ THE SOFTWARE.
 		if( name .forth_function) {
 			sforth_new_helper_variable_42 = new name (stack);
 		} else {
-			var args_for_new = forthCreateArgumentsArray(stack, name .length);
+			var args_for_new = stack.getTopElements( name .length);
 			switch( name .length) {
 				case 0: sforth_new_helper_variable_42 = new name (); break;
 				case 1: sforth_new_helper_variable_42 = new name (args_for_new[0]); break;

@@ -1183,7 +1183,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 					ctxt = "this";
 				append("if(typeof " + name + " == 'function') {");
 				append("if(" + name + ".forth_function) { " + name + "(stack); }");
-				append("else { stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", forthCreateArgumentsArray(stack, " + name + ".length))); }");
+				append("else { stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", stack.getTopElements(" + name + ".length))); }");
 				append("} else { stack.push(" + name + ");}");
 
 				break;
