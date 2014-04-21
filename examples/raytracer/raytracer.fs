@@ -1,9 +1,3 @@
-/*
-typeof PNG "undefined = if
-	»The node.js module pngjs is required, use sudo npm install pngjs to install it« new Error throw
-endif
-*/
-
 // Color
 	: Color { r g b }
 		r to this.r
@@ -342,42 +336,7 @@ var Surfaces;
         :[ scene.lights.reduce(addLight, Color.defaultColor) ]:
     ; to this.getNaturalColor
 
-    :noname { scene png }
-        :noname { x y camera }
-            :noname { x }
-                :[ (x - (png.width / 2.0)) / 2.0 / png.width ]:
-            ; { recenterX }
-            :noname { y }
-                :[ -(y - (png.height / 2.0)) / 2.0 / png.height ]:
-            ; { recenterY }
-
-			x recenterX camera.right.times { tmp }  y recenterY camera.up.times tmp.plus  { tmp } camera.forward tmp.plus  { tmp } tmp.norm
-        ; { getPoint }
-
-        0 png.height 1 do y
-            0 png.width 1 do x
-                x y scene.camera getPoint { p }
-                :[ { start: scene.camera.pos, dir: p } ]: scene 0 this.traceRay { color }
-                color.toDrawingColor { c }
-
-                png.width y * x + 2 << { idx }
-
-                c.r idx png.data !
-				c.g idx 1 + png.data !
-				c.b idx 2 + png.data !
-				0xff idx 3 + png.data !
-            loop
-            »Line « y "\r + + type
-        loop
-    ; to this.renderToPNG
-
-    :noname { scene ctx }
-		' ctx.canvas.width { width }
-		' ctx.canvas.height { height }
-
-		:[ ctx.createImageData(width,height) ]: { image }
-		' image.data { dst }
-
+    :noname { scene width height y-start y-end line-finish-callback }
         :noname { x y camera }
             :noname { x }
                 :[ (x - (width / 2.0)) / 2.0 / width ]:
@@ -389,25 +348,28 @@ var Surfaces;
 			x recenterX camera.right.times { tmp }  y recenterY camera.up.times tmp.plus  { tmp } camera.forward tmp.plus  { tmp } tmp.norm
         ; { getPoint }
 
-        0 height 1 do y
+        :[ new Uint8ClampedArray(width*4) ]: { line }
+
+        y-start y-end 1 do y
             0 width 1 do x
                 x y scene.camera getPoint { p }
                 :[ { start: scene.camera.pos, dir: p } ]: scene 0 this.traceRay { color }
                 color.toDrawingColor { c }
 
-                width y * x + 2 << { idxr }
+                x 2 << { idxr }
                 m+ idxr 1 { idxg }
                 m+ idxr 2 { idxb }
                 m+ idxr 3 { idxa }
 
-                m! dst idxr c.r
-				m! dst idxg c.g
-				m! dst idxb c.b
-				m! dst idxa 0xff
+                m! line idxr c.r
+				m! line idxg c.g
+				m! line idxb c.b
+				m! line idxa 0xff
             loop
+            ' y ' line line-finish-callback
         loop
-        ' image 0 0 ctx.putImageData
-    ; to this.renderToCanvas
+		null null line-finish-callback // Done
+    ; to this.render
 ;
 
 : create-light { pos color }
@@ -417,46 +379,20 @@ var Surfaces;
 : default-scene {}
 	:[ {} ]: { result }
 
-	 0.0 1.0  0.0  new Vector  0.0  Surfaces.checkerboard  new Plane
-	 0.0 1.0 -0.25 new Vector  1.0  Surfaces.shiny         new Sphere
+	0.0 1.0  0.0  new Vector  0.0  Surfaces.checkerboard  new Plane
+	0.0 1.0 -0.25 new Vector  1.0  Surfaces.shiny         new Sphere
 	-1.0 0.5  1.5  new Vector  0.5  Surfaces.shiny         new Sphere
 	3 create-array to result.things
 
 	-2.0 2.5  0.0 new Vector  0.49 0.07 0.07  new Color  create-light
-	 1.5 2.5  1.5 new Vector  0.07 0.07 0.49  new Color  create-light
-	 1.5 2.5 -1.5 new Vector  0.07 0.49 0.071 new Color  create-light
-	 0.0 3.5  0.0 new Vector  0.21 0.21 0.35  new Color  create-light
+	1.5 2.5  1.5 new Vector  0.07 0.07 0.49  new Color  create-light
+	1.5 2.5 -1.5 new Vector  0.07 0.49 0.071 new Color  create-light
+	0.0 3.5  0.0 new Vector  0.21 0.21 0.35  new Color  create-light
 	4 create-array to result.lights
 
-	 3.0 2.0 4.0 new Vector
+	3.0 2.0 4.0 new Vector
 	-1.0 0.5 0.0 new Vector
 	new Camera to result.camera
 
 	result
 ;
-
-
-: drawToPNG {}
-	:[ {
-		width: 640,
-		height: 640,
-		filterType: -1
-	} ]: new PNG { png }
-
-	new RayTracer { rayTracer }
-    default-scene png  rayTracer.renderToPNG
-
-    :[ png.pack().pipe(Filesystem.createWriteStream('raytracer.png')) ];
-;
-
-:js drawToCanvas { ctx }
-	new RayTracer { rayTracer }
-    default-scene ctx  rayTracer.renderToCanvas
-;
-
-/*
-time-in-ms
-drawToPNG
-time-in-ms swap - { x }
-» calculation time =  « x + .
-*/

@@ -10,10 +10,83 @@
 </head>
 <body onload="forth.compileAllScriptRegions();">
 	<script data-src="../../forth.fs;../../browser.fs" type="application/sforth"></script>
-	<script data-src="raytracer.fs" type="application/sforth"></script>
 
-	<canvas id="canvas" width="100" height="100"></canvas>
-	
-	<input type="button" value="Render" onclick="drawToCanvas(document.getElementById('canvas').getContext('2d'));">
+	<script type="application/sforth" data-id="worker1" data-type="javascript/worker"
+		data-src="../../sforth-runtime.js;../../forth.fs;raytracer.fs" data-throw-on-underflow="true">
+		: post-message { msg } :[ self.postMessage(msg) ]; ;
+
+		:jsnoname { e }
+			e.data.scene { scene }
+			e.data.width { width }
+			e.data.height { height }
+			e.data.y_start { y_start }
+			e.data.y_end { y_end }
+			new RayTracer { rayTracer }
+
+			: paint-line { y data }
+				' y null = if
+					// Done
+					null post-message
+					exit
+				endif
+				:[ { y: y, data: data } ]: post-message
+			;
+
+			default-scene width height y_start y_end ' paint-line rayTracer.render
+		; to self.onmessage
+	</script>
+
+	<script type="application/sforth">
+		:js renderToCanvas { }
+			:[ document.getElementById('worker-count').value ]: { worker-count }
+			:[ document.getElementById('width').value ]: { width }
+			:[ document.getElementById('height').value ]: { height }
+
+			"canvas document.getElementById { canvas } :[ canvas.getContext("2d") ]: { ctx }
+
+			width to canvas.width
+			height to canvas.height
+
+			"#worker1 create-worker { worker }
+
+			:[ ctx.createImageData(width, 1) ]: { line }
+
+			:jsnoname { e }
+				' e.data null = if
+					// Done
+					worker.terminate
+					»Worker is done« console-log
+					exit
+				endif
+				e.data.y { y }
+				e.data.data { data }
+				:[ line.data.set(data) ];
+				' line 0 y ctx.putImageData
+			; to worker.onmessage
+
+			:[ {
+				scene: null,
+				width: width,
+				height: height,
+				y_start: 0,
+				y_end: height
+			} ]:
+			worker.postMessage
+		;
+
+		/*
+time-in-ms
+drawToPNG
+time-in-ms swap - { x }
+» calculation time =  « x + .
+*/
+	</script>
+
+	Worker <input id="worker-count" type="text" size="30" maxlength="30" value="8">
+	Width: <input id="width" type="text" size="30" maxlength="30" value="640">
+	Height: <input id="height" type="text" size="30" maxlength="30" value="640">
+	<input type="button" value="Render" onclick="renderToCanvas();">
+	<br>
+	<canvas id="canvas"></canvas>
 </body>
 </html>
