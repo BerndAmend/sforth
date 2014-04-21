@@ -8,7 +8,7 @@
 	<script src="../../sforth-runtime.js"></script>
 	<script src="../../sforth.js"></script>
 	<script src="image-processing.js"></script>
-	
+
 	<style>
 		/*#canvas-output1 {
 			width: 640px;
@@ -23,42 +23,67 @@
 <body onload="forth.compileAllScriptRegions();">
 	<script data-src="../../forth.fs" type="application/sforth"></script>
 	<script data-src="../../browser.fs" type="application/sforth"></script>
-	<script data-src="bv.fs" type="application/sforth"></script>
 	
 	<div id="camera-image"></div>
 	<canvas id="canvas-output1"></canvas>
 
 	<script type="application/sforth">
-		:[
-			var canvas = document.getElementById('canvas-output1');
-			var ctx = canvas.getContext('2d');
-			
-			//var canvas2 = document.getElementById('canvas-output2');
-			//var ctx2 = canvas2.getContext('2d');
-		
-			// "#camera-image"
-			var cameraInterface = new CameraInterface(null,
-			{
-				video: {
-					mandatory: {
-						minWidth: 1920,
-						minHeight: 1080
-					}
-				}
-			});
-			
-			cameraInterface.on('error', function(err) {
-				console.log('error');
-			});
+		:[ document.getElementById('canvas-output1') ]: { canvas }
+		:[ canvas.getContext('2d') ]: { ctx }
 
-			cameraInterface.on('newImage', function(image) {
-				canvas.width = image.width;
-				canvas.height = image.height;
-				processImage(image, ctx);
-			});
-			
-			cameraInterface.start();
-		];
+		:js processImage { image }
+			image.width to canvas.width
+			image.height to canvas.height
+
+			' image.data { src }
+
+			:[ ctx.createImageData(image) ]: { output }
+			' output.data { dst }
+
+			0 ' image.height 1 do y
+				m* y image.width { y-pos }
+				m* y-pos 4 { y-pos }
+				0 ' image.width 1 do x
+					m* x 4 { i }
+					m+ i y-pos { i }
+
+					m+ i 1 { ig }
+					m+ i 2 { ib }
+					m+ i 3 { ia }
+
+					m@ src i { r }
+					m@ src ig { g }
+					m@ src ib { b }
+					m@ src ia { a }
+					m! dst i b
+					m! dst ig g
+					m! dst ib r
+					m! dst ia a
+				loop
+			loop
+
+			' output 0 0 ctx.putImageData
+			 20 20 800 400 ctx.rect
+			"1 to ctx.lineWidth
+			"red to ctx.strokeStyle
+			ctx.stroke
+		;
+
+		// "#camera-image"
+		null
+		:[ {
+			video: {
+				mandatory: {
+					minWidth: 1920,
+					minHeight: 1080
+				}
+			}
+		} ]: new CameraInterface { cameraInterface }
+
+		"error ' console-log cameraInterface.on
+		"newImage ' processImage cameraInterface.on
+
+		cameraInterface.start
 	</script>
 
 </body>
