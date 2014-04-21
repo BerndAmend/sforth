@@ -27,12 +27,16 @@ include »console.fs«
 include time.fs
 include filesystem.fs
 include process.fs
-\ include serial.fs
-
-\ include pdfkit.fs
 
 »sforth, Copyright (C) 2013-2014 Bernd Amend <bernd.amend+sforth@gmail.com>\n«
 »Type `bye' to exit\n« + .
+
+process.argv.length 2 > if
+	2 undefined process.argv.slice { sforth_repl_args }
+	:jsnoname { val } »Compile « val + "\n + . val compile-to-file ;
+	sforth_repl_args.forEach
+	0 process.exit
+endif
 
 true process.stdin.setRawMode
 process.stdin.resume

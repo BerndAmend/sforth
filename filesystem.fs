@@ -30,6 +30,7 @@ THE SOFTWARE.
 : dir ( folder -- ) Filesystem.readdirSync ;
 
 : compile-to-file { filename } filename readFileSync { str } :[ str.toString() ]: forth.compile filename ".js + swap writeFileSync ;
+
 (
 
 
