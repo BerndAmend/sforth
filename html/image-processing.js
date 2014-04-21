@@ -100,16 +100,20 @@ var CameraInterface = (function() {
 		this.element.appendChild(this.video);
 	  }
 
-      this.video.play();
-	  // TODO: we should only call this function if a new image is available
-	  var This = this;
-	  this.timer = setInterval(function() {
-		var w = This.canvas.width = This.video.videoWidth;
-		var h = This.canvas.height = This.video.videoHeight;
-		This.canvasContext.drawImage(This.video, 0, 0, w, h);
+		this.video.play();
+		// TODO: we should only call this function if a new image is available
+		var This = this;
 
-		This.trigger('newImage', This.canvasContext.getImageData(0,0,w,h));
-	  }, 30);
+	  // start the timer when the video is ready
+		this.video.addEventListener("canplay", function() {
+			this.timer = setInterval(function() {
+				var w = This.canvas.width = This.video.videoWidth;
+				var h = This.canvas.height = This.video.videoHeight;
+				This.canvasContext.drawImage(This.video, 0, 0, w, h);
+
+				This.trigger('newImage', This.canvasContext.getImageData(0,0,w,h));
+			}, 10);
+		});
     }.bind(this);
 
     /* error is also called when someone denies access */
