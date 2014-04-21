@@ -1320,3 +1320,49 @@ forth.compile = function(code) {
 	//Filesystem.writeFileSync("generated-code.js", generated_code);
 	return generated_code;
 }
+
+// allows embedding sforth into normal websites
+forth.compileAllScriptRegions = function() {
+	var nodes = document.querySelectorAll('script[type="application/sforth"]');
+
+	function compileAndAddToDOM(src) {
+		var src = forth.compile(src);
+		var script = document.createElement("script");
+		script.textContent = src;
+		document.body.appendChild(script);
+	}
+
+	function compileNextRegion(i) {
+		if(i >= nodes.length) // Done
+			return;
+
+		if(nodes[i].textContent) { // src that is between <script ...> and </script>
+			compileAndAddToDOM(nodes[i].textContent);
+		}
+
+		var filename = nodes[i].getAttribute("data-src");
+		if(filename != "") {
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState === 4){
+					if(xmlhttp.status == 200) {
+						compileAndAddToDOM(xmlhttp.responseText);
+						compileNextRegion(i+1);
+					} else {
+						// TODO: error?
+						console.log("Couldn't load file " + filename);
+					}
+				}
+			};
+
+			xmlhttp.open('GET', filename, true);
+			xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');  // Tells server that this call is made for ajax purposes.
+																			// Most libraries like jQuery/Prototype/Dojo do this
+			xmlhttp.send(null);  // No data need to send along with the request.
+		} else {
+			compileNextRegion(i+1);
+		}
+	}
+
+	compileNextRegion(0);
+}
