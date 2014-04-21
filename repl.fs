@@ -89,7 +89,7 @@ null to forthconsole.onKey
 		entered
 
 		try
-			compile
+			forth.compile
 			»« to entered
 			eval
 			» ok\n« type

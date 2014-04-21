@@ -80,7 +80,7 @@ THE SOFTWARE.
 :macro instanceof { name } { sforth_instanceof_helper_variable_42 } :[ sforth_instanceof_helper_variable_42 instanceof name ]: ;
 
 \ dummy function
-:macro ok {} ;
+: ok {} ;
 
 : output-stack-info { id -- only debugging } :[ console.log(id + ": stack size=" + stack.size() + " content=" + JSON.stringify(stack.stac)) ]; ;
 : clearstack ( -- ) stack.clear ;
@@ -126,44 +126,27 @@ THE SOFTWARE.
 
 :macro || {} ( x1 x2 -- x3 ) :[ stack.pop() || stack.pop() ]: ;
 
-:macro xor {} ( x1 x2 -- x3 ) :[ stack.pop() ^ stack.pop() ]: ;
+: xor {} ( x1 x2 -- x3 ) :[ stack.pop() ^ stack.pop() ]: ;
 
-:macro not {} ( x1 -- x2 ) :[ !stack.pop() ]: ;
+: not ( x1 -- x2 ) :[ !stack.pop() ]: ;
 
-:macro invert {} ( x1 -- x2 ) :[ ~stack.pop() ]: ;
+: invert ( x1 -- x2 ) :[ ~stack.pop() ]: ;
 
-:macro negate {} ( n -- -n ) -1 * ;
+: negate ( n -- -n ) -1 * ;
 
 \ math operations
 
 : tofixed { num digits -- str } num 0= if 1e-323 else num endif { num } digits num.toFixed ;
 
-: deg2rad {} ( x1 -- x2 ) 180 / Math.PI * ;
-: rad2deg {} ( x1 -- x2 ) Math.PI / 180 * ;
+: deg2rad {} ( x1 -- x2 ) 180.0 / Math.PI * ;
+: rad2deg {} ( x1 -- x2 ) Math.PI / 180.0 * ;
 
-:macro abs {} ( x1 -- x2 ) Math.abs ;
-:macro acos {} ( x1 -- x2 ) Math.acos ;
-:macro asin {} ( x1 -- x2 ) Math.asin ;
-:macro atan {} ( x1 -- x2 ) Math.atan ;
-:macro atan2 {} ( y x -- x2 ) Math.atan2 ;
-:macro ceil {} ( x1 -- x2 ) Math.ceil ;
-:macro cos {} ( x1 -- x2 ) Math.cos ;
-:macro exp {} ( x1 -- x2 ) Math.exp ;
-:macro floor {} ( x1 -- x2 ) Math.floor ;
-:macro log {} ( x1 -- x2 ) Math.log ;
-:macro pow {} ( x1 x2 -- x3 ) Math.pow ;
-:macro random {} ( -- x ) Math.random ;
-:macro round {} ( x1 -- x2 ) Math.round ;
-:macro sin {} ( x1 -- x2 ) Math.sin ;
-:macro sqrt {} ( x1 -- x2 ) Math.sqrt ;
-:macro tan {} ( x1 -- x2 ) Math.tan ;
-
-: acosdeg {} ( x1 -- x2 ) acos rad2deg ;
-: asindeg {} ( x1 -- x2 ) asin rad2deg ;
-: atandeg {} ( x1 -- x2 ) atan rad2deg ;
-: cosdeg {} ( x1 -- x2 ) deg2rad cos ;
-: sindeg {} ( x1 -- x2 ) deg2rad sin ;
-: tandeg {} ( x1 -- x2 ) deg2rad tan ;
+: acosdeg {} ( x1 -- x2 ) Math.acos rad2deg ;
+: asindeg {} ( x1 -- x2 ) Math.asin rad2deg ;
+: atandeg {} ( x1 -- x2 ) Math.atan rad2deg ;
+: cosdeg {} ( x1 -- x2 ) deg2rad Math.cos ;
+: sindeg {} ( x1 -- x2 ) deg2rad Math.sin ;
+: tandeg {} ( x1 -- x2 ) deg2rad Math.tan ;
 
 : + { x1 x2 -- x3 } :[ x1 + x2 ]: ;
 : - { x1 x2 -- x3 } :[ x1 - x2 ]: ;
@@ -231,17 +214,12 @@ THE SOFTWARE.
 
 \ : within { x1 x2 x3 -- f } ![ if (x1 < x2 && x2 <= x3) return 0; else return -1; ]! ;
 
-: min ( n1 n2 -- n3 ) Math.min ;
-: max ( n1 n2 -- n3 ) Math.max ;
-
 : assert { flag text -- } flag not if text . endif ;
 
 \ Exceptions
 :macro throw {} ( obj -- ) :[ throw stack.pop() ]; ;
 
 : jseval ( str -- ) eval ;
-
-: compile ( x1 -- ) forth.compile ;
 
 : execute { x1 -- } x1 ;
 
