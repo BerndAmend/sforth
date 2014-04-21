@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script>sforthThrowOnUnderflow=false</script>
+	<script src="../../ext/jquery-2.1.0.min.js"></script>
+	<script src="../../sforth-runtime.js"></script>
+	<script src="../../sforth.js"></script>
+</head>
+<body onload="forth.compileAllScriptRegions();">
+	<script data-src="../../forth.fs;../../browser.fs" type="application/sforth"></script>
+
+	<input id="message" type="text" size="30" maxlength="30">
+	<input type="button" value="Send" onclick="worker.postMessage(document.getElementById('message').value);">
+	<div id="log"></div>
+
+	<script type="application/sforth" data-id="worker1" data-type="javascript/worker"
+		data-src="../../sforth-runtime.js;../../forth.fs" data-throw-on-underflow="false">
+		: post-message { msg } :[ self.postMessage(msg) ]; ;
+
+		:jsnoname { e } 
+			»msg from worker, got « e.data + post-message
+		; to self.onmessage
+	</script>
+
+	<script type="application/sforth">
+		: log { msg }
+			:[
+			var fragment = document.createDocumentFragment();
+			fragment.appendChild(document.createTextNode(msg));
+			fragment.appendChild(document.createElement('br'));
+
+			document.querySelector("#log").appendChild(fragment);
+			]:d
+		;
+		
+		"#worker1 create-worker { worker }
+		
+		:jsnoname { e }
+			»Received: « e.data + log
+		; to worker.onmessage
+
+		"Hi worker.postMessage
+		
+	</script>
+</body>
+</html>
