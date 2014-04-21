@@ -5,8 +5,10 @@ url = require("url"),
 fs = require('fs'),
 
 extensions = {
+	".htm" : "text/html",
     ".html" : "text/html",
     ".css" : "text/css",
+	".fs" : "application/sforth",
     ".js" : "application/javascript",
 	".json" : "application/json",
     ".png" : "image/png",
@@ -17,8 +19,7 @@ extensions = {
 http.createServer(function(request, response) {
 
 	var uri = url.parse(request.url).pathname
-		, filename = path.join(process.cwd(), uri)
-		, ext = path.extname(uri);
+		, filename = path.join(process.cwd(), uri);
 
 	fs.exists(filename, function(exists) {
 		if(!exists) {
@@ -30,6 +31,8 @@ http.createServer(function(request, response) {
 
 		if (fs.statSync(filename).isDirectory())
 			filename += '/index.html';
+
+		var ext = path.extname(filename);
 
 		fs.readFile(filename, "binary", function(err, file) {
 			if(err) {
