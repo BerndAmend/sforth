@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script>sforthThrowOnUnderflow=true</script>
+	<meta charset="utf-8"/>
+	<title>generate pdf</title>
+	<script src="../../ext/jquery-2.1.0.min.js"></script>
+	<script src="../../ext/jspdf.min.js"></script>
+	<script src="../../sforth-runtime.js"></script>
+	<script src="../../sforth.js"></script>
+	
+</head>
+<body onload="forth.compileAllScriptRegions();">
+	<script data-src="../../forth.fs;../../browser.fs" type="application/sforth"></script>
+	
+	<script type="application/sforth">
+		:[ new jsPDF("portrait", "mm", "a4") ]: { doc }
+		20 20 »Hello world!« undefined undefined doc.text drop
+		20 30 »This is client-side Javascript, pumping out a PDF.« undefined undefined doc.text drop
+		doc.addPage drop
+		20 20 »Do you like that?« undefined undefined doc.text drop
+		"fisch doc.output
+	</script>
+</body>
+</html>
