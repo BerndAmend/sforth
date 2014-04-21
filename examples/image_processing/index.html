@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script>sforthThrowIfUnderflow=false</script>
+	<meta charset="utf-8"/>
+	<title>Image processing</title>
+	<script src="../../ext/jquery-2.1.0.min.js"></script>
+	<script src="../../sforth-runtime.js"></script>
+	<script src="../../sforth.js"></script>
+	<script src="image-processing.js"></script>
+	
+	<style>
+		/*#canvas-output1 {
+			width: 640px;
+			height: 360px;
+		}
+		#canvas-output1:hover {
+			width: 1920px;
+			height: 1080px;
+		}*/
+	</style>
+</head>
+<body onload="forth.compileAllScriptRegions();">
+	<script data-src="../../forth.fs" type="application/sforth"></script>
+	<script data-src="../../browser.fs" type="application/sforth"></script>
+	<script data-src="bv.fs" type="application/sforth"></script>
+	
+	<div id="camera-image"></div>
+	<canvas id="canvas-output1"></canvas>
+
+	<script type="application/sforth">
+		:[
+			var canvas = document.getElementById('canvas-output1');
+			var ctx = canvas.getContext('2d');
+			
+			//var canvas2 = document.getElementById('canvas-output2');
+			//var ctx2 = canvas2.getContext('2d');
+		
+			// "#camera-image"
+			var cameraInterface = new CameraInterface(null,
+			{
+				video: {
+					mandatory: {
+						minWidth: 1920,
+						minHeight: 1080
+					}
+				}
+			});
+			
+			cameraInterface.on('error', function(err) {
+				console.log('error');
+			});
+
+			cameraInterface.on('newImage', function(image) {
+				canvas.width = image.width;
+				canvas.height = image.height;
+				processImage(image, ctx);
+			});
+			
+			cameraInterface.start();
+		];
+	</script>
+
+</body>
+</html>

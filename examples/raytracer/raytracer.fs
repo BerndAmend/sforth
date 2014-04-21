@@ -39,7 +39,7 @@ endif
 			b: Math.floor(Math.min(Math.max(this.b,0),1) * 255)
 		} ]:
 	; to Color.prototype.toDrawingColor
-	
+
 	:jsnoname {}
 		:[ {r: this.r, g: this.g, b: this.b} ]:
 	return; to Color.prototype.toString
@@ -431,7 +431,7 @@ var Surfaces;
 	 3.0 2.0 4.0 new Vector
 	-1.0 0.5 0.0 new Vector
 	new Camera to result.camera
-	
+
 	result
 ;
 
@@ -442,7 +442,7 @@ var Surfaces;
 		height: 640,
 		filterType: -1
 	} ]: new PNG { png }
-	
+
 	new RayTracer { rayTracer }
     default-scene png  rayTracer.renderToPNG
 
