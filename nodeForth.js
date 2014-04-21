@@ -23,6 +23,8 @@ THE SOFTWARE.
 */
 // example app for nodejs
 
+sforthThrowIfUnderflow=true;
+
 // has to be done in the main file :(
 try {
 	util = require('util');

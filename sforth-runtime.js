@@ -61,12 +61,43 @@ var ForthStack = (function () {
 		this.pos = -1;
 	}
 
-	ForthStack.prototype.pop=function() {
-		if(this.pos == -1)
-			throw new Error("Stack underflow");
-		var result = this.stac[this.pos];
-		this.stac.splice(this.pos--, 1);
-		return result;
+	if(sforthThrowIfUnderflow) {
+		ForthStack.prototype.pop=function() {
+			if(this.pos == -1)
+				throw new Error("Stack underflow");
+			return this.stac[this.pos--];
+		}
+
+		ForthStack.prototype.getTopElements=function(count) {
+			var realpos = this.pos-count+1;
+			if(realpos < 0)
+				throw new Error("Stack underflow");
+			this.pos -= count;
+			return this.stac.slice(realpos, realpos+count);
+		}
+
+		ForthStack.prototype.remove=function(pos) {
+			var realpos = this.pos-pos;
+			if(realpos < 0)
+				throw new Error("Stack underflow"); //?
+			--this.pos;
+			return this.stac.splice(realpos, 1);
+		}
+	} else {
+		ForthStack.prototype.pop=function() {
+			return this.stac[this.pos--];
+		}
+
+		ForthStack.prototype.getTopElements=function(count) {
+			var realpos = this.pos-count+1;
+			this.pos -= count;
+			return this.stac.slice(realpos, realpos+count);
+		}
+
+		ForthStack.prototype.remove=function(pos) {
+			--this.pos;
+			return this.stac.splice(this.pos-pos, 1);
+		}
 	}
 
 	ForthStack.prototype.push=function(item) {
@@ -96,22 +127,6 @@ var ForthStack = (function () {
 		if(realpos < 0)
 			throw new Error("Stack underflow"); //?
 		return this.stac[realpos];
-	}
-
-	ForthStack.prototype.getTopElements=function(count) {
-		var realpos = this.pos-count+1;
-		if(realpos < 0)
-			throw new Error("Stack underflow");
-		this.pos-=count;
-		return this.stac.splice(realpos, count);
-	}
-
-	ForthStack.prototype.remove=function(pos) {
-		var realpos = this.pos-pos;
-		if(realpos < 0)
-			throw new Error("Stack underflow"); //?
-		--this.pos;
-		return this.stac.splice(realpos, 1);
 	}
 
 	ForthStack.prototype.clear=function() {
