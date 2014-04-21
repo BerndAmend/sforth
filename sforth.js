@@ -1509,7 +1509,7 @@ forth.compileAllScriptRegions = function() {
 						compileRegion(i, src, filenames.slice(1), target_type, id, context);
 					} else {
 						// TODO: error?
-						console.log("Couldn't load file " + filename);
+						console.log("Couldn't load file " + filenames[0]);
 					}
 				}
 			};
