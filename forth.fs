@@ -192,6 +192,14 @@ THE SOFTWARE.
 :macro < {} ( x1 x2 -- f ) :[ stack.pop() > stack.pop() ]: ;
 :macro <= {} ( x1 x2 -- f ) :[ stack.pop() >= stack.pop() ]: ;
 
+:macro m= { x1 x2 -- f } :[ x1 == x2 ]: ;
+:macro m=== { x1 x2 -- f } :[ x1 === x2 ]: ;
+:macro m<> { x1 x2 -- f } :[ x1 != x2 ]: ;
+:macro m> { x1 x2 -- f } :[ x1 > x2 ]: ;
+:macro m>= { x1 x2 -- f } :[ x1 >= x2 ]: ;
+:macro m< { x1 x2 -- f } :[ x1 < x2 ]: ;
+:macro m<= { x1 x2 -- f } :[ x1 >= x2 ]: ;
+
 \ we provide a faster implementation for important functions
 :macro 0= {} ( x1 -- f ) :[ stack.pop() == 0 ]: ;
 :macro 0<> {} ( x1 -- f ) :[ stack.pop() != 0 ]: ;
@@ -199,6 +207,14 @@ THE SOFTWARE.
 :macro 0>= {} ( x1 -- f ) :[ stack.pop() >= 0 ]: ;
 :macro 0< {} ( x1 -- f ) :[ stack.pop() < 0 ]: ;
 :macro 0<= {} ( x1 -- f ) :[ stack.pop() <= 0 ]: ;
+
+:macro m0= { x1 -- f } :[ x1 == 0 ]: ;
+:macro m0=== { x1 -- f } :[ x1 === 0 ]: ;
+:macro m0<> { x1 -- f } :[ x1 != 0 ]: ;
+:macro m0> { x1 -- f } :[ x1 > 0 ]: ;
+:macro m0>= { x1 -- f } :[ x1 >= 0 ]: ;
+:macro m0< { x1 -- f } :[ x1 < 0 ]: ;
+:macro m0<= { x1 -- f } :[ x1 <= 0 ]: ;
 
 :macro 1+ {} ( x1 -- x2 ) 1 + ;
 :macro 1- {} ( x1 -- x2 ) 1 - ;
