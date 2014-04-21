@@ -61,7 +61,7 @@ var ForthStack = (function () {
 		this.pos = -1;
 	}
 
-	if(sforthThrowIfUnderflow) {
+	if(sforthThrowOnUnderflow) {
 		ForthStack.prototype.pop=function() {
 			if(this.pos == -1)
 				throw new Error("Stack underflow");

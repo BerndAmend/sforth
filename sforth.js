@@ -1325,29 +1325,38 @@ forth.compile = function(code) {
 forth.compileAllScriptRegions = function() {
 	var nodes = document.querySelectorAll('script[type="application/sforth"]');
 
-	function compileAndAddToDOM(src) {
-		var src = forth.compile(src);
+	function addToDOM(id, target_type, src) {
 		var script = document.createElement("script");
+		if(id)
+			script.id = id;
+		if(target_type)
+			script.type = target_type;
 		script.textContent = src;
 		document.body.appendChild(script);
 	}
 
-	function compileNextRegion(i) {
-		if(i >= nodes.length) // Done
-			return;
-
-		if(nodes[i].textContent) { // src that is between <script ...> and </script>
-			compileAndAddToDOM(nodes[i].textContent);
-		}
-
-		var filename = nodes[i].getAttribute("data-src");
-		if(filename != "") {
+	function compileRegion(i, src, filenames, target_type, id) {
+		if(filenames.length == 0 || (filenames.length == 1 && filenames[0] == "")) {
+			if(nodes[i].textContent) { // src that is between <script ...> and </script>
+				src += "\n" + forth.compile(nodes[i].textContent);
+			}
+			addToDOM(id, target_type, src);
+			document.body.removeChild(nodes[i]);
+			compileNode(i+1);
+		} else {
 			var xmlhttp = new XMLHttpRequest();
 			xmlhttp.onreadystatechange = function() {
 				if (xmlhttp.readyState === 4){
 					if(xmlhttp.status == 200) {
-						compileAndAddToDOM(xmlhttp.responseText);
-						compileNextRegion(i+1);
+						var ext = filenames[0].substr(filenames[0].length-2);
+						if(ext == "js") {
+							src += "\n" + xmlhttp.responseText;
+						} else if(ext == "fs") {
+							src += "\n" + forth.compile(xmlhttp.responseText);
+						} else {
+							console.log("Unknown file type " + filenames[0]);
+						}
+						compileRegion(i, src, filenames.slice(1), target_type, id);
 					} else {
 						// TODO: error?
 						console.log("Couldn't load file " + filename);
@@ -1355,14 +1364,29 @@ forth.compileAllScriptRegions = function() {
 				}
 			};
 
-			xmlhttp.open('GET', filename, true);
+			xmlhttp.open('GET', filenames[0], true);
 			xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');  // Tells server that this call is made for ajax purposes.
 																			// Most libraries like jQuery/Prototype/Dojo do this
 			xmlhttp.send(null);  // No data need to send along with the request.
-		} else {
-			compileNextRegion(i+1);
 		}
 	}
 
-	compileNextRegion(0);
+	function compileNode(i) {
+		if(i >= nodes.length) // Done
+			return;
+
+		var filenames = nodes[i].getAttribute("data-src") || "";
+		var target_type = nodes[i].getAttribute("data-type");
+		var id = nodes[i].getAttribute("data-id");
+		var throw_on_underflow=nodes[i].getAttribute("data-throw-on-underflow");
+
+		if(throw_on_underflow == null)
+			throw_on_underflow = true;
+
+		var src = "sforthThrowOnUnderflow=" + throw_on_underflow + ";";
+
+		compileRegion(i, src, filenames.split(";"), target_type, id);
+	}
+
+	compileNode(0);
 }

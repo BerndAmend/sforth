@@ -23,7 +23,7 @@ THE SOFTWARE.
 */
 // example app for nodejs
 
-sforthThrowIfUnderflow=true;
+sforthThrowOnUnderflow=true;
 
 // has to be done in the main file :(
 try {
