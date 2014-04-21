@@ -229,16 +229,8 @@ THE SOFTWARE.
 
 : execute { x1 -- } x1 ;
 
+: create-array { num -- new Array } :[ stack.getTopElements(num) ]: ;
 :macro see { function_object -- } :[ #function_object.toString() ]: cr . ;
-
-: create-array { num -- new Array }
-    new Array { result }
-    begin
-        result.push \ returns the number of elements in the array
-        num -
-        0=
-    until
-    result.reverse ;
 
 : new-array { size -- } :[ new Array(size) ]: ;
 
