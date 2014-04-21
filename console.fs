@@ -92,3 +92,5 @@ THE SOFTWARE.
 : binary ( -- ) 2 to consolebase ;
 : decimal ( -- ) 10 to consolebase ;
 : hex ( -- ) 16 to consolebase ;
+
+:macro see { function_object -- } :[ #function_object.toString() ]: cr . ;

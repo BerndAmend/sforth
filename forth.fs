@@ -230,7 +230,6 @@ THE SOFTWARE.
 : execute { x1 -- } x1 ;
 
 : create-array { num -- new Array } :[ stack.getTopElements(num) ]: ;
-:macro see { function_object -- } :[ #function_object.toString() ]: cr . ;
 
 : new-array { size -- } :[ new Array(size) ]: ;
 
