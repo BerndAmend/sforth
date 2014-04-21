@@ -64,7 +64,9 @@ var ForthStack = (function () {
 	ForthStack.prototype.pop=function() {
 		if(this.pos == -1)
 			throw new Error("Stack underflow");
-		return this.stac[this.pos--];
+		var result = this.stac[this.pos];
+		this.stac.splice(this.pos--, 1);
+		return result;
 	}
 
 	ForthStack.prototype.push=function(item) {
@@ -100,8 +102,8 @@ var ForthStack = (function () {
 		var realpos = this.pos-count+1;
 		if(realpos < 0)
 			throw new Error("Stack underflow");
-		this.pos -= count;
-		return this.stac.slice(realpos, count);
+		this.pos-=count;
+		return this.stac.splice(realpos, count);
 	}
 
 	ForthStack.prototype.remove=function(pos) {
