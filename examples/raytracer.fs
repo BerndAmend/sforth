@@ -1,32 +1,36 @@
+/*
 typeof PNG "undefined = if
 	»The node.js module pngjs is required, use sudo npm install pngjs to install it« new Error throw
 endif
+*/
 
-: Color { r g b }
-	r to this.r
-	g to this.g
-	b to this.b
+// Color
+	: Color { r g b }
+		r to this.r
+		g to this.g
+		b to this.b
+	;
 
 	:noname { k }
-		k this.r *
-		k this.g *
-		k this.b *
+		m* k this.r
+		m* k this.g
+		m* k this.b
 		new Color
-	; to this.scale
+	; to Color.prototype.scale
 
 	:noname { other }
-		this.r other.r +
-		this.g other.g +
-		this.b other.b +
+		m+ this.r other.r
+		m+ this.g other.g
+		m+ this.b other.b
 		new Color
-	; to this.plus
+	; to Color.prototype.plus
 
 	:noname { other }
-		this.r other.r *
-		this.g other.g *
-		this.b other.b *
+		m* this.r other.r
+		m* this.g other.g
+		m* this.b other.b
 		new Color
-	; to this.times
+	; to Color.prototype.times
 
 	:noname { }
 		:[ {
@@ -34,12 +38,11 @@ endif
 			g: Math.floor(Math.min(Math.max(this.g,0),1) * 255),
 			b: Math.floor(Math.min(Math.max(this.b,0),1) * 255)
 		} ]:
-	; to this.toDrawingColor
+	; to Color.prototype.toDrawingColor
 	
 	:jsnoname {}
 		:[ {r: this.r, g: this.g, b: this.b} ]:
-	return; to this.toString
-;
+	return; to Color.prototype.toString
 
 \ define some default colors
 1.0 1.0 1.0 new Color  to Color.white
@@ -51,69 +54,66 @@ Color.black to Color.background
 Color.black to Color.defaultColor
 
 
-
-: Vector { x y z }
-	x to this.x
-	y to this.y
-	z to this.z
+// Vector
+	: Vector { x y z }
+		x to this.x
+		y to this.y
+		z to this.z
+	;
 
 	:noname { k }
-		k this.x *
-		k this.y *
-		k this.z *
+		m* k this.x
+		m* k this.y
+		m* k this.z
 		new Vector
-	; to this.times
+	; to Vector.prototype.times
 
 	:noname { other }
-		this.x other.x -
-		this.y other.y -
-		this.z other.z -
+		m- this.x other.x
+		m- this.y other.y
+		m- this.z other.z
 		new Vector
-	; to this.minus
+	; to Vector.prototype.minus
 
 	:noname { other }
-		this.x other.x +
-		this.y other.y +
-		this.z other.z +
+		m+ this.x other.x
+		m+ this.y other.y
+		m+ this.z other.z
 		new Vector
-	; to this.plus
+	; to Vector.prototype.plus
 
 	:noname { other }
-		this.x other.x *
-		this.y other.y *
-		this.z other.z *
-		+ +
-	; to this.dot
+		m* this.x other.x { v1 }
+		m* this.y other.y { v2 }
+		m+ v1 v2 { v3 }
+		m* this.z other.z { v4 }
+		m+ v3 v4
+	; to Vector.prototype.dot
 
 	:noname {}
-		this.x this.x *
-		this.y this.y *
-		this.z this.z *
-		+ +
-		Math.sqrt
-	; to this.mag
+		this this.dot Math.sqrt
+	; to Vector.prototype.mag
 
 	:noname {}
 		this.mag { vmag }
-		vmag 0 === if
+		m=== vmag 0 if
 			Infinity
 		else
-			1.0 vmag /
+			m/ 1.0 vmag
 		endif
 		this.times
-	; to this.norm
+	; to Vector.prototype.norm
 
 	:noname { other }
-		this.y other.z *  this.z other.y * -
-		this.z other.x *  this.x other.z * -
-		this.x other.y *  this.y other.x * -
+		m* this.y other.z  m* this.z other.y -
+		m* this.z other.x  m* this.x other.z -
+		m* this.x other.y  m* this.y other.x -
 		new Vector
-	; to this.cross
+	; to Vector.prototype.cross
 
 	:jsnoname {} \ :noname doesn't work here, since the function signature doesn't match the expected
 		:[ {x: this.x, y: this.y, z: this.z } ]:
-	return; to this.toString
-;
+	return; to Vector.prototype.toString
 
 
 
@@ -126,42 +126,43 @@ Color.black to Color.defaultColor
 ;
 
 
-: Sphere { center radius surface }
-	center to this.center
-	surface to this.surface
-	radius dup * to this.radius2
-	
+// Sphere
+	: Sphere { center radius surface }
+		center to this.center
+		surface to this.surface
+		m* radius radius to this.radius2
+	;
 	:noname { pos }
 		this.center pos.minus { tmp } tmp.norm
-	; to this.normal
+	; to Sphere.prototype.normal
 
 	:noname { ray }
 		ray.start this.center.minus { eo }
 		ray.dir eo.dot { v }
 		0 { dist }
-		v 0>= if
+		m0>= v if
 			this.radius2 eo eo.dot v v * - - { disc }
-			disc 0>= if
+			m0>= disc if
 				v disc Math.sqrt - to dist
 			endif
 		endif
-		dist 0 === if
+		m=== dist 0 if
 			null
 		else
 			:[ { thing: this, ray: ray, dist: dist } ]:
 		endif
-	; to this.intersect
-;
+	; to Sphere.prototype.intersect
 
 : Plane { norm offset surface }
 	surface to this.surface
+
 	:noname { pos }
 		norm
 	; to this.normal
 
 	:noname { ray }
 		ray.dir norm.dot { denom }
-		denom 0> if
+		m0> denom if
 			null
 		else
 			ray.start norm.dot offset + denom -1 * / { dist }
@@ -235,8 +236,8 @@ var Surfaces;
         :[ for (var i in scene.things) { ]:d
             ray i scene.things @ { tmp }
 			tmp.intersect { inter }
-            inter null <> if
-				inter.dist closest < if
+            m<> inter null if
+				m< inter.dist closest if
 					inter to closestInter
 					inter.dist to closest
 				endif
@@ -256,7 +257,7 @@ var Surfaces;
 
     :noname { ray scene depth }
         ray scene this.intersections { isect }
-        isect undefined === if
+        m=== isect undefined if
             Color.background
         else
             isect scene depth this.shade
@@ -281,7 +282,7 @@ var Surfaces;
         Color.background.plus
         { naturalColor }
 
-        depth this.maxDepth >= if
+        m>= depth this.maxDepth if
 			Color.grey
 		else
 			isect.thing pos normal reflectDir scene depth  this.getReflectionColor
@@ -293,7 +294,7 @@ var Surfaces;
 
     :noname { thing pos normal rd scene depth }
 		pos thing.surface.reflect
-        :[ { start: pos, dir: rd } ]: scene depth 1 + this.traceRay { tmp }
+        :[ { start: pos, dir: rd } ]: scene m+ depth 1 this.traceRay { tmp }
         tmp.scale
     ; to this.getReflectionColor
 
@@ -369,6 +370,44 @@ var Surfaces;
             »Line « y "\r + + type
         loop
     ; to this.renderToPNG
+
+    :noname { scene ctx }
+		' ctx.canvas.width { width }
+		' ctx.canvas.height { height }
+
+		:[ ctx.createImageData(width,height) ]: { image }
+		' image.data { dst }
+
+        :noname { x y camera }
+            :noname { x }
+                :[ (x - (width / 2.0)) / 2.0 / width ]:
+            ; { recenterX }
+            :noname { y }
+                :[ -(y - (height / 2.0)) / 2.0 / height ]:
+            ; { recenterY }
+
+			x recenterX camera.right.times { tmp }  y recenterY camera.up.times tmp.plus  { tmp } camera.forward tmp.plus  { tmp } tmp.norm
+        ; { getPoint }
+
+        0 height 1 do y
+            0 width 1 do x
+                x y scene.camera getPoint { p }
+                :[ { start: scene.camera.pos, dir: p } ]: scene 0 this.traceRay { color }
+                color.toDrawingColor { c }
+
+                width y * x + 2 << { idxr }
+                m+ idxr 1 { idxg }
+                m+ idxr 2 { idxb }
+                m+ idxr 3 { idxa }
+
+                m! dst idxr c.r
+				m! dst idxg c.g
+				m! dst idxb c.b
+				m! dst idxa 0xff
+            loop
+        loop
+        ' image 0 0 ctx.putImageData
+    ; to this.renderToCanvas
 ;
 
 : create-light { pos color }
@@ -408,10 +447,16 @@ var Surfaces;
     default-scene png  rayTracer.renderToPNG
 
     :[ png.pack().pipe(Filesystem.createWriteStream('raytracer.png')) ];
-
 ;
 
+:js drawToCanvas { ctx }
+	new RayTracer { rayTracer }
+    default-scene ctx  rayTracer.renderToCanvas
+;
+
+/*
 time-in-ms
 drawToPNG
 time-in-ms swap - { x }
 » calculation time =  « x + .
+*/
