@@ -38,11 +38,21 @@
 	</script>
 
 	<script type="application/sforth">
+		false { is-currently-rendering }
 		:js renderToCanvas { }
+			is-currently-rendering if
+				»Rendering was already started« console-log
+				exit
+			endif
+			true to is-currently-rendering
 			:[ document.getElementById('worker-count').value ]: { workerCount }
 			:[ document.getElementById('width').value ]: { width }
 			:[ document.getElementById('height').value ]: { height }
 			:[ document.getElementById('processing-time') ]: { processing-time }
+
+			// disable the render button
+			:[ document.getElementById('render-button') ]: { render-button }
+			true to render-button.disabled
 
 			"canvas document.getElementById { canvas }
 			:[ canvas.getContext("2d") ]: { ctx }
@@ -60,13 +70,19 @@
 			:js worker-onmessage { e }
 				e.data.id { id }
 				' e.data.done if
-					// Done
-					// »Worker « id + » is done« + console-log
+					// Worker is done
 					active-worker 1 - to active-worker
 					active-worker 0 = if
 						time-in-ms start-time - { required-time }
 						required-time » ms« + to processing-time.value
-						// »Rendering done in « required-time + » ms« + console-log
+						false to is-currently-rendering
+
+						// enable the render-button
+						false to render-button.disabled
+
+						// enable the download-button
+						:[ document.getElementById('download-button') ]: { download-button }
+						false to download-button.disabled
 					endif
 					exit
 				endif
@@ -97,13 +113,20 @@
 				worker.postMessage
 			loop
 		;
+
+		:js downloadImage { }
+			"canvas document.getElementById { canvas }
+			:[ canvas.getContext("2d") ]: { ctx }
+			:[ canvas.toDataURL("image/webp") ]: { image } "image/webp "image/octet-stream image.replace 'new_window' window.open
+		;
 	</script>
 
 	Worker <input id="worker-count" type="text" size="30" maxlength="30" value="16">
 	Width: <input id="width" type="text" size="30" maxlength="30" value="2000">
 	Height: <input id="height" type="text" size="30" maxlength="30" value="2000">
 	Time: <input id="processing-time" type="text" size="30" maxlength="30" readonly>
-	<input type="button" value="Render" onclick="renderToCanvas();">
+	<input type="button" id="render-button" value="Render" onclick="renderToCanvas();">
+	<input type="button" id="download-button" value="Download" onclick="downloadImage();" disabled="true">
 	<br>
 	<canvas id="canvas"></canvas>
 </body>
