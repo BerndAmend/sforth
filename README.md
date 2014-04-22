@@ -32,6 +32,13 @@ To test the raytracer locally go to http://localhost:8080/examples/raytracer/
 
 Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/sforth/tree/master/examples)
 
+## Examples
+- Hello World http://tptb.github.io/sforth/examples/Hello-World.html
+- Web worker http://tptb.github.io/sforth/examples/web-worker.html
+- Playground http://tptb.github.io/sforth/examples/editor/
+- Raytracer http://tptb.github.io/sforth/examples/raytracer/
+- Image processing http://tptb.github.io/sforth/examples/image_processing/
+
 ## Syntax
 
 ### functions
