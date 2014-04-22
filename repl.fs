@@ -24,7 +24,6 @@ THE SOFTWARE.
 
 include "forth.fs
 include »console.fs«
-include time.fs
 include filesystem.fs
 include process.fs
 

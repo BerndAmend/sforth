@@ -252,3 +252,11 @@ THE SOFTWARE.
 
 : o>string { n -- str } :[ n.toString() ]: ;
 : /string { str n -- str } n undefined str.substr ;
+
+: time-in-ms ( -- x ) :[ new Date ]: { x } x.getTime ;
+
+: settimeout { jsfunction timeout -- handle } :[ setTimeout(jsfunction, timeout) ]: ;
+: cleartimeout { handle -- } :[ clearTimeout(handle) ]:d ;
+
+: setinterval { jsfunction timeout -- handle } :[ setInterval(jsfunction, timeout) ]: ;
+: clearinterval { handle } :[ clearInterval(handle) ]:d ;
