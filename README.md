@@ -7,18 +7,26 @@ See http://tptb.github.io/sforth/
 ## node.js
 
 Get the source code and start the sforth repl
+
 ./sforth
+
 or
+
 node nodeForth.js
+
 
 ## Firefox / Chromium / Google Chrome
 
 The examples require that they are served using a static webserver.
 A test webserver is include that only requires node.js.
 Start it and follow the printed instructions
+
 ./start-webserver.sh
+
 or
+
 node webserver.js
+
 
 To test the raytracer locally go to http://localhost:8080/examples/raytracer/
 
