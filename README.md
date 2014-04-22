@@ -44,182 +44,181 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 ### functions
 
 ```forth
-	\ normal function
-	: function-name ( stack-comment ) body ;
-	\ e.g.
-	: mul ( x1 x2 -- x ) * ;
-	\ using an argument list
-	: mul { x1 x2 -- x } x1 x2 * ;
+\ normal function
+: function-name ( stack-comment ) body ;
+\ e.g.
+: mul ( x1 x2 -- x ) * ;
+\ using an argument list
+: mul { x1 x2 -- x } x1 x2 * ;
 
-	\ anonymous function - the function is pushed to the stack
-	:noname ( stack-comment ) body ;
-	\ e.g.
-	:noname ( x1 x2 -- x ) * ;
-	\ using an argument list
-	:noname { x1 x2 -- x ) x1 x2 * ;
-	
-	\ to simplify the integration into normal javascript applications
-	\ normal javascript functions can be defined.
-	\ They behave like every javascript function.
-	
-	\ without a return value
-	:js { parameters } body ;
-	
-	\ with a return value
-	:js { parameters } body return;
-	
-	\ anonymous javascript functions
-	:jsnoname { parameters } body ;
-	:jsnoname { parameters } body return;
-	
-	\ push a function reference to the stack
-	' function-name
-	\ e.g.
-	' mul
-	
-	\ Calling javascript functions from sforth
-	\ If you call javascript functions from forth they will take required number of parameters from the data stack
-	\ and place the result on the stack
-	
+\ anonymous function - the function is pushed to the stack
+:noname ( stack-comment ) body ;
+\ e.g.
+:noname ( x1 x2 -- x ) * ;
+\ using an argument list
+:noname { x1 x2 -- x ) x1 x2 * ;
+
+\ to simplify the integration into normal javascript applications
+\ normal javascript functions can be defined.
+\ They behave like every javascript function.
+
+\ without a return value
+:js { parameters } body ;
+
+\ with a return value
+:js { parameters } body return;
+
+\ anonymous javascript functions
+:jsnoname { parameters } body ;
+:jsnoname { parameters } body return;
+
+\ push a function reference to the stack
+' function-name
+\ e.g.
+' mul
+
+\ Calling javascript functions from sforth
+\ If you call javascript functions from forth they will take required number of parameters from the data stack
+\ and place the result on the stack
 ```
 
 ### variables
 
 ```forth
-	\ Defining a value
-	{ var1 var2 var3 ... -- <comment> }
-	<initial-value> value <name>
-	\ e.g.
-	90 value blobvar
+\ Defining a value
+{ var1 var2 var3 ... -- <comment> }
+<initial-value> value <name>
+\ e.g.
+90 value blobvar
 
-	\ assign something to a value
-	<new-value> to <name>
-	\ e.g.
-	42 to blobvar
+\ assign something to a value
+<new-value> to <name>
+\ e.g.
+42 to blobvar
 ```
 
 ### strings
 ```forth
-	\ normal strings
-	»text«
-	
-	\ strings without whitespaces
-	"text
+\ normal strings
+»text«
+
+\ strings without whitespaces
+"text
 ```
 
 ### objects
 ```forth
-	\ allocating an object
-	new <classname>
+\ allocating an object
+new <classname>
 ```
 
 ### arrays
 ```forth
-	<size> new Array
+<size> new Array
 
-	\ Allocate an Array with 42 elements and store it in the variable arr
-	42 new Array { arr }
-	
-	\ store a value
-	<value> <position> <array> !
+\ Allocate an Array with 42 elements and store it in the variable arr
+42 new Array { arr }
 
-	\ store the value 63 at the 10 position in the array arr
-	63 10 arr !
-	\ store the string foo at the 31 position in the array arr
-	"foo 31 arr !
-	
-	\ get a value
-	<position> <array> @
-	
-	\ read the value from position 10 and print it
-	10 arr @ .
+\ store a value
+<value> <position> <array> !
+
+\ store the value 63 at the 10 position in the array arr
+63 10 arr !
+\ store the string foo at the 31 position in the array arr
+"foo 31 arr !
+
+\ get a value
+<position> <array> @
+
+\ read the value from position 10 and print it
+10 arr @ .
 ```
 
 ### if
 ```forth
-	<conditition> if
-		<code>
-	elseif <next-condition> if \ optional
-		<code>
-	else \ optional
-		<code>
-	endif
-	
-	\ example
-	0 0 = if
-		":) .
-	else
-		":( .
-	endif
+<conditition> if
+	<code>
+elseif <next-condition> if \ optional
+	<code>
+else \ optional
+	<code>
+endif
+
+\ example
+0 0 = if
+	":) .
+else
+	":( .
+endif
 ```
 
 ### case ... endcase
 ```forth
-	<value> case
-		of <value>
-			<code>
-		endof
+<value> case
+	of <value>
+		<code>
+	endof
 
-		of <value>
-			<code>
-		endof
+	of <value>
+		<code>
+	endof
 
-		default
-			<code>
-	endcase
+	default
+		<code>
+endcase
+
+\ e.g.
+20 case
+	of 20
+		":) .
+	endof
 	
-	\ e.g.
-	20 case
-		of 20
-			":) .
-		endof
+	default
 		
-		default
-			
-	endcase
+endcase
 ```
 
 ### do ... loop
 ```forth
-	<start> <end> <increment> do <variable>
-		<code>
-	loop
-	
-	\ example - prints the numbers from 0 to 9
-	0 10 1 do i
-		i .
-	loop
+<start> <end> <increment> do <variable>
+	<code>
+loop
+
+\ example - prints the numbers from 0 to 9
+0 10 1 do i
+	i .
+loop
 ```
 
 ### try ... catch ... finally
 ```forth
-	try
-		<code>
-	catch err
-		<code>
-	finally \ optional
-		<code>
-	endtry
-	
-	\ e.g.
-	try
-		":( new Error throw
-	catch err
-		err .
-	endtry
+try
+	<code>
+catch err
+	<code>
+finally \ optional
+	<code>
+endtry
+
+\ e.g.
+try
+	":( new Error throw
+catch err
+	err .
+endtry
 ```
 
 
 ### embed javascript code
 ```forth
-	\ push the result on the stack
-	:[ <javascript code> ]:
-	
-	\ directly insert the code
-	:[ <javascript code> ]:d
-	
-	\ insert the code and terminate it with ;
-	:[ <javascript code> ];
+\ push the result on the stack
+:[ <javascript code> ]:
+
+\ directly insert the code
+:[ <javascript code> ]:d
+
+\ insert the code and terminate it with ;
+:[ <javascript code> ];
 ```
 
 ### embed into html
@@ -247,9 +246,9 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 ### comments
 
 ```forth
-	\ line comment
-	// line comment
-	( comment )
-	/* comment */
-	/** comment */
+\ line comment
+// line comment
+( comment )
+/* comment */
+/** comment */
 ```
