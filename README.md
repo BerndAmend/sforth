@@ -82,6 +82,21 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 \ and place the result on the stack
 ```
 
+### macros
+Macros are used to rewrite sourcecode before the code gets compiled. value and to are implemented as macros.
+```forth
+:macro <name> { <arguments> } <body> ;
+
+\ e.g. the value implemention
+:macro value { name } :[ var name = stack.pop() ]; ;
+\ usage example
+30 value test-name
+
+\ e.g. the && implementation
+:macro && {} ( x1 x2 -- x3 ) :[ stack.pop() && stack.pop() ]: ;
+
+```
+
 ### variables
 
 ```forth
