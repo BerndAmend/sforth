@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script>sforthThrowOnUnderflow=true</script> <!-- decide if the stack should throw an error if an stack underflow occurs -->
+	<script src="../sforth-runtime.js"></script>
+	<script src="../sforth.js"></script>
+</head>
+<body onload="forth.compileAllScriptRegions();">
+	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script> <!-- include the base system -->
+
+	<script type="application/sforth">
+		:js sayHello { } »Hello World!« show-alert ;
+	</script>
+	
+	<input type="button" value="Say hello!" onclick="sayHello();">
+</body>
+</html>
