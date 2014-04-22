@@ -4,6 +4,8 @@ path = require('path'),
 url = require("url"),
 fs = require('fs'),
 
+port = process.argv[2] || 8080,
+
 extensions = {
 	".htm" : "text/html",
     ".html" : "text/html",
@@ -15,6 +17,37 @@ extensions = {
     ".gif" : "image/gif",
     ".jpg" : "image/jpeg"
 };
+
+function getDirectoryListening(pathname) {
+	var html = '<!doctype html>\
+			<html> \
+			<head> \
+			<meta charset="utf-8"> \
+			<title>Index of ' + pathname +'</title> \
+			</head> \
+			<body> \
+			<h1>Index of ' + pathname + '</h1>\n';
+
+	function addRow(filename) {
+		var fullfilename = path.join(pathname, filename);
+		if(fs.statSync(fullfilename).isDirectory()) {
+			filename += "/";
+		}
+
+		html += '<a href="' + filename + '">' + filename + '</a><br>';
+	}
+
+	addRow(".");
+	addRow("..");
+
+	var files = fs.readdirSync(pathname);
+
+	files.forEach(addRow);
+
+	html += '</body></html>';
+
+	return html;
+}
 
 http.createServer(function(request, response) {
 
@@ -29,8 +62,17 @@ http.createServer(function(request, response) {
 			return;
 		}
 
-		if (fs.statSync(filename).isDirectory())
-			filename += '/index.html';
+		if (fs.statSync(filename).isDirectory()) {
+			if(fs.existsSync(filename + "/index.html")) {
+				filename += '/index.html';
+			} else {
+				// Directory listening
+				response.writeHead(200, {"Content-Type": "text/html"});
+				response.write(getDirectoryListening(filename));
+				response.end();
+				return;
+			}
+		}
 
 		var ext = path.extname(filename);
 
@@ -50,4 +92,6 @@ http.createServer(function(request, response) {
 			response.end();
 		});
 	});
-}).listen(8080);
+}).listen(parseInt(port, 10));
+
+console.log("Static file server running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown");
