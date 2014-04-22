@@ -94,7 +94,6 @@ Macros are used to rewrite sourcecode before the code gets compiled. value and t
 
 \ e.g. the && implementation
 :macro && {} ( x1 x2 -- x3 ) :[ stack.pop() && stack.pop() ]: ;
-
 ```
 
 ### variables
