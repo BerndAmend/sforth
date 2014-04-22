@@ -45,14 +45,14 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 
 ```forth
 \ normal function
-: function-name ( stack-comment ) body ;
+: <name> ( <stack-comment> ) <body> ;
 \ e.g.
 : mul ( x1 x2 -- x ) * ;
 \ using an argument list
 : mul { x1 x2 -- x } x1 x2 * ;
 
 \ anonymous function - the function is pushed to the stack
-:noname ( stack-comment ) body ;
+:noname ( <stack-comment> ) <body> ;
 \ e.g.
 :noname ( x1 x2 -- x ) * ;
 \ using an argument list
@@ -63,17 +63,17 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 \ They behave like every javascript function.
 
 \ without a return value
-:js { parameters } body ;
+:js <name> { <parameters> } <body> ;
 
 \ with a return value
-:js { parameters } body return;
+:js <name> { <parameters> } <body> return;
 
 \ anonymous javascript functions
-:jsnoname { parameters } body ;
-:jsnoname { parameters } body return;
+:jsnoname { <parameters> } <body> ;
+:jsnoname { <parameters> } <body> return;
 
 \ push a function reference to the stack
-' function-name
+' <function-name>
 \ e.g.
 ' mul
 
@@ -86,10 +86,11 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 
 ```forth
 \ Defining a value
-{ var1 var2 var3 ... -- <comment> }
+{ <var1> <var2> <var3> ... -- <comment> }
 <initial-value> value <name>
 \ e.g.
 90 value blobvar
+10 20 30 { var1 var2 var3 }
 
 \ assign something to a value
 <new-value> to <name>
