@@ -27,7 +27,7 @@
 	<canvas id="canvas-output1"></canvas>
 
 	<script type="application/sforth">
-		:[ document.getElementById('canvas-output1') ]: { canvas }
+		"canvas-output1 document.getElementById { canvas }
 		:[ canvas.getContext('2d') ]: { ctx }
 
 		:js processImage { image }

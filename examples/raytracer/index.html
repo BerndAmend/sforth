@@ -11,11 +11,12 @@
 <body onload="forth.compileAllScriptRegions();">
 	<script data-src="../../forth.fs;../../browser.fs" type="application/sforth"></script>
 
-	<script type="application/sforth" data-id="worker1" data-type="javascript/worker"
+	<script type="application/sforth" data-id="raytracer-worker" data-type="javascript/worker"
 		data-src="../../sforth-runtime.js;../../forth.fs;raytracer.fs" data-throw-on-underflow="true">
 		: post-message { msg } :[ self.postMessage(msg) ]; ;
 
 		:jsnoname { e }
+			e.data.id { id }
 			e.data.scene { scene }
 			e.data.width { width }
 			e.data.height { height }
@@ -25,11 +26,11 @@
 
 			: paint-line { y data }
 				' y null = if
-					// Done
-					null post-message
+					:[ { id: id, done: true } ]: post-message
+					self.close
 					exit
 				endif
-				:[ { y: y, data: data } ]: post-message
+				:[ { id: id, y: y, data: data } ]: post-message
 			;
 
 			default-scene width height y_start y_end ' paint-line rayTracer.render
@@ -38,53 +39,70 @@
 
 	<script type="application/sforth">
 		:js renderToCanvas { }
-			:[ document.getElementById('worker-count').value ]: { worker-count }
+			:[ document.getElementById('worker-count').value ]: { workerCount }
 			:[ document.getElementById('width').value ]: { width }
 			:[ document.getElementById('height').value ]: { height }
+			:[ document.getElementById('processing-time') ]: { processing-time }
 
-			"canvas document.getElementById { canvas } :[ canvas.getContext("2d") ]: { ctx }
+			"canvas document.getElementById { canvas }
+			:[ canvas.getContext("2d") ]: { ctx }
 
 			width to canvas.width
 			height to canvas.height
 
-			"#worker1 create-worker { worker }
+			workerCount { active-worker }
 
 			:[ ctx.createImageData(width, 1) ]: { line }
 
-			:jsnoname { e }
-				' e.data null = if
+			»« to processing-time.value
+			time-in-ms { start-time }
+
+			:js worker-onmessage { e }
+				e.data.id { id }
+				' e.data.done if
 					// Done
-					worker.terminate
-					»Worker is done« console-log
+					// »Worker « id + » is done« + console-log
+					active-worker 1 - to active-worker
+					active-worker 0 = if
+						time-in-ms start-time - { required-time }
+						required-time » ms« + to processing-time.value
+						// »Rendering done in « required-time + » ms« + console-log
+					endif
 					exit
 				endif
 				e.data.y { y }
 				e.data.data { data }
 				:[ line.data.set(data) ];
 				' line 0 y ctx.putImageData
-			; to worker.onmessage
+			;
 
-			:[ {
-				scene: null,
-				width: width,
-				height: height,
-				y_start: 0,
-				y_end: height
-			} ]:
-			worker.postMessage
+			:js worker-onerror { e }
+				»web worker error: « e.message + console-log
+			;
+
+			0 workerCount 1 do i
+				"#raytracer-worker create-worker { worker }
+
+				' worker-onmessage to worker.onmessage
+				' worker-onerror to worker.onerror
+
+				:[ {
+					id: i,
+					scene: null,
+					width: width,
+					height: height,
+					y_start: (height/workerCount)*i,
+					y_end: (height/workerCount)*(i+1)
+				} ]:
+				worker.postMessage
+			loop
 		;
-
-		/*
-time-in-ms
-drawToPNG
-time-in-ms swap - { x }
-» calculation time =  « x + .
-*/
 	</script>
 
-	Worker <input id="worker-count" type="text" size="30" maxlength="30" value="8">
-	Width: <input id="width" type="text" size="30" maxlength="30" value="640">
-	Height: <input id="height" type="text" size="30" maxlength="30" value="640">
+	Worker <input id="worker-count" type="text" size="30" maxlength="30" value="16">
+	Width: <input id="width" type="text" size="30" maxlength="30" value="2000">
+	Height: <input id="height" type="text" size="30" maxlength="30" value="2000">
+	Time: <input id="processing-time" type="text" size="30" maxlength="30" readonly>
 	<input type="button" value="Render" onclick="renderToCanvas();">
 	<br>
 	<canvas id="canvas"></canvas>

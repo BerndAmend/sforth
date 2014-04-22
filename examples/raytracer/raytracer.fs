@@ -356,7 +356,7 @@ var Surfaces;
                 :[ { start: scene.camera.pos, dir: p } ]: scene 0 this.traceRay { color }
                 color.toDrawingColor { c }
 
-                x 2 << { idxr }
+                x 4 * { idxr }
                 m+ idxr 1 { idxg }
                 m+ idxr 2 { idxb }
                 m+ idxr 3 { idxa }
