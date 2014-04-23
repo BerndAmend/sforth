@@ -153,7 +153,7 @@ THE SOFTWARE.
 : * { x1 x2 -- x3 } :[ x1 * x2 ]: ;
 : / { x1 x2 -- x3 } :[ x1 / x2 ]: ;
 : mod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
-: /mod { x1 x2 -- x3 } :[ x1 % x2 ]: x1 x2 / floor ;
+: /mod { x1 x2 -- x3 } :[ x1 % x2 ]: x1 x2 / Math.floor ;
 
 :macro m+ { x1 x2 -- x3 } :[ x1 + x2 ]: ;
 :macro m- { x1 x2 -- x3 } :[ x1 - x2 ]: ;
