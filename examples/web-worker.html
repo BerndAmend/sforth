@@ -3,19 +3,19 @@
 <head>
 	<meta charset="utf-8" />
 	<script>sforthThrowOnUnderflow=false</script>
-	<script src="../../ext/jquery-2.1.0.min.js"></script>
-	<script src="../../sforth-runtime.js"></script>
-	<script src="../../sforth.js"></script>
+	<script src="../ext/jquery-2.1.0.min.js"></script>
+	<script src="../sforth-runtime.js"></script>
+	<script src="../sforth.js"></script>
 </head>
 <body>
-	<script data-src="../../forth.fs;../../browser.fs" type="application/sforth"></script>
+	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script>
 
 	<input id="message" type="text" size="30" maxlength="30">
 	<input type="button" value="Send" onclick="worker.postMessage(document.getElementById('message').value);">
 	<div id="log"></div>
 
 	<script type="application/sforth" data-id="worker1" data-type="javascript/worker"
-		data-src="../../sforth-runtime.js;../../forth.fs" data-throw-on-underflow="false">
+		data-src="../sforth-runtime.js;../forth.fs" data-throw-on-underflow="false">
 		: post-message { msg } :[ self.postMessage(msg) ]; ;
 
 		:jsnoname { e } 
