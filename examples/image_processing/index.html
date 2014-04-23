@@ -27,6 +27,14 @@
 	<canvas id="canvas-output1"></canvas>
 
 	<script type="application/sforth">
+
+		:macro m+!> { x1 x2 dst -- } :[ var dst = x1 + x2 ]; ;
+		:macro m-!> { x1 x2 dst -- } :[ var dst = x1 - x2 ]; ;
+		:macro m*!> { x1 x2 dst -- } :[ var dst = x1 * x2 ]; ;
+		:macro m/!> { x1 x2 dst -- } :[ var dst = x1 / x2 ]; ;
+
+		:macro m@!> { variable index dst -- value } :[ dst = variable [ index ] ]; ;
+
 		"canvas-output1 document.getElementById { canvas }
 		:[ canvas.getContext('2d') ]: { ctx }
 
@@ -40,20 +48,20 @@
 			' output.data { dst }
 
 			0 ' image.height 1 do y
-				m* y image.width { y-pos }
-				m* y-pos 4 { y-pos }
+				m*!> y image.width y-pos
+				m*!> y-pos 4 y-pos
 				0 ' image.width 1 do x
-					m* x 4 { i }
-					m+ i y-pos { i }
+					m*!> x 4 i
+					m+!> i y-pos i
 
-					m+ i 1 { ig }
-					m+ i 2 { ib }
-					m+ i 3 { ia }
+					m+!> i 1 ig
+					m+!> i 2 ib
+					m+!> i 3 ia
 
-					m@ src i { r }
-					m@ src ig { g }
-					m@ src ib { b }
-					m@ src ia { a }
+					m@!> src i r
+					m@!> src ig g
+					m@!> src ib b
+					m@!> src ia a
 					m! dst i b
 					m! dst ig g
 					m! dst ib r
