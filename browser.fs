@@ -7,3 +7,5 @@
 	:[ new Worker(window.URL.createObjectURL(blob)) ]: { worker }
 	worker
 ;
+
+: . ( string -- ) console-log ;
