@@ -18,7 +18,7 @@ node nodeForth.js
 ## Firefox / Chromium / Google Chrome
 
 The examples require that they are served using a static webserver.
-A test webserver is include that only requires node.js.
+A test webserver is included that only requires node.js.
 Start it and follow the printed instructions
 
 ./start-webserver.sh
@@ -78,7 +78,8 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 ' mul
 
 \ Calling javascript functions from sforth
-\ If you call javascript functions from forth they will take required number of parameters from the data stack
+\ If you call javascript functions from forth they will take required number of
+\ parameters from the data stack
 \ and place the result on the stack
 ```
 
@@ -151,7 +152,7 @@ new <classname>
 
 ### if
 ```forth
-<conditition> if
+<condition> if
 	<code>
 elseif <next-condition> if \ optional
 	<code>
@@ -183,8 +184,8 @@ endif
 endcase
 
 \ e.g.
-20 case
-	of 20
+"20 case
+	of "20
 		":) .
 	endof
 	
@@ -202,6 +203,11 @@ loop
 \ example - prints the numbers from 0 to 9
 0 10 1 do i
 	i .
+loop
+
+\ example - prints the numbers from 10 to 1
+10 0 -1 do counter
+	counter .
 loop
 ```
 
@@ -232,7 +238,7 @@ endtry
 \ directly insert the code
 :[ <javascript code> ]:d
 
-\ insert the code and terminate it with ;
+\ insert the code and append a ;
 :[ <javascript code> ];
 ```
 
@@ -244,13 +250,15 @@ endtry
 <html>
 <head>
 	<meta charset="utf-8" />
-	<script>sforthThrowOnUnderflow=true</script> <!-- decide if the stack should throw an error if an stack underflow occurs -->
+	<!-- decide if the stack should throw an error if an stack underflow occurs -->
+	<script>sforthThrowOnUnderflow=true</script>
 	<script src="../ext/jquery-2.1.0.min.js"></script>
 	<script src="../sforth-runtime.js"></script>
 	<script src="../sforth.js"></script>
 </head>
 <body>
-	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script> <!-- include the base system -->
+	<!-- include the base system -->
+	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script>
 
 	<script type="application/sforth">
 		:js sayHello { } »Hello World!« show-alert ;
@@ -267,12 +275,14 @@ endtry
 <html>
 <head>
 	<meta charset="utf-8" />
-	<script>sforthThrowOnUnderflow=true</script> <!-- decide if the stack should throw an error if an stack underflow occurs -->
+	<!-- decide if the stack should throw an error if an stack underflow occurs -->
+	<script>sforthThrowOnUnderflow=true</script>
 	<script src="../sforth-runtime.js"></script>
 	<script src="../sforth.js"></script>
 </head>
 <body onload="forth.compileAllScriptRegions();">
-	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script> <!-- include the base system -->
+	<!-- include the base system -->
+	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script>
 
 	<script type="application/sforth">
 		:js sayHello { } »Hello World!« show-alert ;
