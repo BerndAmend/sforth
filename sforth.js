@@ -1475,14 +1475,20 @@ forth.compileWithContext = function(code, context) {
 forth.compileAllScriptRegions = function() {
 	var nodes = document.querySelectorAll('script[type="application/sforth"]');
 
-	function addToDOM(id, target_type, src) {
+	function addToDOM(i, id, target_type, src) {
 		var script = document.createElement("script");
 		if(id)
 			script.id = id;
 		if(target_type)
 			script.type = target_type;
 		script.textContent = src;
-		document.body.appendChild(script);
+
+		if(!!window.jQuery) {
+			$(nodes[i]).replaceWith(script);
+		} else {
+			document.body.removeChild(nodes[i]);
+			document.body.appendChild(script);
+		}
 	}
 
 	function compileRegion(i, src, filenames, target_type, id, context) {
@@ -1490,8 +1496,7 @@ forth.compileAllScriptRegions = function() {
 			if(nodes[i].textContent) { // src that is between <script ...> and </script>
 				src += "\n" + forth.compileWithContext(nodes[i].textContent, context);
 			}
-			addToDOM(id, target_type, src);
-			document.body.removeChild(nodes[i]);
+			addToDOM(i, id, target_type, src);
 			compileNode(i+1);
 		} else {
 			var xmlhttp = new XMLHttpRequest();
@@ -1539,4 +1544,11 @@ forth.compileAllScriptRegions = function() {
 	}
 
 	compileNode(0);
+}
+
+// auto compile the script nodes to javascript
+if(!!window.jQuery) {
+	$( document ).ready(function() {
+		forth.compileAllScriptRegions();
+	});
 }

@@ -237,6 +237,31 @@ endtry
 ```
 
 ### embed into html
+
+#### with jquery (recommended)
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script>sforthThrowOnUnderflow=true</script> <!-- decide if the stack should throw an error if an stack underflow occurs -->
+	<script src="../ext/jquery-2.1.0.min.js"></script>
+	<script src="../sforth-runtime.js"></script>
+	<script src="../sforth.js"></script>
+</head>
+<body>
+	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script> <!-- include the base system -->
+
+	<script type="application/sforth">
+		:js sayHello { } »Hello World!« show-alert ;
+	</script>
+	
+	<input type="button" value="Say hello!" onclick="sayHello();">
+</body>
+</html>
+```
+
+#### without jquery
 ```html
 <!DOCTYPE html>
 <html>
@@ -252,7 +277,7 @@ endtry
 	<script type="application/sforth">
 		:js sayHello { } »Hello World!« show-alert ;
 	</script>
-	
+
 	<input type="button" value="Say hello!" onclick="sayHello();">
 </body>
 </html>
