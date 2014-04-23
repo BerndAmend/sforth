@@ -1547,7 +1547,7 @@ forth.compileAllScriptRegions = function() {
 }
 
 // auto compile the script nodes to javascript
-if(!!window.jQuery) {
+if(typeof window != "undefined" && !!window.jQuery) {
 	$( document ).ready(function() {
 		forth.compileAllScriptRegions();
 	});
