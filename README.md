@@ -250,7 +250,7 @@ endtry
 <html>
 <head>
 	<meta charset="utf-8" />
-	<!-- decide if the stack should throw an error if an stack underflow occurs -->
+	<!-- throw an exception if an stack underflow occurs -->
 	<script>sforthThrowOnUnderflow=true</script>
 	<script src="../ext/jquery-2.1.0.min.js"></script>
 	<script src="../sforth-runtime.js"></script>
@@ -275,7 +275,7 @@ endtry
 <html>
 <head>
 	<meta charset="utf-8" />
-	<!-- decide if the stack should throw an error if an stack underflow occurs -->
+	<!-- throw an exception if an stack underflow occurs -->
 	<script>sforthThrowOnUnderflow=true</script>
 	<script src="../sforth-runtime.js"></script>
 	<script src="../sforth.js"></script>
@@ -301,4 +301,5 @@ endtry
 ( comment )
 /* comment */
 /** comment */
+\\ ignore the rest of the file
 ```
