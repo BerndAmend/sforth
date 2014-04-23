@@ -35,7 +35,7 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 ## Examples
 - [Hello World](http://tptb.github.io/sforth/examples/Hello-World.html)
 - [Web worker](http://tptb.github.io/sforth/examples/web-worker.html)
-- [Playground](http://tptb.github.io/sforth/examples/editor/)
+- [Playground](http://tptb.github.io/sforth/examples/playground/)
 - [Raytracer](http://tptb.github.io/sforth/examples/raytracer/)
 - [Image processing](http://tptb.github.io/sforth/examples/image_processing/)
 
