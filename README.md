@@ -38,6 +38,7 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 - [Playground](http://tptb.github.io/sforth/examples/playground/)
 - [Raytracer](http://tptb.github.io/sforth/examples/raytracer/)
 - [Image processing](http://tptb.github.io/sforth/examples/image_processing/)
+- [Function plot](http://tptb.github.io/sforth/examples/function-plot.html)
 
 ## Syntax
 

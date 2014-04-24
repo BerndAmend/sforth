@@ -135,7 +135,7 @@ var ForthStack = (function () {
 	}
 
 	ForthStack.prototype.getArray=function() {
-		return this.stac.slice(0,Math.max(this.pos,0));
+		return this.stac.slice(0,Math.max(this.pos+1,0));
 	}
 
 	ForthStack.prototype.toString=function() {
