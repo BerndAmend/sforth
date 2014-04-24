@@ -81,6 +81,10 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 \ If you call javascript functions from forth they will take required number of
 \ parameters from the data stack
 \ and place the result on the stack
+\ If you explicitly want or have to specify the number of arguments that should be passed to a js function
+\ you have to use parentheses e.g.
+"Test console.log(1) \ will pass one stack element to the function
+\ This is necessary since different browsers report for some functions different argument count values.
 ```
 
 ### macros

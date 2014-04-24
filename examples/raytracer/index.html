@@ -13,8 +13,6 @@
 
 	<script type="application/sforth" data-id="raytracer-worker" data-type="javascript/worker"
 		data-src="../../sforth-runtime.js;../../forth.fs;raytracer.fs" data-throw-on-underflow="true">
-		: post-message { msg } :[ self.postMessage(msg) ]; ;
-
 		:jsnoname { e }
 			e.data.id { id }
 			e.data.scene { scene }
@@ -26,11 +24,11 @@
 
 			: paint-line { y data }
 				' y null = if
-					:[ { id: id, done: true } ]: post-message
+					:[ { id: id, done: true } ]: self.postMessage(1)
 					self.close
 					exit
 				endif
-				:[ { id: id, y: y, data: data } ]: post-message
+				:[ { id: id, y: y, data: data } ]: self.postMessage(1)
 			;
 
 			default-scene width height y_start y_end ' paint-line rayTracer.render
@@ -48,21 +46,21 @@
 			:[ document.getElementById('worker-count').value ]: { workerCount }
 			:[ document.getElementById('width').value ]: { width }
 			:[ document.getElementById('height').value ]: { height }
-			:[ document.getElementById('processing-time') ]: { processing-time }
+			"processing-time document.getElementById(1) { processing-time }
 
 			// disable the render button
-			:[ document.getElementById('render-button') ]: { render-button }
+			"render-button document.getElementById(1) { render-button }
 			true to render-button.disabled
 
-			"canvas document.getElementById { canvas }
-			:[ canvas.getContext("2d") ]: { ctx }
+			"canvas document.getElementById(1) { canvas }
+			"2d canvas.getContext(1) { ctx }
 
 			width to canvas.width
 			height to canvas.height
 
 			workerCount { active-worker }
 
-			:[ ctx.createImageData(width, 1) ]: { line }
+			width 1 ctx.createImageData(2) { line }
 
 			»« to processing-time.value
 			time-in-ms { start-time }
@@ -81,14 +79,14 @@
 						false to render-button.disabled
 
 						// enable the download-button
-						:[ document.getElementById('download-button') ]: { download-button }
+						"download-button document.getElementById(1) { download-button }
 						false to download-button.disabled
 					endif
 					exit
 				endif
 				e.data.y { y }
 				e.data.data { data }
-				:[ line.data.set(data) ];
+				data line.data.set(1)
 				' line 0 y ctx.putImageData
 			;
 
@@ -116,8 +114,8 @@
 
 		:js downloadImage { }
 			"canvas document.getElementById { canvas }
-			:[ canvas.getContext("2d") ]: { ctx }
-			:[ canvas.toDataURL("image/webp") ]: { image } "image/webp "image/octet-stream image.replace 'new_window' window.open
+			"2d canvas.getContext(1) { ctx }
+			"image/webp canvas.toDataURL(1) { image } "image/webp "image/octet-stream image.replace 'new_window' window.open
 		;
 	</script>
 

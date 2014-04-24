@@ -35,8 +35,8 @@
 
 		:macro m@!> { variable index dst -- value } :[ dst = variable [ index ] ]; ;
 
-		"canvas-output1 document.getElementById { canvas }
-		:[ canvas.getContext('2d') ]: { ctx }
+		"canvas-output1 document.getElementById(1) { canvas }
+		"2d canvas.getContext(1) { ctx }
 
 		:js processImage { image }
 			image.width to canvas.width
@@ -44,7 +44,7 @@
 
 			' image.data { src }
 
-			:[ ctx.createImageData(image) ]: { output }
+			image ctx.createImageData(1) { output }
 			' output.data { dst }
 
 			0 ' image.height 1 do y
