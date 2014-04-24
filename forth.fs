@@ -223,6 +223,8 @@ THE SOFTWARE.
 
 : execute { x1 -- } x1 ;
 
+:macro create-empty-object {} :[ {} ]: ;
+
 : create-array { num -- new Array } :[ stack.getTopElements(num) ]: ;
 
 : new-array { size -- } :[ new Array(size) ]: ;
