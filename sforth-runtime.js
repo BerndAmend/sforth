@@ -49,7 +49,7 @@ String.prototype.replaceWholeWord = function(search, replacement, ch) {
 
 Number.isNumeric = function( obj ) {
 	return !isNaN( parseFloat(obj) ) && isFinite( obj );
-}
+};
 
 function forthClone(other) {
 	return JSON.parse(JSON.stringify(other));
@@ -66,7 +66,7 @@ var ForthStack = (function () {
 			if(this.pos == -1)
 				throw new Error("Stack underflow");
 			return this.stac[this.pos--];
-		}
+		};
 
 		ForthStack.prototype.getTopElements=function(count) {
 			var realpos = this.pos-count+1;
@@ -74,7 +74,7 @@ var ForthStack = (function () {
 				throw new Error("Stack underflow");
 			this.pos -= count;
 			return this.stac.slice(realpos, realpos+count);
-		}
+		};
 
 		ForthStack.prototype.remove=function(pos) {
 			var realpos = this.pos-pos;
@@ -82,76 +82,76 @@ var ForthStack = (function () {
 				throw new Error("Stack underflow"); //?
 			--this.pos;
 			return this.stac.splice(realpos, 1);
-		}
+		};
 	} else {
 		ForthStack.prototype.pop=function() {
 			return this.stac[this.pos--];
-		}
+		};
 
 		ForthStack.prototype.getTopElements=function(count) {
 			var realpos = this.pos-count+1;
 			this.pos -= count;
 			return this.stac.slice(realpos, realpos+count);
-		}
+		};
 
 		ForthStack.prototype.remove=function(pos) {
 			--this.pos;
 			return this.stac.splice(this.pos-pos, 1);
-		}
+		};
 	}
 
 	ForthStack.prototype.push=function(item) {
 		// TODO: should we throw an overflow?
 		this.stac[++this.pos] = item;
-	}
+	};
 
 	ForthStack.prototype.pushIfNotUndefined=function(item) {
-		if(item != undefined)
+		if(item !== undefined)
 			this.stac[++this.pos] = item;
-	}
+	};
 
 	ForthStack.prototype.isEmpty=function() {
 		return this.pos == -1;
-	}
+	};
 
 	ForthStack.prototype.size=function() {
 		return this.pos+1;
-	}
+	};
 
 	ForthStack.prototype.top=function() {
 		return this.get(0);
-	}
+	};
 
 	ForthStack.prototype.get=function(pos) {
 		var realpos = this.pos-pos;
 		if(realpos < 0)
 			throw new Error("Stack underflow"); //?
 		return this.stac[realpos];
-	}
+	};
 
 	ForthStack.prototype.clear=function() {
 		this.stac = new Array(32);
 		this.pos = -1;
-	}
+	};
 
 	ForthStack.prototype.getArray=function() {
 		return this.stac.slice(0,Math.max(this.pos+1,0));
-	}
+	};
 
 	ForthStack.prototype.toString=function() {
 		return this.getArray().toString();
-	}
+	};
 
 	ForthStack.prototype.toJSON=function() {
 		return JSON.stringify(this.getArray());
-	}
+	};
 
 	ForthStack.prototype.fromJSON=function(str) {
 		var l = JSON.parse(str);
 		this.clear();
 		for(var i=0;i<l.length;++i)
 			this.push(l[i]);
-	}
+	};
 
     return ForthStack;
 })();

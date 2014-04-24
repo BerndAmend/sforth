@@ -1,4 +1,5 @@
 // Color
+	@constructor
 	: Color { r g b }
 		r to this.r
 		g to this.g
@@ -49,6 +50,7 @@ Color.black to Color.defaultColor
 
 
 // Vector
+	@constructor
 	: Vector { x y z }
 		x to this.x
 		y to this.y
@@ -110,7 +112,7 @@ Color.black to Color.defaultColor
 	return; to Vector.prototype.toString
 
 
-
+@constructor
 : Camera { pos lookAt }
 	pos to this.pos
 	0.0 -1.0 0.0 new Vector { down }
@@ -121,6 +123,7 @@ Color.black to Color.defaultColor
 
 
 // Sphere
+	@constructor
 	: Sphere { center radius surface }
 		center to this.center
 		surface to this.surface
@@ -220,7 +223,7 @@ var Surfaces;
 
 ];
 
-
+@constructor
 : RayTracer { }
 	5 to this.maxDepth
 

@@ -184,7 +184,7 @@ THE SOFTWARE.
 :macro m<= { x1 x2 -- f } :[ x1 >= x2 ]: ;
 
 \ we provide a faster implementation for important functions
-:macro 0= {} ( x1 -- f ) :[ stack.pop() == 0 ]: ;
+:macro 0= {} ( x1 -- f ) :[ stack.pop() === 0 ]: ;
 :macro 0<> {} ( x1 -- f ) :[ stack.pop() != 0 ]: ;
 :macro 0> {} ( x1 -- f ) :[ stack.pop() > 0 ]: ;
 :macro 0>= {} ( x1 -- f ) :[ stack.pop() >= 0 ]: ;
@@ -222,6 +222,8 @@ THE SOFTWARE.
 : jseval ( str -- ) eval ;
 
 : execute { x1 -- } x1 ;
+
+:macro @constructor {} :[ /** @constructor */ ]:d ;
 
 :macro create-empty-object {} :[ {} ]: ;
 

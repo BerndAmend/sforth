@@ -57,7 +57,8 @@ forth.mangling = {
 	"{": "$$obraces",
 	"}": "$$obraces",
 	"\u00b7": "$$middot",
-	"\"": "$$quotationmark"
+	"\"": "$$quotationmark",
+	"'": "$$apostrophe"
 };
 
 forth.mangleName = function(str) {
@@ -68,7 +69,9 @@ forth.mangleName = function(str) {
 	}
 
 	for(var s in forth.mangling) {
-		result = result.replaceAll(s, forth.mangling[s]);
+		if (forth.mangling.hasOwnProperty(s)) {
+			result = result.replaceAll(s, forth.mangling[s]);
+		}
 	}
 
 	if(result[0] == ".")
@@ -77,15 +80,17 @@ forth.mangleName = function(str) {
 		result = "$$dot" + result.substr(0, result.length-1);
 
 	return result;
-}
+};
 
 forth.demangleName = function (str) {
 	var result = str;
 	for(var s in forth.mangling) {
-		result = result.replaceAll(forth.mangling[s], s);
+		if (forth.mangling.hasOwnProperty(s)) {
+			result = result.replaceAll(forth.mangling[s], s);
+		}
 	}
 	return result;
-}
+};
 
 forth.Types = {
 	BeginAgain: "BeginAgain",
@@ -165,7 +170,7 @@ forth.BranchIf = function(if_body, else_if_bodies, else_body) {
 
 forth.Body = function() {
 	this.type = forth.Types.Body;
-	this.body = new Array;
+	this.body = [];
 };
 
 forth.Call = function(name, argument_count) {
@@ -254,7 +259,7 @@ forth.TryCatchFinally = function(body, catchVar, catchBody, finallyBody) {
 	this.catchVar = catchVar;
 	this.catchBody = catchBody;
 	this.finallyBody = finallyBody;
-}
+};
 
 forth.ValueLocal = function(values, comment) {
 	this.type = forth.Types.ValueLocal;
@@ -281,11 +286,11 @@ forth.CodeTreeIterator = function(body) {
 	 * The following options are supported:
 	 *	type [Array]
 	 *	keepScope [Boolean]
-	 * 	skip [Array]
+	 *	skip [Array]
 	 */
 	this.next = function(options) {
 		return null;
-	}
+	};
 
 /*
 	switch(current.type) {
@@ -357,7 +362,7 @@ forth.CodeTreeIterator = function(body) {
 		}
 	}
 */
-}
+};
 
 // Currently this function only splits the code into tokens
 // later version will also keep track where the tokens are fetched from
@@ -372,7 +377,7 @@ forth.tokenize = function(code) {
 	var tokens=clean_code.split(" ");
 
 	// merge tokens
-	var merged_tokens = new Array();
+	var merged_tokens = [];
 
 	function add(something) {
 		merged_tokens.push(something);
@@ -389,7 +394,7 @@ forth.tokenize = function(code) {
 				break;
 
 			case "\\\\":
-				var str = ""
+				var str = "";
 				i++;
 				while(i < tokens.length) {
 					str += tokens[i] + " ";
@@ -413,7 +418,7 @@ forth.tokenize = function(code) {
 				add(new forth.CommentLine(str.slice(0,str.length-1)));
 				break;
 			case "(": // comment start
-				var str = ""
+				var str = "";
 				var depth = 1;
 				while(depth > 0) {
 					i++;
@@ -434,7 +439,7 @@ forth.tokenize = function(code) {
 				break;
 			case "/*": // comment start
 			case "/**":
-				var str = ""
+				var str = "";
 				var depth = 1;
 				while(depth > 0) {
 					i++;
@@ -454,7 +459,7 @@ forth.tokenize = function(code) {
 				add(new forth.CommentParentheses(str.slice(0, str.length-1)));
 				break;
 			case ":[": // execute js code start
-				var str = ""
+				var str = "";
 				i++;
 				while(tokens[i] != "]:" && tokens[i] != "]:d" && tokens[i] != "];") {
 					str += tokens[i] + " ";
@@ -473,7 +478,7 @@ forth.tokenize = function(code) {
 				break;
 			case "{": // local variable start
 				var done = false;
-				var localvars = new Array;
+				var localvars = [];
 				var comment = "";
 				i++;
 				while(tokens[i] != "}") {
@@ -495,7 +500,7 @@ forth.tokenize = function(code) {
 				add(new forth.ValueLocal(localvars.reverse(), comment.slice(0, comment.length-1)));
 				break;
 			case "{}":
-				add(new forth.ValueLocal(new Array, ""));
+				add(new forth.ValueLocal([], ""));
 				break;
 			default:
 				var replacedcommawithperiod = t.replaceAll(",", ".");
@@ -507,16 +512,16 @@ forth.tokenize = function(code) {
 					add(new forth.String(t.substr(1)));
 				} else if(t[0] == "\u00bb") { // »
 					var str = "";
-					if(tokens[i].substr(tokens[i].length-1) == "\u00ab" // «
-						&& tokens[i].substr(tokens[i].length-2) != "\\\u00ab" // «
+					if(tokens[i].substr(tokens[i].length-1) == "\u00ab" && // «
+						tokens[i].substr(tokens[i].length-2) != "\\\u00ab" // «
 					) {
 						str = tokens[i].substr(1,tokens[i].length-1);
 					} else {
 						str = tokens[i].substr(1) + " ";
 						i++;
 						while(true) {
-							if(tokens[i].substr(tokens[i].length-1) == "\u00ab" // «
-								&& tokens[i].substr(tokens[i].length-2) != "\\\u00ab" // «
+							if(tokens[i].substr(tokens[i].length-1) == "\u00ab" && // «
+								tokens[i].substr(tokens[i].length-2) != "\\\u00ab" // «
 							) {
 								if(tokens[i].length == 1)
 									str += " ";
@@ -541,7 +546,7 @@ forth.tokenize = function(code) {
 											.replaceAll("\"", "\\\"")
 											.replaceAll("\\\u00bb", "\u00bb")
 											.replaceAll("\\\u00ab", "\u00ab")
-								  ));
+						));
 				} else if(t[0] == "$" && t.length >= 2) {
 					add(new forth.Number("0x" + t.substr(1)));
 				} else if(t[0] == "%" && t.length >= 2) {
@@ -553,7 +558,7 @@ forth.tokenize = function(code) {
 	}
 
 	return merged_tokens;
-}
+};
 
 forth.createFromForthTokens = function(tokens, context) {
 	context = context || {}; //forthClone(parent_context);
@@ -590,7 +595,7 @@ forth.createFromForthTokens = function(tokens, context) {
 			case "if":
 				var depth = 1;
 
-				var tokensIf = new Array;
+				var tokensIf = [];
 				var tokensElseIf = null;
 				var tokensElse = null;
 				var current = tokensIf;
@@ -616,9 +621,9 @@ forth.createFromForthTokens = function(tokens, context) {
 						case "elseif":
 							if(depth == 1) {
 								if(!tokensElseIf)
-									tokensElseIf = new Array;
+									tokensElseIf = [];
 
-								var elseIf = new forth.BranchIfBody(new Array, new Array);
+								var elseIf = new forth.BranchIfBody([], []);
 								tokensElseIf.push(elseIf);
 
 								current = elseIf.condition;
@@ -643,7 +648,7 @@ forth.createFromForthTokens = function(tokens, context) {
 							break;
 						case "else":
 							if(depth == 1) {
-								tokensElse = new Array;
+								tokensElse = [];
 								current = tokensElse;
 							} else {
 								current.push(tokens[i]);
@@ -668,7 +673,7 @@ forth.createFromForthTokens = function(tokens, context) {
 					compiledIf = forth.createFromForthTokens(tokensIf, context);
 
 				if(tokensElseIf) {
-					compiledElseIf = new Array;
+					compiledElseIf = [];
 					tokensElseIf.forEach(function(entry) {
 						var condition = forth.createFromForthTokens(entry.condition, context);
 						var body = forth.createFromForthTokens(entry.body, context);
@@ -684,7 +689,7 @@ forth.createFromForthTokens = function(tokens, context) {
 			case "try":
 				var depth = 1;
 
-				var tokensBody = new Array;
+				var tokensBody = [];
 				var tokensCatch = null;
 				var tokensFinally = null;
 
@@ -713,7 +718,7 @@ forth.createFromForthTokens = function(tokens, context) {
 							if(depth == 1) {
 								i++;
 								catchVar = tokens[i];
-								tokensCatch = new Array;
+								tokensCatch = [];
 								current = tokensCatch;
 							} else {
 								current.push(tokens[i]);
@@ -721,11 +726,12 @@ forth.createFromForthTokens = function(tokens, context) {
 							break;
 						case "finally":
 							if(depth == 1) {
-								tokensFinally = new Array;
+								tokensFinally = [];
 								current = tokensFinally;
 							} else {
 								current.push(tokens[i]);
 							}
+							break;
 						case "endtry":
 							depth--;
 							if(depth > 0)
@@ -754,7 +760,7 @@ forth.createFromForthTokens = function(tokens, context) {
 			case "begin":
 				var depth = 1;
 
-				var current = new Array;
+				var current = [];
 				while(depth > 0) {
 					i++;
 
@@ -794,7 +800,7 @@ forth.createFromForthTokens = function(tokens, context) {
 				// TODO: we have to parse the of entries
 				var depth = 1;
 
-				var current = new Array;
+				var current = [];
 				var defaultOf = null;
 				while(depth > 0) {
 					i++;
@@ -837,9 +843,9 @@ forth.createFromForthTokens = function(tokens, context) {
 				if(i >= tokens.length)
 						throw new Error("Couldn't find closing element for '" + start + "'");
 
-				var idx = tokens[i]
+				var idx = tokens[i];
 
-				var current = new Array;
+				var current = [];
 				while(depth > 0) {
 					i++;
 
@@ -878,7 +884,7 @@ forth.createFromForthTokens = function(tokens, context) {
 				break;
 			case "include":
 				if(typeof Filesystem != "undefined") {
-					var str = ""
+					var str = "";
 					i++;
 
 					if(i >= tokens.length)
@@ -902,7 +908,7 @@ forth.createFromForthTokens = function(tokens, context) {
 
 				var function_name = tokens[i];
 
-				var localtokens = new Array;
+				var localtokens = [];
 
 				while(depth > 0) {
 					i++;
@@ -923,7 +929,7 @@ forth.createFromForthTokens = function(tokens, context) {
 			case ":noname": // function definition
 				var depth = 1;
 
-				var localtokens = new Array;
+				var localtokens = [];
 
 				while(depth > 0) {
 					i++;
@@ -950,7 +956,7 @@ forth.createFromForthTokens = function(tokens, context) {
 
 				var depth = 1;
 
-				var localtokens = new Array;
+				var localtokens = [];
 
 				var returnValue = false;
 
@@ -993,7 +999,7 @@ forth.createFromForthTokens = function(tokens, context) {
 			case ":jsnoname": // function definition
 				var depth = 1;
 
-				var localtokens = new Array;
+				var localtokens = [];
 
 				var returnValue = false;
 
@@ -1049,7 +1055,7 @@ forth.createFromForthTokens = function(tokens, context) {
 
 				var function_name = tokens[i];
 
-				var localtokens = new Array;
+				var localtokens = [];
 
 				while(depth > 0) {
 					i++;
@@ -1115,7 +1121,7 @@ forth.createFromForthTokens = function(tokens, context) {
 				}
 
 				if(macro) {
-					if(macro.args.length == 0) {
+					if(macro.args.length === 0) {
 						var gcode = forth.createFromForthTokens(macro.body, context);
 						add(gcode);
 					} else {
@@ -1165,7 +1171,7 @@ forth.createFromForthTokens = function(tokens, context) {
 					}
 				} else {
 					var match = /^(.+)\((\d*)\)$/.exec(t);
-					if(match == null) {
+					if(match === null) {
 						add(new forth.Call(t));
 					} else {
 						add(new forth.Call(match[1], match[2]));
@@ -1181,12 +1187,8 @@ forth.createFromForth = function(code, context) {
 	return forth.createFromForthTokens(forth.tokenize(code), context);
 };
 
-forth.generateForthCode = function(code_tree) {
-	// TODO
-};
-
 forth.generateJsCode = function(code_tree, indent_characters) {
-	if(indent_characters == undefined)
+	if(indent_characters === undefined)
 		indent_characters = "\t";
 
 	function generateCode(code_tree, level) {
@@ -1198,12 +1200,12 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			lp += indent_characters;
 
 		function append(str, add_level) {
-			if(add_level == undefined)
+			if(add_level === undefined)
 				add_level = 0;
 			var tlp = lp;
 			for(var i = 0; i < add_level; i++)
 			tlp += indent_characters;
-			if(str && str != "")
+			if(str && str !== "")
 				out += tlp + str + "\n";
 		}
 
@@ -1258,7 +1260,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 					});
 				}
 				if(code_tree.else_body) {
-					append(identLevel + "} else {")
+					append(identLevel + "} else {");
 					out += generateCode(code_tree.else_body, level+openingBrackets);
 				}
 				for(var i=0;i<openingBrackets+1;++i) {
@@ -1277,17 +1279,17 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 			case forth.Types.Call:
 				var name = forth.mangleName(code_tree.name);
-				var splitted = name.split(".")
+				var splitted = name.split(".");
 				var ctxt = splitted.slice(0, splitted.length-1).join(".");
-				if(ctxt == "")
+				if(ctxt === "")
 					ctxt = "this";
-				if(code_tree.argument_count == undefined) {
+				if(code_tree.argument_count === undefined) {
 					append("if(typeof " + name + " == 'function') {");
-					append("if(" + name + ".forth_function) { " + name + "(stack); }");
-					append("else { stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", stack.getTopElements(" + name + ".length))); }");
+					append("if(!" + name + ".forth_function) { stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", stack.getTopElements(" + name + ".length)));");
+					append("} else { " + name + "(stack); }");
 					append("} else { stack.push(" + name + ");}");
 				} else {
-					if(code_tree.argument_count==0) {
+					if(code_tree.argument_count === 0) {
 						append("stack.pushIfNotUndefined(" + name + "());");
 					} else {
 						append("stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", stack.getTopElements(" + code_tree.argument_count + ")));");
@@ -1363,12 +1365,12 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 			case forth.Types.JsCode:
 				var clean = code_tree.body.replaceAll(" ", "").replaceAll("\t", "").replaceAll("\n", "").replaceAll("\r", "");
-				if(clean && clean != "")
+				if(clean && clean !== "")
 					append(code_tree.body + ";");
 				break;
 			case forth.Types.JsCodeDirect:
 				var clean = code_tree.body.replaceAll(" ", "").replaceAll("\t", "").replaceAll("\n", "").replaceAll("\r", "");
-				if(clean && clean != "")
+				if(clean && clean !== "")
 					append(code_tree.body);
 				break;
 			case forth.Types.JsCodeWithReturn:
@@ -1391,7 +1393,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 				var name = forth.mangleName(code_tree.name);
 
-				append("forth_macros[\"" + name + "\"] = " + JSON.stringify(code_tree) + ";\n");
+				append("forth_macros." + name + " = " + JSON.stringify(code_tree) + ";\n");
 
 				break;
 			case forth.Types.Number:
@@ -1437,16 +1439,16 @@ forth.optimizeCodeTree = function(org_code_tree) {
 	
 	// if possible write results directly into a var
 	(function() {
-		var iter = new forth.CodeTreeIterator(code_tree);;
+		var iter = new forth.CodeTreeIterator(code_tree);
 		do {
 			var current = iter.next({type: [forth.Types.JsCodeWithReturn]});
-			if(current == null)
+			if(current === null)
 				break;
 			var next = this.next({
 							keepScope: true,
 							skip: [forth.Types.CommentLine, forth.Types.CommentParentheses, forth.Types.Macro]
 						});
-			if(next != null) {
+			if(next !== null) {
 				switch(next.type) {
 					case forth.Types.ValueLocal:
 						if(next.values.length < 1) // TODO: we should go to the next element
@@ -1462,10 +1464,10 @@ forth.optimizeCodeTree = function(org_code_tree) {
 	// detect operators like +,-,& and rewrite them
 
 	return code_tree;
-}
+};
 
 forth.compile = function(code) {
-	var tokens = forth.tokenize(code)
+	var tokens = forth.tokenize(code);
 	//Filesystem.writeFileSync("generated-tokens.json", JSON.stringify(tokens, null, "\t"));
 	var code_tree = forth.createFromForthTokens(tokens);
 	//Filesystem.writeFileSync("generated-code_tree.json", JSON.stringify(code_tree, null, "\t"));
@@ -1474,15 +1476,15 @@ forth.compile = function(code) {
 	var generated_code = forth.generateJsCode(optimized_code_tree);
 	//Filesystem.writeFileSync("generated-code.js", generated_code);
 	return generated_code;
-}
+};
 
 forth.compileWithContext = function(code, context) {
-	var tokens = forth.tokenize(code)
+	var tokens = forth.tokenize(code);
 	var code_tree = forth.createFromForthTokens(tokens, context);
 	var optimized_code_tree = forth.optimizeCodeTree(code_tree);
 	var generated_code = forth.generateJsCode(optimized_code_tree);
 	return generated_code;
-}
+};
 
 // allows embedding sforth into normal websites
 forth.compileAllScriptRegions = function() {
@@ -1505,7 +1507,7 @@ forth.compileAllScriptRegions = function() {
 	}
 
 	function compileRegion(i, src, filenames, target_type, id, context) {
-		if(filenames.length == 0 || (filenames.length == 1 && filenames[0] == "")) {
+		if(filenames.length === 0 || (filenames.length == 1 && filenames[0] === "")) {
 			if(nodes[i].textContent) { // src that is between <script ...> and </script>
 				src += "\n" + forth.compileWithContext(nodes[i].textContent, context);
 			}
@@ -1548,7 +1550,7 @@ forth.compileAllScriptRegions = function() {
 		var id = nodes[i].getAttribute("data-id");
 		var throw_on_underflow=nodes[i].getAttribute("data-throw-on-underflow");
 
-		if(throw_on_underflow == null)
+		if(throw_on_underflow === null)
 			throw_on_underflow = true;
 
 		var src = "sforthThrowOnUnderflow=" + throw_on_underflow + ";";
@@ -1557,7 +1559,7 @@ forth.compileAllScriptRegions = function() {
 	}
 
 	compileNode(0);
-}
+};
 
 // auto compile the script nodes to javascript
 if(typeof window != "undefined" && !!window.jQuery) {
