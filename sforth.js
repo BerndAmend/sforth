@@ -24,6 +24,10 @@ THE SOFTWARE.
 
 var forth = forth || {};
 
+forth.forthClone = function(other) {
+	return JSON.parse(JSON.stringify(other));
+}
+
 forth.compiler_message_handler = forth.compiler_message_handler || console.log;
 
 // We don't allow . in function names
@@ -561,7 +565,7 @@ forth.tokenize = function(code) {
 };
 
 forth.createFromForthTokens = function(tokens, context) {
-	context = context || {}; //forthClone(parent_context);
+	context = context || {}; //forth.forthClone(parent_context);
 
 	var out = new forth.Body();
 
@@ -1125,7 +1129,7 @@ forth.createFromForthTokens = function(tokens, context) {
 						var gcode = forth.createFromForthTokens(macro.body, context);
 						add(gcode);
 					} else {
-						var gcode = forthClone(macro.body);
+						var gcode = forth.forthClone(macro.body);
 						for(var k=macro.args.length-1;k>=0;--k) {
 							i++;
 							for(var n=0; n<gcode.length;++n) {
@@ -1435,7 +1439,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 };
 
 forth.optimizeCodeTree = function(org_code_tree) {
-	var code_tree = forthClone(org_code_tree);
+	var code_tree = forth.forthClone(org_code_tree);
 	
 	// if possible write results directly into a var
 	(function() {

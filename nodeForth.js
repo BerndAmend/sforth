@@ -23,7 +23,7 @@ THE SOFTWARE.
 */
 // example app for nodejs
 
-sforthThrowOnUnderflow=true;
+global.sforthThrowOnUnderflow = true;
 
 // has to be done in the main file :(
 try {
@@ -49,7 +49,7 @@ try {
 //require("./sforth.js");
 //require("./sforth-runtime.js");
 
-global.eval(Filesystem.readFileSync('sforth.js').toString());
 global.eval(Filesystem.readFileSync('sforth-runtime.js').toString());
+global.eval(Filesystem.readFileSync('sforth.js').toString());
 
 global.eval(forth.compile(Filesystem.readFileSync("repl.fs").toString()));

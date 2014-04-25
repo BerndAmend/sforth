@@ -52,12 +52,7 @@ Number.isNumeric = function( obj ) {
 	return !isNaN( parseFloat(obj) ) && isFinite( obj );
 };
 
-function forthClone(other) {
-	return JSON.parse(JSON.stringify(other));
-}
-
 var ForthStack = (function () {
-	"use strict";
 	function ForthStack() {
 		this.stac=new Array(32);
 		this.pos = -1;
@@ -158,6 +153,11 @@ var ForthStack = (function () {
     return ForthStack;
 })();
 
-// create the global stack
-var stack = stack || new ForthStack();
-var forth_macros = forth_macros || {};
+if(typeof global === "undefined") {
+	var stack = stack || new ForthStack();
+	var forth_macros = forth_macros || {};
+} else {
+	global.ForthStack = ForthStack;
+	global.stack = global.stack || new ForthStack();
+	global.forth_macros = global.forth_macros || {};
+}
