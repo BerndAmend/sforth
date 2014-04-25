@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<script>sforthThrowOnUnderflow=false</script>
+	<script>var sforthThrowOnUnderflow=false;</script>
 	<meta charset="utf-8"/>
 	<title>Image processing</title>
 	<script src="../../ext/jquery-2.1.0.min.js"></script>
@@ -33,7 +33,7 @@
 		:macro m*!> { x1 x2 dst -- } :[ var dst = x1 * x2 ]; ;
 		:macro m/!> { x1 x2 dst -- } :[ var dst = x1 / x2 ]; ;
 
-		:macro m@!> { variable index dst -- value } :[ dst = variable [ index ] ]; ;
+		:macro m@!> { variable index dst -- value } :[ var dst = variable [ index ] ]; ;
 
 		"canvas-output1 document.getElementById(1) { canvas }
 		"2d canvas.getContext(1) { ctx }

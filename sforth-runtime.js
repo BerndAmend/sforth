@@ -1,3 +1,4 @@
+"use strict";
 /**
 The MIT License (MIT)
 
@@ -56,6 +57,7 @@ function forthClone(other) {
 }
 
 var ForthStack = (function () {
+	"use strict";
 	function ForthStack() {
 		this.stac=new Array(32);
 		this.pos = -1;

@@ -1553,7 +1553,8 @@ forth.compileAllScriptRegions = function() {
 		if(throw_on_underflow === null)
 			throw_on_underflow = true;
 
-		var src = "sforthThrowOnUnderflow=" + throw_on_underflow + ";";
+		var src = "\"use strict\";\n"
+		src += "var sforthThrowOnUnderflow=" + throw_on_underflow + ";";
 
 		compileRegion(i, src, filenames.split(";"), target_type, id, {});
 	}
