@@ -1453,19 +1453,23 @@ forth.optimizeCodeTree = function(org_code_tree) {
 			if(current == null) {
 			} else if(current instanceof Array) {
 				var previous = null;
+				var previous_pos = 0;
 				for (var i=0;i<current.length;++i) {
 					var val = current[i];
 					if(val.type === forth.Types.DoLoop &&
 						val.compareOperation === null && val.increment === null &&
 						previous !== null && previous.type === forth.Types.Number) {
 						val.increment = previous.value;
-						current.splice(i-1, 1);
+						current.splice(previous_pos, 1);
 						// restart fixIncompleteDoLoops
 						fixIncompleteDoLoops(current);
 						return;
 					}
 					fixIncompleteDoLoops(val);
-					previous = val;
+					if(val.type != forth.Types.CommentLine && val.type != forth.Types.CommentParentheses) {
+						previous = val;
+						previous_pos = i;
+					}
 				}
 			} else {
 				switch(current.type) {
