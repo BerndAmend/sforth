@@ -418,7 +418,7 @@ var Surfaces;
 
 	// things
 	desc.things.length { length }
-	length new Array { things }
+	length new-array { things }
 	0 length 1 do i
 		m@ desc.things i { thing }
 
@@ -442,14 +442,14 @@ var Surfaces;
 
 	// lights
 	desc.lights.length to length
-	length new Array { lights }
-	0 length 1 do i
-		m@ desc.lights i { light }
+	length new-array { lights }
+	0 length 1 do j
+		m@ desc.lights j { light }
 
 		light.pos.x light.pos.y light.pos.z new Vector
 		light.color.r light.color.g light.color.b new Color
 		create-light
-		' i lights !
+		' j lights !
 	loop
 	lights to scene.lights
 

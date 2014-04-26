@@ -228,6 +228,7 @@ THE SOFTWARE.
 
 : create-array { num -- new Array } :[ stack.getTopElements(num) ]: ;
 
+: new-empty-array ( -- ) :[ [] ]: ;
 : new-array { size -- } :[ new Array(size) ]: ;
 
 : new-int8-array { size -- } :[ new Int8Array(size) ]: ;
