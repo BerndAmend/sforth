@@ -1,6 +1,6 @@
 clearstack
 
-new ForthStack value stack2
+new forth.Stack value stack2
 
 2 stack2.push
 

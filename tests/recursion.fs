@@ -1,5 +1,5 @@
  : fac-rec ( acc n -- n! )
-	 dup dup 1 = swap 0 = or
+	 dup dup 1 = swap 0 = ||
 	 if
 		 drop ( drop 1 or 0, leaving the accumulator )
 	 else

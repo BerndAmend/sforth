@@ -12,7 +12,7 @@
   swap rot ;
 
 : hanoi ( n -- )
-  1 max >r
+  1 Math.max >r
   ' right ' middle ' left r> move-disk
   drop drop drop ;
 

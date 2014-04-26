@@ -20,14 +20,14 @@ depth 4 = »dup added more than 1 element to the stack« assert
 
 clearstack
 
-11 42 min  11 = »min didn't returned the correct value 1« assert
-42 11 min  11 = »min didn't returned the correct value 2« assert
-11 42 max  42 = »max didn't returned the correct value 1« assert
-42 11 max  42 = »max didn't returned the correct value 2« assert
+11 42 Math.min  11 = »min didn't returned the correct value 1« assert
+42 11 Math.min  11 = »min didn't returned the correct value 2« assert
+11 42 Math.max  42 = »max didn't returned the correct value 1« assert
+42 11 Math.max  42 = »max didn't returned the correct value 2« assert
 
 \ TODO
 
-0.2 floor 0 = »floor result should be 0« assert
+0.2 Math.floor 0 = »floor result should be 0« assert
 
 13 3 /mod 4 = 1 = && »/mod result should be 4 1« assert
 

@@ -13,7 +13,7 @@
 // Returns level of key k if it is present in tree, otherwise returns -1
 : findLevel { croot k level -- level-of-key/-1 }
 	// Base case
-	' croot null = if -1 exit endif
+	' croot null === if -1 exit endif
 
 	// If key is present at croot, or in left subtree or right subtree,
 	// return true
@@ -36,7 +36,7 @@
 : findDistUtil { croot n1 n2 d1 d2 dist lvl -- croot d1 d2 dist }
 
     // Base case
-    ' croot null = if
+    ' croot null === if
 		null d1 d2 dist
 		exit
     endif
@@ -66,7 +66,7 @@
     endif
 
     // Otherwise check if left subtree or right subtree is LCA
-    ' left_lca null <> if
+    ' left_lca null !== if
 		' left_lca d1 d2 dist
 	else
 		' right_lca d1 d2 dist
