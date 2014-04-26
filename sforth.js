@@ -192,9 +192,11 @@ forth.CommentParentheses = function(comment) {
 	this.comment = comment;
 };
 
-forth.DoLoop = function(index, body) {
+forth.DoLoop = function(index, body, compareOperation) {
 	this.type = forth.Types.DoLoop;
 	this.index = index;
+	this.compareOperation = compareOperation;
+	this.increment = null;
 	this.body = body;
 };
 
@@ -839,7 +841,8 @@ forth.createFromForthTokens = function(tokens, context) {
 				add(new forth.BranchCase(forth.createFromForthTokens(current, context), defaultOf));
 				break;
 			case "do":
-			case "?do":
+			case "+do":
+			case "-do":
 				var start = tokens[i];
 
 				i++;
@@ -862,7 +865,8 @@ forth.createFromForthTokens = function(tokens, context) {
 
 					switch(tokens[i].toLowerCase()) {
 						case "do":
-						case "?do":
+						case "+do":
+						case "-do":
 							depth++;
 							current.push(tokens[i]);
 							break;
@@ -876,13 +880,21 @@ forth.createFromForthTokens = function(tokens, context) {
 					}
 				}
 
-				var end = tokens[i].toLowerCase();
-				switch(end) {
-					case "loop":
-						add(new forth.DoLoop(idx, forth.createFromForthTokens(current, context)));
+				if(tokens[i].toLowerCase() != "loop") {
+					throw new Error("Internal compiler error: last closing element in a '" + start + "' loop was invalid");
+				}
+				switch(start.toLowerCase()) {
+					case "do":
+						add(new forth.DoLoop(idx, forth.createFromForthTokens(current, context), null));
+						break;
+					case "+do":
+						add(new forth.DoLoop(idx, forth.createFromForthTokens(current, context), "<"));
+						break;
+					case "-do":
+						add(new forth.DoLoop(idx, forth.createFromForthTokens(current, context), ">"));
 						break;
 					default:
-						throw new Error("Internal compiler error: last closing element in a '" + start + "' loop was invalid");
+						throw new Error("Internal compiler error: start element in a '" + start + "' loop was invalid");
 				}
 				break;
 			case "include":
@@ -1287,22 +1299,34 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			case forth.Types.DoLoop:
 				var idx = forth.mangleName(code_tree.index);
 
-				append("var " + idx + ";");
-				append("var " + idx + "_increment=stack.pop();");
-				append("var " + idx + "_end=stack.pop();");
-				append("var " + idx + "_start=stack.pop();");
+				if(code_tree.increment === null) {
+					if(code_tree.compareOperation === null) {
+						throw new Error("Can not deduce in which direction the loop should go either use +do, -do, or use a constant increment");
+					}
 
-				append("if(" + idx + "_start <= " + idx + "_end) {");
-					append("if(" + idx + "_increment < 0) throw new Error(\"Increment doesn't match the sign assument by the start/end\");",1);
-					append("for(" + idx + "=" + idx + "_start; " + idx + "<" + idx + "_end;" + idx + "+= " + idx + "_increment) {",1);
-						out += generateCode(code_tree.body, level+1);
-					append("}",1);
-				append("} else {");
-					append("if(" + idx + "_increment > 0) throw new Error(\"Increment doesn't match the sign assument by the start/end\");",1);
-					append("for(" + idx + "=" + idx + "_start; " + idx + ">" + idx + "_end;" + idx + "+= " + idx + "_increment) {",1);
-						out += generateCode(code_tree.body, level+1);
-					append("}",1);
-				append("}");
+					append("var " + idx + "_increment=stack.pop();");
+					append("var " + idx + "_end=stack.pop();");
+
+					append("for(var " + idx + "=stack.pop(); " + idx + code_tree.compareOperation + idx + "_end;" + idx + "+= " + idx + "_increment) {");
+						out += generateCode(code_tree.body, level);
+					append("}");
+				} else {
+					append("var " + idx + "_end=stack.pop();");
+
+					if(code_tree.increment == 1) {
+						append("for(var " + idx + "=stack.pop(); " + idx + "<" + idx + "_end; ++" + idx + ") {");
+					} else if(code_tree.increment == -1) {
+						append("for(var " + idx + "=stack.pop(); " + idx + ">" + idx + "_end; --" + idx + ") {");
+					} else {
+						if(code_tree.increment >= 0) {
+							append("for(var " + idx + "=stack.pop(); " + idx + "<" + idx + "_end;" + idx + "+= " + code_tree.increment + ") {");
+						} else {
+							append("for(var " + idx + "=stack.pop(); " + idx + ">" + idx + "_end;" + idx + "+= " + code_tree.increment + ") {");
+						}
+					}
+						out += generateCode(code_tree.body, level);
+					append("}");
+				}
 
 				break;
 
@@ -1422,6 +1446,89 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 forth.optimizeCodeTree = function(org_code_tree) {
 	var code_tree = forth.forthClone(org_code_tree);
 	
+	// rewrite do without a compare operation to do with an increment
+	// TODO
+	(function() {
+		function fixIncompleteDoLoops(current) {
+			if(current == null) {
+			} else if(current instanceof Array) {
+				var previous = null;
+				for (var i=0;i<current.length;++i) {
+					var val = current[i];
+					if(val.type === forth.Types.DoLoop &&
+						val.compareOperation === null && val.increment === null &&
+						previous !== null && previous.type === forth.Types.Number) {
+						val.increment = previous.value;
+						current.splice(i-1, 1);
+						// restart fixIncompleteDoLoops
+						fixIncompleteDoLoops(current);
+						return;
+					}
+					fixIncompleteDoLoops(val);
+					previous = val;
+				}
+			} else {
+				switch(current.type) {
+					case forth.Types.BeginAgain:
+					case forth.Types.BeginUntil:
+					case forth.Types.BeginWhileRepeat:
+						fixIncompleteDoLoops(current.body);
+						break;
+					case forth.Types.BranchCase:
+						// TODO: we currently can not optimize them, because they are not correctly parsed
+						//optimize(current.body, p);
+						//optimize(current.defaultOf, p);
+						break;
+					case forth.Types.BranchCaseOf:
+						// TODO: we currently can not optimize them, because they are not correctly parsed
+						//optimize(current.body, p);
+						break;
+					case forth.Types.BranchIf:
+						fixIncompleteDoLoops(current.body);
+						fixIncompleteDoLoops(current.else_if_bodies);
+						fixIncompleteDoLoops(current.else_body);
+						break;
+					case forth.Types.BranchIfBody:
+						fixIncompleteDoLoops(current.body);
+						break;
+					case forth.Types.Body:
+						fixIncompleteDoLoops(current.body);
+						break;
+					case forth.Types.Call:
+						break;
+					case forth.Types.CommentLine:
+					case forth.Types.CommentParentheses:
+						break;
+					case forth.Types.DoLoop:
+					case forth.Types.FunctionForth:
+					case forth.Types.FunctionForthAnonymous:
+					case forth.Types.FunctionJs:
+					case forth.Types.FunctionJsAnonymous:
+						fixIncompleteDoLoops(current.body);
+						break;
+					case forth.Types.JsCode:
+					case forth.Types.JsCodeDirect:
+					case forth.Types.JsCodeWithReturn:
+					case forth.Types.Macro:
+					case forth.Types.Number:
+					case forth.Types.String:
+						break;
+					case forth.Types.TryCatchFinally:
+						fixIncompleteDoLoops(current.body);
+						fixIncompleteDoLoops(current.catchBody);
+						fixIncompleteDoLoops(current.finallyBody);
+						break;
+					case forth.Types.ValueLocal:
+						break;
+					default:
+						console.log("Unexpected entry found: " + JSON.stringify(current));
+				}
+			}
+		}
+
+		fixIncompleteDoLoops(code_tree);
+	})();
+
 	// if possible write results directly into a var
 	(function() {
 		var iter = new forth.CodeTreeIterator(code_tree);
