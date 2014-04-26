@@ -8,14 +8,15 @@ port = process.argv[2] || 8080,
 
 extensions = {
 	".htm" : "text/html",
-    ".html" : "text/html",
-    ".css" : "text/css",
+	".html" : "text/html",
+	".css" : "text/css",
 	".fs" : "application/sforth",
-    ".js" : "application/javascript",
+	".js" : "application/javascript",
 	".json" : "application/json",
-    ".png" : "image/png",
-    ".gif" : "image/gif",
-    ".jpg" : "image/jpeg"
+	".png" : "image/png",
+	".gif" : "image/gif",
+	".jpg" : "image/jpeg",
+	".svg" : "image/svg+xml"
 };
 
 function getDirectoryListening(pathname) {
