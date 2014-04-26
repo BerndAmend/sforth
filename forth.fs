@@ -206,12 +206,12 @@ THE SOFTWARE.
 :macro 2/ {} ( x1 -- x2 ) 2 / ;
 
 \ return stack functions
-: >r {} ( w -- R:w ) ' this.returnStack not if new forth.Stack to this.returnStack endif this.returnStack.push ;
-: r> {} ( R:w -- w ) this.returnStack.pop ;
-: r@ {} ( -- w R: w -- w ) this.returnStack.top ;
-: rdrop {} ( R:w -- ) this.returnStack.pop drop ;
-: rdepth {} ( -- n ) this.returnStack.size ;
-: rpick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) this.returnStack.get ;
+:macro >r {} ( w -- R:w ) :[ var returnStack = returnStack || new forth.Stack() ]; returnStack.push ;
+:macro r> {} ( R:w -- w ) returnStack.pop ;
+:macro r@ {} ( -- w R: w -- w ) returnStack.top ;
+:macro rdrop {} ( R:w -- ) :[ returnStack.pop() ]; ;
+:macro rdepth {} ( -- n ) returnStack.size ;
+:macro rpick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) returnStack.get ;
 
 \ : within { x1 x2 x3 -- f } ![ if (x1 < x2 && x2 <= x3) return 0; else return -1; ]! ;
 
