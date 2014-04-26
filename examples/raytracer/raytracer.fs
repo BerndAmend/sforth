@@ -116,9 +116,9 @@ Color.black to Color.defaultColor
 : Camera { pos lookAt }
 	pos to this.pos
 	0.0 -1.0 0.0 new Vector { down }
-	pos lookAt.minus { tmp } tmp.norm to this.forward
-	down this.forward.cross { tmp } tmp.norm { tmp } 1.5 tmp.times to this.right
-	this.right this.forward.cross  { tmp } tmp.norm { tmp } 1.5 tmp.times to this.up
+	pos lookAt.minus { tmp1 } tmp1.norm to this.forward
+	down this.forward.cross { tmp2 } tmp2.norm { tmp3 } 1.5 tmp3.times to this.right
+	this.right this.forward.cross  { tmp4 } tmp4.norm { tmp5 } 1.5 tmp5.times to this.up
 ;
 
 
@@ -221,158 +221,155 @@ var Surfaces;
     };
 })(Surfaces || (Surfaces = {}));
 
-];
+]:d
 
 @constructor
 : RayTracer { }
 	5 to this.maxDepth
 
-    :noname { ray scene }
-        Infinity { closest }
-        undefined { closestInter }
-        :[ for (var i in scene.things) { ]:d
-            ray i scene.things @ { tmp }
+	:noname { ray scene }
+		Infinity { closest }
+		undefined { closestInter }
+		0 scene.things.length 1 do i
+			ray i scene.things @ { tmp }
 			tmp.intersect { inter }
-            m<> inter null if
+			m!== inter null if
 				m< inter.dist closest if
 					inter to closestInter
 					inter.dist to closest
 				endif
-            endif
-        :[ } ]:d
-        closestInter
-    ; to this.intersections
+			endif
+		loop
+		closestInter
+	; to this.intersections
 
-    :noname { ray scene }
-        ray scene this.intersections { isect }
-        isect null <> if
-            isect.dist
-        else
-            undefined
-        endif
-    ; to this.testRay
+	:noname { ray scene }
+		ray scene this.intersections { isect }
+		isect null <> if
+			isect.dist
+		else
+			undefined
+		endif
+	; to this.testRay
 
-    :noname { ray scene depth }
-        ray scene this.intersections { isect }
-        m=== isect undefined if
-            Color.background
-        else
-            isect scene depth this.shade
-            dup undefined === if
-				:[ console.log(":(:(:(") ];
-            endif
-        endif
-    ; to this.traceRay
+	:noname { ray scene depth }
+		ray scene this.intersections { isect }
+		m=== isect undefined if
+			Color.background
+		else
+			isect scene depth this.shade
+		endif
+	; to this.traceRay
 
-    :noname { isect scene depth }
-        isect.ray.dir { d }
-        isect.dist d.times isect.ray.start.plus { pos }
-        pos isect.thing.normal { normal }
+	:noname { isect scene depth }
+		isect.ray.dir { d }
+		isect.dist d.times isect.ray.start.plus { pos }
+		pos isect.thing.normal { normal }
 
 		2
 		d normal.dot
 		normal.times { tmp } tmp.times
 		d.minus
-        { reflectDir }
+		{ reflectDir }
 
-        isect.thing pos normal reflectDir scene  this.getNaturalColor
-        Color.background.plus
-        { naturalColor }
+		isect.thing pos normal reflectDir scene  this.getNaturalColor
+		Color.background.plus
+		{ naturalColor }
 
-        m>= depth this.maxDepth if
+		m>= depth this.maxDepth if
 			Color.grey
 		else
 			isect.thing pos normal reflectDir scene depth  this.getReflectionColor
 		endif
-        { reflectedColor }
+		{ reflectedColor }
 
-        reflectedColor naturalColor.plus
-    ; to this.shade
+		reflectedColor naturalColor.plus
+	; to this.shade
 
-    :noname { thing pos normal rd scene depth }
+	:noname { thing pos normal rd scene depth }
 		pos thing.surface.reflect
-        :[ { start: pos, dir: rd } ]: scene m+ depth 1 this.traceRay { tmp }
-        tmp.scale
-    ; to this.getReflectionColor
+		:[ { start: pos, dir: rd } ]: scene m+ depth 1 this.traceRay { tmp }
+		tmp.scale
+	; to this.getReflectionColor
 
-    :noname { thing pos norm rd scene }
-        this { _this }
-        :jsnoname { col light }
-            pos light.pos.minus { ldis }
-            ldis.norm { livec }
-            :[ { start: pos, dir: livec } ]: scene _this.testRay { neatIsect }
+	:noname { thing pos norm rd scene }
+		this { _this }
+		:jsnoname { col light }
+			pos light.pos.minus { ldis }
+			ldis.norm { livec }
+			:[ { start: pos, dir: livec } ]: scene _this.testRay { neatIsect }
 
-            neatIsect undefined === if
+			neatIsect undefined === if
 				false
 			else
 				neatIsect ldis.mag <=
 			endif
 			{ isInShadow }
 
-            isInShadow if
-                col
-            else
-                livec norm.dot { illum }
-                illum 0 > if
+			isInShadow if
+				col
+			else
+				livec norm.dot { illum }
+				illum 0 > if
 					illum light.color.scale
 				else
 					Color.defaultColor
 				endif
-                { lcolor }
+				{ lcolor }
 
-                rd.norm livec.dot { specular }
-                specular 0 > if
+				rd.norm livec.dot { specular }
+				specular 0 > if
 					specular thing.surface.roughness Math.pow light.color.scale
 				else
 					Color.defaultColor
 				endif
-                { scolor }
+				{ scolor }
 
 				col
 				pos thing.surface.diffuse
 				lcolor.times
 				pos thing.surface.specular
-				scolor.times { tmp } tmp.plus { tmp } tmp.plus
+				scolor.times { tmp1 } tmp1.plus { tmp2 } tmp2.plus
 
-            endif
-        return; { addLight }
-        :[ scene.lights.reduce(addLight, Color.defaultColor) ]:
-    ; to this.getNaturalColor
+			endif
+		return; { addLight }
+		:[ scene.lights.reduce(addLight, Color.defaultColor) ]:
+	; to this.getNaturalColor
 
-    :noname { scene width height y-start y-end line-finish-callback }
-        :noname { x y camera }
-            :noname { x }
-                :[ (x - (width / 2.0)) / 2.0 / width ]:
-            ; { recenterX }
-            :noname { y }
-                :[ -(y - (height / 2.0)) / 2.0 / height ]:
-            ; { recenterY }
+	:noname { scene width height y-start y-end line-finish-callback }
+		:noname { x y camera }
+			:noname { x }
+				:[ (x - (width / 2.0)) / 2.0 / width ]:
+			; { recenterX }
+			:noname { y }
+				:[ -(y - (height / 2.0)) / 2.0 / height ]:
+			; { recenterY }
 
-			x recenterX camera.right.times { tmp }  y recenterY camera.up.times tmp.plus  { tmp } camera.forward tmp.plus  { tmp } tmp.norm
-        ; { getPoint }
+			x recenterX camera.right.times { tmp1 }  y recenterY camera.up.times tmp1.plus  { tmp2 } camera.forward tmp2.plus  { tmp3 } tmp3.norm
+		; { getPoint }
 
-        :[ new Uint8ClampedArray(width*4) ]: { line }
+		:[ new Uint8ClampedArray(width*4) ]: { line }
 
-        y-start y-end 1 do y
-            0 width 1 do x
-                x y scene.camera getPoint { p }
-                :[ { start: scene.camera.pos, dir: p } ]: scene 0 this.traceRay { color }
-                color.toDrawingColor { c }
+		y-start y-end 1 do y
+			0 width 1 do x
+				x y scene.camera getPoint { p }
+				:[ { start: scene.camera.pos, dir: p } ]: scene 0 this.traceRay { color }
+				color.toDrawingColor { c }
 
-                x 4 * { idxr }
-                m+ idxr 1 { idxg }
-                m+ idxr 2 { idxb }
-                m+ idxr 3 { idxa }
+				x 4 * { idxr }
+				m+ idxr 1 { idxg }
+				m+ idxr 2 { idxb }
+				m+ idxr 3 { idxa }
 
-                m! line idxr c.r
+				m! line idxr c.r
 				m! line idxg c.g
 				m! line idxb c.b
 				m! line idxa 0xff
-            loop
-            ' y ' line line-finish-callback
-        loop
+			loop
+			' y ' line line-finish-callback
+		loop
 		null null line-finish-callback // Done
-    ; to this.render
+	; to this.render
 ;
 
 : create-light { pos color }

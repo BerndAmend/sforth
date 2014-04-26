@@ -23,8 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-var forth = forth || {};
-
 forth.forthClone = function(other) {
 	return JSON.parse(JSON.stringify(other));
 };
@@ -279,7 +277,7 @@ forth.ValueToStack = function(name) {
 
 forth.CodeTreeIterator = function(body) {
 
-	this.stack = new ForthStack();
+	this.stack = new forth.Stack();
 
 	this.stack.push({node: body, pos: 0});
 
@@ -689,6 +687,7 @@ forth.createFromForthTokens = function(tokens, context) {
 					compiledIf = forth.createFromForthTokens(tokensIf, context);
 
 				if(tokensElseIf) {
+					/*jshint loopfunc:true */
 					compiledElseIf = [];
 					tokensElseIf.forEach(function(entry) {
 						var condition = forth.createFromForthTokens(entry.condition, context);
@@ -1092,9 +1091,9 @@ forth.createFromForthTokens = function(tokens, context) {
 				// first try to find the macro within the current list
 				if(context.macro && context.macro[mangledT]) {
 					dmacro = context.macro[mangledT];
-				} else if(forth_macros && forth_macros[mangledT]) {
+				} else if(forth.macros && forth.macros[mangledT]) {
 					// search within the global list
-					dmacro = forth_macros[mangledT];
+					dmacro = forth.macros[mangledT];
 				}
 
 				if(dmacro) {
@@ -1288,18 +1287,19 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			case forth.Types.DoLoop:
 				var idx = forth.mangleName(code_tree.index);
 
+				append("var " + idx + ";");
 				append("var " + idx + "_increment=stack.pop();");
 				append("var " + idx + "_end=stack.pop();");
 				append("var " + idx + "_start=stack.pop();");
 
 				append("if(" + idx + "_start <= " + idx + "_end) {");
 					append("if(" + idx + "_increment < 0) throw new Error(\"Increment doesn't match the sign assument by the start/end\");",1);
-					append("for(var " + idx + "=" + idx + "_start; " + idx + "<" + idx + "_end;" + idx + "+= " + idx + "_increment) {",1);
+					append("for(" + idx + "=" + idx + "_start; " + idx + "<" + idx + "_end;" + idx + "+= " + idx + "_increment) {",1);
 						out += generateCode(code_tree.body, level+1);
 					append("}",1);
 				append("} else {");
 					append("if(" + idx + "_increment > 0) throw new Error(\"Increment doesn't match the sign assument by the start/end\");",1);
-					append("for(var " + idx + "=" + idx + "_start; " + idx + ">" + idx + "_end;" + idx + "+= " + idx + "_increment) {",1);
+					append("for(" + idx + "=" + idx + "_start; " + idx + ">" + idx + "_end;" + idx + "+= " + idx + "_increment) {",1);
 						out += generateCode(code_tree.body, level+1);
 					append("}",1);
 				append("}");
@@ -1311,16 +1311,17 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				if(name.indexOf(".") != -1)
 					throw new Error("Function names can not contain .");
 				append("function " + name + "(stack) {");
+				append("/* jshint validthis:true */");
 				out += generateCode(code_tree.body, level);
 				append("}");
 				append(name + ".forth_function=true;\n");
 				break;
 			case forth.Types.FunctionForthAnonymous:
-				append("var temp_forth_function_anonymous = function(stack) {");
+				append("stack.push(function(stack) {");
+				append("/* jshint validthis:true */");
 				out += generateCode(code_tree.body, level);
-				append("}");
-				append("temp_forth_function_anonymous.forth_function=true;");
-				append("stack.push(temp_forth_function_anonymous);\n");
+				append("});\n");
+				append("stack.top().forth_function=true;");
 				break;
 
 			case forth.Types.FunctionJs:
@@ -1329,7 +1330,8 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 					throw new Error("Function names can not contain .");
 				args = code_tree.args.map(forth.mangleName).join(", ");
 				append("function " + name + "(" + args + ") {");
-				append(indent_characters + "var stack = new ForthStack();");
+				append("/* jshint validthis:true */");
+				append(indent_characters + "var stack = new forth.Stack();");
 				out += generateCode(code_tree.body, level);
 				if(code_tree.returnValue)
 					append(" return stack.pop();");
@@ -1338,7 +1340,8 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			case forth.Types.FunctionJsAnonymous:
 				args = code_tree.args.map(forth.mangleName).join(", ");
 				append("stack.push(function(" + args + ") {");
-				append(indent_characters + "var stack = new ForthStack();");
+				append("/* jshint validthis:true */");
+				append(indent_characters + "var stack = new forth.Stack();");
 				out += generateCode(code_tree.body, level);
 				if(code_tree.returnValue)
 					append(" return stack.pop();");
@@ -1375,7 +1378,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 				name = forth.mangleName(code_tree.name);
 
-				append("forth_macros." + name + " = " + JSON.stringify(code_tree) + ";\n");
+				append("forth.macros." + name + " = " + JSON.stringify(code_tree) + ";\n");
 
 				break;
 			case forth.Types.Number:

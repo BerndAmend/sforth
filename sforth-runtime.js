@@ -23,6 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+var forth = forth || {};
+
+forth.macros = forth.macros || {};
+
 // TODO optimize functions
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
@@ -52,7 +56,7 @@ Number.isNumeric = function( obj ) {
 	return !isNaN( parseFloat(obj) ) && isFinite( obj );
 };
 
-var ForthStack = (function () {
+forth.Stack = (function () {
 	function ForthStack() {
 		this.stac=new Array(32);
 		this.pos = -1;
@@ -154,10 +158,8 @@ var ForthStack = (function () {
 })();
 
 if(typeof global === "undefined") {
-	var stack = stack || new ForthStack();
-	var forth_macros = forth_macros || {};
+	var stack = stack || new forth.Stack();
 } else {
-	global.ForthStack = ForthStack;
-	global.stack = global.stack || new ForthStack();
-	global.forth_macros = global.forth_macros || {};
+	global.forth = forth;
+	global.stack = global.stack || new forth.Stack();
 }

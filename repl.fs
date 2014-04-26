@@ -56,7 +56,7 @@ process.stdin.resume
 »« value entered
 
 0 value cmd_last_pos
-new ForthStack value cmd_history
+new forth.Stack value cmd_history
 
 try
 	".sforth_history readFileSync cmd_history.fromJSON

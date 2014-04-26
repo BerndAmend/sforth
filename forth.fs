@@ -30,27 +30,28 @@ THE SOFTWARE.
 :macro Infinity {} :[ Infinity ]: ;
 
 :macro new { name }
-	:[
-		var sforth_new_helper_variable_42 = null;
-		if( name .forth_function) {
-			sforth_new_helper_variable_42 = new name (stack);
-		} else {
-			var args_for_new = stack.getTopElements( name .length);
-			switch( name .length) {
-				case 0: sforth_new_helper_variable_42 = new name (); break;
-				case 1: sforth_new_helper_variable_42 = new name (args_for_new[0]); break;
-				case 2: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1]); break;
-				case 3: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2]); break;
-				case 4: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3]); break;
-				case 5: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4]); break;
-				case 6: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5]); break;
-				case 7: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5], args_for_new[6]); break;
-				case 8: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5], args_for_new[6], args_for_new[7]); break;
-				default: throw new Error("new should be revised, it can not handle ctors with more than 8 arguments");
-			}
-		}
-		stack.push(sforth_new_helper_variable_42);
-	];
+// spaces are used to circumvent "Mixed spaces and tabs." warnings from jshint
+:[
+    var sforth_new_helper_variable_42 = null; // jshint ignore:line
+    if( name .forth_function) {
+        sforth_new_helper_variable_42 = new name (stack);
+    } else {
+        var args_for_new = stack.getTopElements( name .length); // jshint ignore:line
+        switch( name .length) {
+            case 0: sforth_new_helper_variable_42 = new name (); break;
+            case 1: sforth_new_helper_variable_42 = new name (args_for_new[0]); break;
+            case 2: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1]); break;
+            case 3: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2]); break;
+            case 4: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3]); break;
+            case 5: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4]); break;
+            case 6: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5]); break;
+            case 7: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5], args_for_new[6]); break;
+            case 8: sforth_new_helper_variable_42 = new name (args_for_new[0], args_for_new[1], args_for_new[2], args_for_new[3], args_for_new[4], args_for_new[5], args_for_new[6], args_for_new[7]); break;
+            default: throw new Error("new should be revised, it can not handle ctors with more than 8 arguments");
+        }
+    }
+    stack.push(sforth_new_helper_variable_42);
+]:d
 ;
 
 :macro value { name } :[ var name = stack.pop() ]; ;
@@ -77,7 +78,7 @@ THE SOFTWARE.
 :macro ' { name } :[ name ]: ;
 
 :macro typeof { name } :[ typeof name ]: ;
-:macro instanceof { name } { sforth_instanceof_helper_variable_42 } :[ sforth_instanceof_helper_variable_42 instanceof name ]: ;
+:macro instanceof { name } :[ stack.pop() instanceof name ]: ;
 
 \ dummy function
 : ok {} ;
@@ -126,17 +127,15 @@ THE SOFTWARE.
 
 :macro || {} ( x1 x2 -- x3 ) :[ stack.pop() || stack.pop() ]: ;
 
-: xor {} ( x1 x2 -- x3 ) :[ stack.pop() ^ stack.pop() ]: ;
+: xor {} ( x1 x2 -- x3 ) :[ /* jshint bitwise:false */ ]:d :[ stack.pop() ^ stack.pop() ]: ;
 
 : not ( x1 -- x2 ) :[ !stack.pop() ]: ;
 
-: invert ( x1 -- x2 ) :[ ~stack.pop() ]: ;
+: invert ( x1 -- x2 ) :[ /* jshint bitwise:false */ ]:d :[ ~stack.pop() ]: ;
 
 : negate ( n -- -n ) -1 * ;
 
 \ math operations
-
-: tofixed { num digits -- str } num 0= if 1e-323 else num endif { num } digits num.toFixed ;
 
 : deg2rad {} ( x1 -- x2 ) 180.0 / Math.PI * ;
 : rad2deg {} ( x1 -- x2 ) Math.PI / 180.0 * ;
@@ -161,14 +160,15 @@ THE SOFTWARE.
 :macro m/ { x1 x2 -- x3 } :[ x1 / x2 ]: ;
 :macro mmod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
 
-: << { x1 x2 -- x3 } :[ x1 << x2 ]: ;
-: >> { x1 x2 -- x3 } :[ x1 >> x2 ]: ;
-: >>> { x1 x2 -- x3 } :[ x1 >>> x2 ]: ;
+: << { x1 x2 -- x3 } :[ /* jshint bitwise:false */ ]:d :[ x1 << x2 ]: ;
+: >> { x1 x2 -- x3 } :[ /* jshint bitwise:false */ ]:d :[ x1 >> x2 ]: ;
+: >>> { x1 x2 -- x3 } :[ /* jshint bitwise:false */ ]:d :[ x1 >>> x2 ]: ;
 : lshift << ;
 : rshift >>> ;
 
 :macro = {} ( x1 x2 -- f ) :[ stack.pop() == stack.pop() ]: ;
 :macro === {} ( x1 x2 -- f ) :[ stack.pop() === stack.pop() ]: ;
+:macro !== {} ( x1 x2 -- f ) :[ stack.pop() !== stack.pop() ]: ;
 :macro <> {} ( x1 x2 -- f ) :[ stack.pop() != stack.pop() ]: ;
 :macro > {} ( x1 x2 -- f ) :[ stack.pop() < stack.pop() ]: ;
 :macro >= {} ( x1 x2 -- f ) :[ stack.pop() <= stack.pop() ]: ;
@@ -177,6 +177,7 @@ THE SOFTWARE.
 
 :macro m= { x1 x2 -- f } :[ x1 == x2 ]: ;
 :macro m=== { x1 x2 -- f } :[ x1 === x2 ]: ;
+:macro m!== { x1 x2 -- f } :[ x1 !== x2 ]: ;
 :macro m<> { x1 x2 -- f } :[ x1 != x2 ]: ;
 :macro m> { x1 x2 -- f } :[ x1 > x2 ]: ;
 :macro m>= { x1 x2 -- f } :[ x1 >= x2 ]: ;
@@ -219,8 +220,6 @@ THE SOFTWARE.
 \ Exceptions
 :macro throw {} ( obj -- ) :[ throw stack.pop() ]; ;
 
-: jseval ( str -- ) eval ;
-
 : execute { x1 -- } x1 ;
 
 :macro @constructor {} :[ /** @constructor */ ]:d ;
@@ -252,15 +251,17 @@ THE SOFTWARE.
 
 \ String functions
 
+: tofixed { num digits -- str } num 0= if 1e-323 else num endif to num digits num.toFixed ;
+
 : count { str -- len } :[ str.toString().length ]: ;
 
 : o>string { n -- str } :[ n.toString() ]: ;
 : /string { str n -- str } n undefined str.substr ;
 
-: time-in-ms ( -- x ) :[ new Date ]: { x } x.getTime ;
+: time-in-ms ( -- x ) :[ new Date() ]: { x } x.getTime ;
 
-: settimeout { jsfunction timeout -- handle } :[ setTimeout(jsfunction, timeout) ]: ;
-: cleartimeout { handle -- } :[ clearTimeout(handle) ]:d ;
+: settimeout ( jsfunction timeout -- handle ) setTimeout(2) ;
+: cleartimeout ( handle -- ) clearTimeout(1) ;
 
-: setinterval { jsfunction timeout -- handle } :[ setInterval(jsfunction, timeout) ]: ;
-: clearinterval { handle } :[ clearInterval(handle) ]:d ;
+: setinterval ( jsfunction timeout -- handle ) setInterval(2) ;
+: clearinterval ( handle ) clearInterval(1) ;
