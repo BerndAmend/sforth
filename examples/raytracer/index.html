@@ -9,13 +9,13 @@
 	<script src="../../sforth.js"></script>
 </head>
 <body>
-	<script data-src="../../forth.fs;../../browser.fs" type="application/sforth"></script>
+	<script data-src="../../forth.fs;../../browser.fs;raytracer.fs" type="application/sforth"></script>
 
 	<script type="application/sforth" data-id="raytracer-worker" data-type="javascript/worker"
 		data-src="../../sforth-runtime.js;../../forth.fs;raytracer.fs" data-throw-on-underflow="true">
 		:jsnoname { e }
 			e.data.id { id }
-			e.data.scene { scene }
+			e.data.scene deserialize-scene { scene }
 			e.data.width { width }
 			e.data.height { height }
 			e.data.y_start { y_start }
@@ -23,7 +23,7 @@
 			new RayTracer { rayTracer }
 
 			: paint-line { y data }
-				' y null = if
+				' y null === if
 					:[ { id: id, done: true } ]: self.postMessage(1)
 					self.close
 					exit
@@ -31,7 +31,7 @@
 				:[ { id: id, y: y, data: data } ]: self.postMessage(1)
 			;
 
-			default-scene width height y_start y_end ' paint-line rayTracer.render
+			scene width height y_start y_end ' paint-line rayTracer.render
 		; to self.onmessage
 	</script>
 
@@ -57,6 +57,9 @@
 
 			width to canvas.width
 			height to canvas.height
+
+			"scene-desc document.getElementById(1) { scene-desc }
+			"{ scene-desc.value + "} + { scene }
 
 			workerCount { active-worker }
 
@@ -102,7 +105,7 @@
 
 				:[ {
 					id: i,
-					scene: null,
+					scene: scene,
 					width: width,
 					height: height,
 					y_start: (height/workerCount)*i,
@@ -120,11 +123,114 @@
 	</script>
 
 	Worker <input id="worker-count" type="text" size="30" maxlength="30" value="16">
-	Width: <input id="width" type="text" size="30" maxlength="30" value="2000">
-	Height: <input id="height" type="text" size="30" maxlength="30" value="2000">
+	Width: <input id="width" type="text" size="30" maxlength="30" value="1000">
+	Height: <input id="height" type="text" size="30" maxlength="30" value="1000">
 	Time: <input id="processing-time" type="text" size="30" maxlength="30" readonly>
 	<input type="button" id="render-button" value="Render" onclick="renderToCanvas();">
 	<input type="button" id="download-button" value="Download" onclick="downloadImage();" disabled="true">
+	<br>
+	<textarea id="scene-desc" cols="100" rows="10">
+"things": [
+	{
+		"type": "Plane",
+		"norm": {
+			"x": 0,
+			"y": 1,
+			"z": 0
+		},
+		"offset": 0,
+		"surface": {
+			"type": "checkerboard"
+		}
+	},
+	{
+		"type": "Sphere",
+		"center": {
+			"x": 0,
+			"y": 1,
+			"z": -0.25
+		},
+		"surface": {
+			"type": "shiny"
+		},
+		"radius": 1
+	},
+	{
+		"type": "Sphere",
+		"center": {
+			"x": -1,
+			"y": 0.5,
+			"z": 1.5
+		},
+		"surface": {
+			"type": "shiny"
+		},
+		"radius": 0.5
+	}
+],
+"lights": [
+	{
+		"pos": {
+			"x": -2,
+			"y": 2.5,
+			"z": 0
+		},
+		"color": {
+			"r": 0.49,
+			"g": 0.07,
+			"b": 0.07
+		}
+	},
+	{
+		"pos": {
+			"x": 1.5,
+			"y": 2.5,
+			"z": 1.5
+		},
+		"color": {
+			"r": 0.07,
+			"g": 0.07,
+			"b": 0.49
+		}
+	},
+	{
+		"pos": {
+			"x": 1.5,
+			"y": 2.5,
+			"z": -1.5
+		},
+		"color": {
+			"r": 0.07,
+			"g": 0.49,
+			"b": 0.071
+		}
+	},
+	{
+		"pos": {
+			"x": 0,
+			"y": 3.5,
+			"z": 0
+		},
+		"color": {
+			"r": 0.21,
+			"g": 0.21,
+			"b": 0.35
+		}
+	}
+],
+"camera": {
+	"pos": {
+		"x": 3,
+		"y": 2,
+		"z": 4
+	},
+	"lookAt": {
+		"x": -1,
+		"y": 0.5,
+		"z": 0
+	}
+}
+	</textarea>
 	<br>
 	<canvas id="canvas"></canvas>
 </body>

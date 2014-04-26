@@ -101,9 +101,9 @@ Color.black to Color.defaultColor
 	; to Vector.prototype.norm
 
 	:noname { other }
-		m* this.y other.z  m* this.z other.y -
-		m* this.z other.x  m* this.x other.z -
-		m* this.x other.y  m* this.y other.x -
+		m* this.y other.z { x1 } m* this.z other.y { x2 } m- x1 x2
+		m* this.z other.x { y1 } m* this.x other.z { y2 } m- y1 y2
+		m* this.x other.y { z1 } m* this.y other.x { z2 } m- z1 z2
 		new Vector
 	; to Vector.prototype.cross
 
@@ -115,6 +115,7 @@ Color.black to Color.defaultColor
 @constructor
 : Camera { pos lookAt }
 	pos to this.pos
+	lookAt to this.lookAt
 	0.0 -1.0 0.0 new Vector { down }
 	pos lookAt.minus { tmp1 } tmp1.norm to this.forward
 	down this.forward.cross { tmp2 } tmp2.norm { tmp3 } 1.5 tmp3.times to this.right
@@ -125,8 +126,10 @@ Color.black to Color.defaultColor
 // Sphere
 	@constructor
 	: Sphere { center radius surface }
+		"Sphere to this.type
 		center to this.center
 		surface to this.surface
+		radius to this.radius
 		m* radius radius to this.radius2
 	;
 	:noname { pos }
@@ -138,7 +141,7 @@ Color.black to Color.defaultColor
 		ray.dir eo.dot { v }
 		0 { dist }
 		m0>= v if
-			this.radius2 eo eo.dot v v * - - { disc }
+			this.radius2 eo eo.dot m* v v - - { disc }
 			m0>= disc if
 				v disc Math.sqrt - to dist
 			endif
@@ -150,23 +153,28 @@ Color.black to Color.defaultColor
 		endif
 	; to Sphere.prototype.intersect
 
-: Plane { norm offset surface }
-	surface to this.surface
+// Plane
+	@constructor
+	: Plane { norm offset surface }
+		"Plane to this.type
+		norm to this.norm
+		offset to this.offset
+		surface to this.surface
+	;
 
 	:noname { pos }
-		norm
-	; to this.normal
+		this.norm
+	; to Plane.prototype.normal
 
 	:noname { ray }
-		ray.dir norm.dot { denom }
+		ray.dir this.norm.dot { denom }
 		m0> denom if
 			null
 		else
-			ray.start norm.dot offset + denom -1 * / { dist }
+			ray.start this.norm.dot this.offset + denom -1 * / { dist }
 			:[ { thing: this, ray: ray, dist: dist } ]:
 		endif
-	; to this.intersect
-;
+	; to Plane.prototype.intersect
 
 :[
 
@@ -174,6 +182,7 @@ var Surfaces;
 
 (function (Surfaces) {
     Surfaces.shiny2 = {
+        type: "shiny2",
         diffuse: function (pos) {
             return Color.red;
         },
@@ -187,6 +196,7 @@ var Surfaces;
     };
 
     Surfaces.shiny = {
+        type: "shiny",
         diffuse: function (pos) {
             return Color.white;
         },
@@ -200,6 +210,7 @@ var Surfaces;
     };
 
     Surfaces.checkerboard = {
+        type: "checkerboard",
         diffuse: function (pos) {
             if ((Math.floor(pos.z) + Math.floor(pos.x)) % 2 !== 0) {
                 return Color.white;
@@ -229,9 +240,9 @@ var Surfaces;
 
 	:noname { ray scene }
 		Infinity { closest }
-		undefined { closestInter }
+		null { closestInter }
 		0 scene.things.length 1 do i
-			ray i scene.things @ { tmp }
+			ray m@ scene.things i { tmp }
 			tmp.intersect { inter }
 			m!== inter null if
 				m< inter.dist closest if
@@ -245,16 +256,16 @@ var Surfaces;
 
 	:noname { ray scene }
 		ray scene this.intersections { isect }
-		isect null <> if
+		m!== isect null if
 			isect.dist
 		else
-			undefined
+			null
 		endif
 	; to this.testRay
 
 	:noname { ray scene depth }
 		ray scene this.intersections { isect }
-		m=== isect undefined if
+		m=== isect null if
 			Color.background
 		else
 			isect scene depth this.shade
@@ -299,7 +310,7 @@ var Surfaces;
 			ldis.norm { livec }
 			:[ { start: pos, dir: livec } ]: scene _this.testRay { neatIsect }
 
-			neatIsect undefined === if
+			m=== neatIsect null if
 				false
 			else
 				neatIsect ldis.mag <=
@@ -377,7 +388,7 @@ var Surfaces;
 ;
 
 : default-scene {}
-	:[ {} ]: { result }
+	create-empty-object { result }
 
 	0.0 1.0  0.0  new Vector  0.0  Surfaces.checkerboard  new Plane
 	0.0 1.0 -0.25 new Vector  1.0  Surfaces.shiny         new Sphere
@@ -395,4 +406,59 @@ var Surfaces;
 	new Camera to result.camera
 
 	result
+;
+
+: serialize-scene { scene -- str }
+	' scene null "t JSON.stringify(3) ;
+
+: deserialize-scene { str -- scene }
+	create-empty-object { scene }
+
+	str JSON.parse(1) { desc }
+
+	// things
+	desc.things.length { length }
+	length new Array { things }
+	0 length 1 do i
+		m@ desc.things i { thing }
+
+		thing.type case
+			of "Plane
+				thing.norm.x thing.norm.y thing.norm.z new Vector
+				thing.offset
+				m@ Surfaces thing.surface.type
+				new Plane
+			break
+			of "Sphere
+				thing.center.x thing.center.y thing.center.z new Vector
+				thing.radius
+				m@ Surfaces thing.surface.type
+				new Sphere
+			break
+		endcase
+		' i things !
+	loop
+	things to scene.things
+
+	// lights
+	desc.lights.length to length
+	length new Array { lights }
+	0 length 1 do i
+		m@ desc.lights i { light }
+
+		light.pos.x light.pos.y light.pos.z new Vector
+		light.color.r light.color.g light.color.b new Color
+		create-light
+		' i lights !
+	loop
+	lights to scene.lights
+
+	// camera
+	desc.camera.pos { pos }
+	pos.x pos.y pos.z new Vector
+	desc.camera.lookAt { lookAt }
+	lookAt.x lookAt.y lookAt.z new Vector
+	new Camera to scene.camera
+
+	scene
 ;
