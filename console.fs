@@ -56,7 +56,7 @@ THE SOFTWARE.
 
 : .s
 	"< depth 1- »> « + + . depth dup 0 swap 1
-	?DO i
+	do i
 		dup i - pick { e }
 		typeof e { typeof-e }
 		typeof-e "string = if
@@ -76,7 +76,7 @@ THE SOFTWARE.
 	:[ if(!this.returnStack) return ]; \ return if no return stack exists
 	this.returnStack to returnStack \ get the return stack of the caller
 	"< rdepth »> « + + . rdepth 1- rdepth 0 swap 1
-	?DO i
+	do i
 		dup i - rpick type space
 	LOOP
 	drop ;
