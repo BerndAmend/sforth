@@ -1202,7 +1202,10 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 					append("} else { " + name + "(stack); }");
 					append("} else { stack.push(" + name + ");}");
 				} else {
-					if(code_tree.argument_count === 0) {
+					if(code_tree.argument_count === "") {
+						append("if(!" + name + ".forth_function) { stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", stack.getTopElements(" + name + ".length)));");
+					append("} else { " + name + "(stack); }");
+					} else if(code_tree.argument_count === 0) {
 						append("stack.pushIfNotUndefined(" + name + "());");
 					} else {
 						append("stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", stack.getTopElements(" + code_tree.argument_count + ")));");
