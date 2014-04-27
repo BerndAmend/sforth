@@ -1,3 +1,4 @@
+"use strict";
 /**
 The MIT License (MIT)
 
@@ -27,23 +28,23 @@ global.sforthThrowOnUnderflow = true;
 
 // has to be done in the main file :(
 try {
-	util = require('util');
+	global.util = require('util');
 } catch(e) {}
 
 try {
-	Filesystem = require('fs');
+	global.Filesystem = require('fs');
 } catch(e) {}
 
 try {
-	PDFDocument = require("pdfkit");
+	global.PDFDocument = require("pdfkit");
 } catch(e) {}
 
 try {
-	SerialPort = require("serialport").SerialPort;
+	global.SerialPort = require("serialport").SerialPort;
 } catch(e) {}
 
 try {
-	PNG = require('pngjs').PNG;
+	global.PNG = require('pngjs').PNG;
 } catch(e) {}
 
 //require("./sforth.js");

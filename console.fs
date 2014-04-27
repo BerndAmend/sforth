@@ -87,7 +87,7 @@ THE SOFTWARE.
 : spaces { n -- } »« 0 n 0 Math.max 1 do i » « + loop type ;
 : cr ( -- ) "\n . ;
 
-: clearcurrentline »\r\033[K« . ;
+: clearcurrentline »\r\u001B[K« . ;
 
 : binary ( -- ) 2 to consolebase ;
 : decimal ( -- ) 10 to consolebase ;

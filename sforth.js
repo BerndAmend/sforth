@@ -1240,6 +1240,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				if(name.indexOf(".") != -1)
 					throw new Error("Function names can not contain .");
 				append("function " + name + "(stack) {");
+				append("'use strict';");
 				append("/* jshint validthis:true */");
 				out += generateCode(code_tree.body, level);
 				append("}");
@@ -1247,6 +1248,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				break;
 			case forth.Types.FunctionForthAnonymous:
 				append("stack.push(function(stack) {");
+				append("'use strict';");
 				append("/* jshint validthis:true */");
 				out += generateCode(code_tree.body, level);
 				append("});\n");
@@ -1259,6 +1261,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 					throw new Error("Function names can not contain .");
 				args = code_tree.args.map(forth.mangleName).join(", ");
 				append("function " + name + "(" + args + ") {");
+				append("'use strict';");
 				append("/* jshint validthis:true */");
 				append(indent_characters + "var stack = new forth.Stack();");
 				out += generateCode(code_tree.body, level);
@@ -1267,6 +1270,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 			case forth.Types.FunctionJsAnonymous:
 				args = code_tree.args.map(forth.mangleName).join(", ");
 				append("stack.push(function(" + args + ") {");
+				append("'use strict';");
 				append("/* jshint validthis:true */");
 				append(indent_characters + "var stack = new forth.Stack();");
 				out += generateCode(code_tree.body, level);
