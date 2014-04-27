@@ -50,8 +50,9 @@ THE SOFTWARE.
             default: throw new Error("new should be revised, it can not handle ctors with more than 8 arguments");
         }
     }
-    stack.push(sforth_new_helper_variable_42);
 ]:d
+	// separate otherwise the compiler wouldn't detect that it can be inlined
+	:[ sforth_new_helper_variable_42 ]:
 ;
 
 :macro value { name } :[ var name = stack.pop() ]; ;
@@ -212,8 +213,6 @@ THE SOFTWARE.
 :macro rdrop {} ( R:w -- ) :[ returnStack.pop() ]; ;
 :macro rdepth {} ( -- n ) returnStack.size ;
 :macro rpick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) returnStack.get ;
-
-\ : within { x1 x2 x3 -- f } ![ if (x1 < x2 && x2 <= x3) return 0; else return -1; ]! ;
 
 : assert { flag text -- } flag not if text . endif ;
 

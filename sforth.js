@@ -127,7 +127,17 @@ forth.Types = {
 	// the following elements add the element value to the JsCodeWithReturn object instances
 	JsCodeWithReturnToVar: "JsCodeWithReturnToVar",
 	JsCodeWithReturnAssignToVar: "JsCodeWithReturnAssignToVar",
-	JsCodeWithReturnAddToVar: "JsCodeWithReturnAddToVar"
+	JsCodeWithReturnAddToVar: "JsCodeWithReturnAddToVar",
+
+	// new element name
+	NumberToVar: "NumberToVar",
+	NumberAssignToVar: "NumberAssignToVar",
+	NumberAddToVar: "NumberAddToVar",
+	StringToVar: "StringToVar",
+	StringAssignToVar: "StringAssignToVar",
+	StringAddToVar: "StringAddToVar",
+
+	Empty: "Empty"
 };
 
 forth.BeginAgain = function(body) {
@@ -275,98 +285,6 @@ forth.ValueLocal = function(values, comment) {
 forth.ValueToStack = function(name) {
 	this.type = forth.Types.ValueToStack;
 	this.name = name;
-};
-
-forth.CodeTreeIterator = function(body) {
-
-	this.stack = new forth.Stack();
-
-	this.stack.push({node: body, pos: 0});
-
-	function nextElement() {
-	}
-
-	/**
-	 * returns the next element that fulfills the requirements imposed by options or null
-	 * The following options are supported:
-	 *	type [Array]
-	 *	keepScope [Boolean]
-	 *	skip [Array]
-	 */
-	this.next = function(options) {
-		return null;
-	};
-
-/*
-	switch(current.type) {
-			case forth.Types.BeginAgain:
-			case forth.Types.BeginUntil:
-			case forth.Types.BeginWhileRepeat:
-				optimize(current.body, p);
-				break;
-			case forth.Types.BranchCase:
-				// TODO: we currently can not optimize them, because they are not correctly parsed
-				//optimize(current.body, p);
-				//optimize(current.defaultOf, p);
-				break;
-			case forth.Types.BranchCaseOf:
-				// TODO: we currently can not optimize them, because they are not correctly parsed
-				//optimize(current.body, p);
-				break;
-			case forth.Types.BranchIf:
-				optimize(current.body, p);
-				if(current.else_if_bodies) {
-					current.else_if_bodies.forEach(function(entry, index, array) {
-						optimize(entry, p);
-					});
-				}
-				optimize(current.else_body, p);
-				break;
-			case forth.Types.BranchIfBody:
-				optimize(current.body, p);
-				break;
-			case forth.Types.Body:
-				current.body.forEach(function(entry, index, array) {
-					optimize(entry, p);
-				});
-				break;
-			case forth.Types.Call:
-				break;
-			case forth.Types.CommentLine:
-			case forth.Types.CommentParentheses:
-				break;
-			case forth.Types.DoLoop:
-				optimize(current.body, p);
-				break;
-			case forth.Types.FunctionForth:
-			case forth.Types.FunctionForthAnonymous:
-			case forth.Types.FunctionJs:
-			case forth.Types.FunctionJsAnonymous:
-				optimize(current.body, p);
-				break;
-			case forth.Types.JsCode:
-				break;
-			case forth.Types.JsCodeDirect:
-				break;
-			case forth.Types.JsCodeWithReturn:
-				directlyWriteJsCodeWithReturnIntoVar(current,parents);
-				break;
-			case forth.Types.Macro:
-			case forth.Types.Number:
-			case forth.Types.String:
-				break;
-			case forth.Types.TryCatchFinally:
-				optimize(current.body, p);
-				optimize(current.catchBody, p);
-				optimize(current.finallyBody, p);
-				break;
-			case forth.Types.ValueLocal:
-				break;
-			default:
-				console.log("Unexpected entry found: " + JSON.stringify(current));
-		}
-	}
-*/
 };
 
 // Currently this function only splits the code into tokens
@@ -1203,6 +1121,8 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 		var args = null;
 
 		switch(code_tree.type) {
+			case forth.Types.Empty:
+				break;
 			case forth.Types.BeginAgain:
 				append("do {");
 				out += generateCode(code_tree.body, level);
@@ -1358,7 +1278,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append(indent_characters + "var stack = new forth.Stack();");
 				out += generateCode(code_tree.body, level);
 				if(code_tree.returnValue)
-					append(" return stack.pop();");
+					append("return stack.pop();", 1);
 				append("}");
 				break;
 			case forth.Types.FunctionJsAnonymous:
@@ -1368,7 +1288,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append(indent_characters + "var stack = new forth.Stack();");
 				out += generateCode(code_tree.body, level);
 				if(code_tree.returnValue)
-					append(" return stack.pop();");
+					append("return stack.pop();", 1);
 				append("});");
 				break;
 
@@ -1387,13 +1307,13 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				break;
 
 			case forth.Types.JsCodeWithReturnToVar:
-				append("var " + code_tree.value + " = " + code_tree.body + ";");
+				append("var " + forth.mangleName(code_tree.value) + " = " + code_tree.body + ";");
 				break;
 			case forth.Types.JsCodeWithReturnAssignToVar:
-				append(code_tree.value + " = " + code_tree.body + ";");
+				append(forth.mangleName(code_tree.value) + " = " + code_tree.body + ";");
 				break;
 			case forth.Types.JsCodeWithReturnAddToVar:
-				append(code_tree.value + " += " + code_tree.body + ";");
+				append(forth.mangleName(code_tree.value) + " += " + code_tree.body + ";");
 				break;
 
 			case forth.Types.Macro:
@@ -1403,14 +1323,34 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				name = forth.mangleName(code_tree.name);
 
 				append("forth.macros." + name + " = " + JSON.stringify(code_tree) + ";\n");
-
 				break;
+
 			case forth.Types.Number:
 				append("stack.push(" + code_tree.value + ");");
 				break;
+			case forth.Types.NumberToVar:
+				append("var " + forth.mangleName(code_tree.name) + " = " + code_tree.value + ";");
+				break;
+			case forth.Types.NumberAssignToVar:
+				append(forth.mangleName(code_tree.name) + " = " + code_tree.value + ";");
+				break;
+			case forth.Types.NumberAddToVar:
+				append(forth.mangleName(code_tree.name) + " += " + code_tree.value + ";");
+				break;
+
 			case forth.Types.String:
 				append("stack.push(\"" + code_tree.value + "\");");
 				break;
+			case forth.Types.StringToVar:
+				append("var " + forth.mangleName(code_tree.name) + " = \"" + code_tree.value + "\";");
+				break;
+			case forth.Types.StringAssignToVar:
+				append(forth.mangleName(code_tree.name) + " = \"" + code_tree.value + "\";");
+				break;
+			case forth.Types.StringAddToVar:
+				append(forth.mangleName(code_tree.name) + " += \"" + code_tree.value + "\";");
+				break;
+
 			case forth.Types.TryCatchFinally:
 				append("try {");
 					out += generateCode(code_tree.body, level+1);
@@ -1446,120 +1386,379 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 forth.optimizeCodeTree = function(org_code_tree) {
 	var code_tree = forth.forthClone(org_code_tree);
 	
+	var modified;
+
 	// rewrite do without a compare operation to do with an increment
-	// TODO
-	(function() {
-		function fixIncompleteDoLoops(current) {
-			if(current == null) {
-			} else if(current instanceof Array) {
-				var previous = null;
-				var previous_pos = 0;
-				for (var i=0;i<current.length;++i) {
-					var val = current[i];
-					if(val.type === forth.Types.DoLoop &&
-						val.compareOperation === null && val.increment === null &&
-						previous !== null && previous.type === forth.Types.Number) {
-						val.increment = previous.value;
-						current.splice(previous_pos, 1);
-						// restart fixIncompleteDoLoops
-						fixIncompleteDoLoops(current);
-						return;
-					}
-					fixIncompleteDoLoops(val);
-					if(val.type != forth.Types.CommentLine && val.type != forth.Types.CommentParentheses) {
-						previous = val;
-						previous_pos = i;
-					}
+	function fixIncompleteDoLoops(current) {
+		if(current == null) {
+		} else if(current instanceof Array) {
+			var previous = null;
+			var previous_pos = 0;
+			for (var i=0;i<current.length;++i) {
+				var val = current[i];
+				if(val.type === forth.Types.DoLoop &&
+					val.compareOperation === null && val.increment === null &&
+					previous !== null && previous.type === forth.Types.Number) {
+					modified = true;
+					val.increment = previous.value;
+					current.splice(previous_pos, 1);
+					// restart fixIncompleteDoLoops
+					fixIncompleteDoLoops(current);
+					return;
 				}
-			} else {
-				switch(current.type) {
-					case forth.Types.BeginAgain:
-					case forth.Types.BeginUntil:
-					case forth.Types.BeginWhileRepeat:
-						fixIncompleteDoLoops(current.body);
-						break;
-					case forth.Types.BranchCase:
-						// TODO: we currently can not optimize them, because they are not correctly parsed
-						//optimize(current.body, p);
-						//optimize(current.defaultOf, p);
-						break;
-					case forth.Types.BranchCaseOf:
-						// TODO: we currently can not optimize them, because they are not correctly parsed
-						//optimize(current.body, p);
-						break;
-					case forth.Types.BranchIf:
-						fixIncompleteDoLoops(current.body);
-						fixIncompleteDoLoops(current.else_if_bodies);
-						fixIncompleteDoLoops(current.else_body);
-						break;
-					case forth.Types.BranchIfBody:
-						fixIncompleteDoLoops(current.body);
-						break;
-					case forth.Types.Body:
-						fixIncompleteDoLoops(current.body);
-						break;
-					case forth.Types.Call:
-						break;
-					case forth.Types.CommentLine:
-					case forth.Types.CommentParentheses:
-						break;
-					case forth.Types.DoLoop:
-					case forth.Types.FunctionForth:
-					case forth.Types.FunctionForthAnonymous:
-					case forth.Types.FunctionJs:
-					case forth.Types.FunctionJsAnonymous:
-						fixIncompleteDoLoops(current.body);
-						break;
-					case forth.Types.JsCode:
-					case forth.Types.JsCodeDirect:
-					case forth.Types.JsCodeWithReturn:
-					case forth.Types.Macro:
-					case forth.Types.Number:
-					case forth.Types.String:
-						break;
-					case forth.Types.TryCatchFinally:
-						fixIncompleteDoLoops(current.body);
-						fixIncompleteDoLoops(current.catchBody);
-						fixIncompleteDoLoops(current.finallyBody);
-						break;
-					case forth.Types.ValueLocal:
-						break;
-					default:
-						console.log("Unexpected entry found: " + JSON.stringify(current));
+				fixIncompleteDoLoops(val);
+				if(val.type != forth.Types.CommentLine && val.type != forth.Types.CommentParentheses) {
+					previous = val;
+					previous_pos = i;
 				}
+			}
+		} else {
+			switch(current.type) {
+				case forth.Types.BeginAgain:
+				case forth.Types.BeginUntil:
+				case forth.Types.BeginWhileRepeat:
+				case forth.Types.BranchIfBody:
+				case forth.Types.BranchCaseOf:
+				case forth.Types.Body:
+				case forth.Types.DoLoop:
+				case forth.Types.FunctionForth:
+				case forth.Types.FunctionForthAnonymous:
+				case forth.Types.FunctionJs:
+				case forth.Types.FunctionJsAnonymous:
+					fixIncompleteDoLoops(current.body);
+					break;
+				case forth.Types.BranchCase:
+					fixIncompleteDoLoops(current.body);
+					fixIncompleteDoLoops(current.defaultOf);
+					break;
+				case forth.Types.BranchIf:
+					fixIncompleteDoLoops(current.body);
+					fixIncompleteDoLoops(current.else_if_bodies);
+					fixIncompleteDoLoops(current.else_body);
+					break;
+				case forth.Types.Empty:
+				case forth.Types.Call:
+				case forth.Types.CommentLine:
+				case forth.Types.CommentParentheses:
+				case forth.Types.JsCode:
+				case forth.Types.JsCodeDirect:
+				case forth.Types.JsCodeWithReturn:
+				case forth.Types.JsCodeWithReturnToVar:
+				case forth.Types.JsCodeWithReturnAssignToVar:
+				case forth.Types.JsCodeWithReturnAddToVar:
+				case forth.Types.Macro:
+				case forth.Types.Number:
+				case forth.Types.NumberToVar:
+				case forth.Types.NumberAssignToVar:
+				case forth.Types.NumberAddToVar:
+				case forth.Types.String:
+				case forth.Types.StringToVar:
+				case forth.Types.StringAssignToVar:
+				case forth.Types.StringAddToVar:
+				case forth.Types.ValueLocal:
+					break;
+				case forth.Types.TryCatchFinally:
+					fixIncompleteDoLoops(current.body);
+					fixIncompleteDoLoops(current.catchBody);
+					fixIncompleteDoLoops(current.finallyBody);
+					break;
+				default:
+					console.log("Unexpected entry found: " + JSON.stringify(current));
 			}
 		}
+	}
 
-		fixIncompleteDoLoops(code_tree);
-	})();
+	// rewrite var <something> = stack.pop() to ValueLocal
+	function rewriteStackPop(current) {
+		if(current == null) {
+		} else if(current instanceof Array) {
+			for (var i=0;i<current.length;++i) {
+				var val = current[i];
+				if(val.type === forth.Types.JsCode) {
+					var match = /^[ ]*var[ ]+(.+)[ ]+=[ ]+stack\.pop\([ ]*\)[ ;]*$/.exec(val.body);
+					if(match !== null) {
+						modified = true;
+						val.type = forth.Types.ValueLocal;
+						delete val.body;
+						val.values = [match[1]];
+					}
+				}
+				rewriteStackPop(val);
+			}
+		} else {
+			switch(current.type) {
+				case forth.Types.BeginAgain:
+				case forth.Types.BeginUntil:
+				case forth.Types.BeginWhileRepeat:
+				case forth.Types.BranchCaseOf:
+				case forth.Types.BranchIfBody:
+				case forth.Types.Body:
+				case forth.Types.DoLoop:
+				case forth.Types.FunctionForth:
+				case forth.Types.FunctionForthAnonymous:
+				case forth.Types.FunctionJs:
+				case forth.Types.FunctionJsAnonymous:
+					rewriteStackPop(current.body);
+					break;
+				case forth.Types.BranchCase:
+					rewriteStackPop(current.body);
+					rewriteStackPop(current.defaultOf);
+					break;
+				case forth.Types.BranchIf:
+					rewriteStackPop(current.body);
+					rewriteStackPop(current.else_if_bodies);
+					rewriteStackPop(current.else_body);
+					break;
+				case forth.Types.Empty:
+				case forth.Types.Call:
+				case forth.Types.CommentLine:
+				case forth.Types.CommentParentheses:
+				case forth.Types.JsCode:
+				case forth.Types.JsCodeDirect:
+				case forth.Types.JsCodeWithReturn:
+				case forth.Types.JsCodeWithReturnToVar:
+				case forth.Types.JsCodeWithReturnAssignToVar:
+				case forth.Types.JsCodeWithReturnAddToVar:
+				case forth.Types.Macro:
+				case forth.Types.Number:
+				case forth.Types.NumberToVar:
+				case forth.Types.NumberAssignToVar:
+				case forth.Types.NumberAddToVar:
+				case forth.Types.String:
+				case forth.Types.StringToVar:
+				case forth.Types.StringAssignToVar:
+				case forth.Types.StringAddToVar:
+				case forth.Types.ValueLocal:
+					break;
+				case forth.Types.TryCatchFinally:
+					rewriteStackPop(current.body);
+					rewriteStackPop(current.catchBody);
+					rewriteStackPop(current.finallyBody);
+					break;
+				default:
+					console.log("Unexpected entry found: " + JSON.stringify(current));
+			}
+		}
+	}
 
-	// if possible write results directly into a var
-	(function() {
-		var iter = new forth.CodeTreeIterator(code_tree);
-		var current;
-		var next;
-		do {
-			current = iter.next({type: [forth.Types.JsCodeWithReturn]});
-			if(current === null)
-				break;
-			next = this.next({
-							keepScope: true,
-							skip: [forth.Types.CommentLine, forth.Types.CommentParentheses, forth.Types.Macro]
-						});
-			if(next !== null) {
-				switch(next.type) {
-					case forth.Types.ValueLocal:
-						if(next.values.length < 1) // TODO: we should go to the next element
-							break;
-						current.type = forth.Types.JsCodeWithReturnToVar;
-						current.value = next.values.slice(0,1);
-						break;
+	function inlineValueLocal(current, previous) {
+		if(current == null) {
+		} else if(current instanceof Array) {
+			for (var i=0;i<current.length;++i) {
+				var val = current[i];
+				if(val.type === forth.Types.ValueLocal && val.values.length > 0 && previous !== undefined) {
+					if(previous.type === forth.Types.Number) {
+						previous.type = forth.Types.NumberToVar;
+						previous.name = val.values.splice(0, 1)[0];
+						modified = true;
+						return;
+					} else if(previous.type === forth.Types.String) {
+						previous.type = forth.Types.StringToVar;
+						previous.name = val.values.splice(0, 1)[0];
+						modified = true;
+						return;
+					} else if(previous.type === forth.Types.JsCodeWithReturn) {
+						previous.type = forth.Types.JsCodeWithReturnToVar;
+						previous.value = val.values.splice(0,1)[0];
+						modified = true;
+						return;
+					}
+				}  else if(val.type === forth.Types.JsCode && previous !== undefined) {
+					var match = /^[ ]*(.+)[ ]+=[ ]+stack\.pop\([ ]*\)[ ;]*$/.exec(val.body);
+					if(match !== null) {
+						if(previous.type === forth.Types.Number) {
+							previous.type = forth.Types.NumberAssignToVar;
+							previous.name = match[1];
+							val.type = forth.Types.Empty;
+							modified = true;
+							return;
+						} else if(previous.type === forth.Types.String) {
+							previous.type = forth.Types.StringAssignToVar;
+							previous.name = match[1];
+							val.type = forth.Types.Empty;
+							modified = true;
+							return;
+						} else if(previous.type === forth.Types.JsCodeWithReturn) {
+							previous.type = forth.Types.JsCodeWithReturnAssignToVar;
+							previous.value = match[1];
+							val.type = forth.Types.Empty;
+							modified = true;
+							return;
+						}
+					} else {
+						match = /^[ ]*(.+)[ ]+\+=[ ]+stack\.pop\([ ]*\)[ ;]*$/.exec(val.body);
+						if(match !== null) {
+							if(previous.type === forth.Types.Number) {
+								previous.type = forth.Types.NumberAddToVar;
+								previous.name = match[1];
+								val.type = forth.Types.Empty;
+								modified = true;
+								return;
+							} else if(previous.type === forth.Types.String) {
+								previous.type = forth.Types.StringAddToVar;
+								previous.name = match[1];
+								val.type = forth.Types.Empty;
+								modified = true;
+								return;
+							} else if(previous.type === forth.Types.JsCodeWithReturn) {
+								previous.type = forth.Types.JsCodeWithReturnAddToVar;
+								previous.value = match[1];
+								val.type = forth.Types.Empty;
+								modified = true;
+								return;
+							}
+						}
+					}
+				}
+				if(val.type == forth.Types.CommentLine || val.type == forth.Types.CommentParentheses) {
+				} else if(val.type === forth.Types.ValueLocal && val.values.length == 0) {
+				} else if(val.type === forth.Types.Body) {
+					previous = inlineValueLocal(val, previous);
+				} else {
+					inlineValueLocal(val);
+					previous = val;
 				}
 			}
-		} while(true);
-	})();
+			return previous;
+		} else {
+			switch(current.type) {
+				case forth.Types.BeginAgain:
+				case forth.Types.BeginUntil:
+				case forth.Types.BeginWhileRepeat:
+				case forth.Types.BranchCaseOf:
+				case forth.Types.BranchIfBody:
+				case forth.Types.DoLoop:
+				case forth.Types.FunctionForth:
+				case forth.Types.FunctionForthAnonymous:
+				case forth.Types.FunctionJs:
+				case forth.Types.FunctionJsAnonymous:
+					inlineValueLocal(current.body);
+					break;
+				case forth.Types.BranchCase:
+					inlineValueLocal(current.body);
+					inlineValueLocal(current.defaultOf);
+					break;
+				case forth.Types.BranchIf:
+					inlineValueLocal(current.body);
+					inlineValueLocal(current.else_if_bodies);
+					inlineValueLocal(current.else_body);
+					break;
+				case forth.Types.Body:
+					return inlineValueLocal(current.body, previous);
+					break;
+				case forth.Types.Empty:
+				case forth.Types.Call:
+				case forth.Types.CommentLine:
+				case forth.Types.CommentParentheses:
+				case forth.Types.JsCode:
+				case forth.Types.JsCodeDirect:
+				case forth.Types.JsCodeWithReturn:
+				case forth.Types.JsCodeWithReturnToVar:
+				case forth.Types.JsCodeWithReturnAssignToVar:
+				case forth.Types.JsCodeWithReturnAddToVar:
+				case forth.Types.Macro:
+				case forth.Types.Number:
+				case forth.Types.NumberToVar:
+				case forth.Types.NumberAssignToVar:
+				case forth.Types.NumberAddToVar:
+				case forth.Types.String:
+				case forth.Types.StringToVar:
+				case forth.Types.StringAssignToVar:
+				case forth.Types.StringAddToVar:
+				case forth.Types.ValueLocal:
+					break;
+				case forth.Types.TryCatchFinally:
+					inlineValueLocal(current.body);
+					inlineValueLocal(current.catchBody);
+					inlineValueLocal(current.finallyBody);
+					break;
+				default:
+					console.log("Unexpected entry found: " + JSON.stringify(current));
+			}
+		}
+	}
 
-	// detect operators like +,-,& and rewrite them
+	// remove empty code tree entries
+	function removeEmptyCodeTreeEntries(current) {
+		if(current == null) {
+		} else if(current instanceof Array) {
+			for (var i=0;i<current.length;++i) {
+				var val = current[i];
+				if((val.type === forth.Types.ValueLocal && val.values.length == 0) ||
+					(val.type === forth.Types.Body && val.body.length == 0) ||
+					(val.type === forth.Types.Empty)
+				) {
+					current.splice(i, 1);
+					modified = true;
+				}
+				removeEmptyCodeTreeEntries(val);
+			}
+		} else {
+			switch(current.type) {
+				case forth.Types.BeginAgain:
+				case forth.Types.BeginUntil:
+				case forth.Types.BeginWhileRepeat:
+				case forth.Types.BranchIfBody:
+				case forth.Types.BranchCaseOf:
+				case forth.Types.Body:
+				case forth.Types.DoLoop:
+				case forth.Types.FunctionForth:
+				case forth.Types.FunctionForthAnonymous:
+				case forth.Types.FunctionJs:
+				case forth.Types.FunctionJsAnonymous:
+					removeEmptyCodeTreeEntries(current.body);
+					break;
+				case forth.Types.BranchCase:
+					removeEmptyCodeTreeEntries(current.body);
+					removeEmptyCodeTreeEntries(current.defaultOf);
+					break;
+				case forth.Types.BranchIf:
+					removeEmptyCodeTreeEntries(current.body);
+					removeEmptyCodeTreeEntries(current.else_if_bodies);
+					removeEmptyCodeTreeEntries(current.else_body);
+					break;
+				case forth.Types.Empty:
+				case forth.Types.Call:
+				case forth.Types.CommentLine:
+				case forth.Types.CommentParentheses:
+				case forth.Types.JsCode:
+				case forth.Types.JsCodeDirect:
+				case forth.Types.JsCodeWithReturn:
+				case forth.Types.JsCodeWithReturnToVar:
+				case forth.Types.JsCodeWithReturnAssignToVar:
+				case forth.Types.JsCodeWithReturnAddToVar:
+				case forth.Types.Macro:
+				case forth.Types.Number:
+				case forth.Types.NumberToVar:
+				case forth.Types.NumberAssignToVar:
+				case forth.Types.NumberAddToVar:
+				case forth.Types.String:
+				case forth.Types.StringToVar:
+				case forth.Types.StringAssignToVar:
+				case forth.Types.StringAddToVar:
+				case forth.Types.ValueLocal:
+					break;
+				case forth.Types.TryCatchFinally:
+					removeEmptyCodeTreeEntries(current.body);
+					removeEmptyCodeTreeEntries(current.catchBody);
+					removeEmptyCodeTreeEntries(current.finallyBody);
+					break;
+				default:
+					console.log("Unexpected entry found: " + JSON.stringify(current));
+			}
+		}
+	}
+
+	// TODO: detect operators like +,-,& and rewrite them
+
+	do {
+		modified = false;
+
+		fixIncompleteDoLoops(code_tree);
+		rewriteStackPop(code_tree);
+		inlineValueLocal(code_tree);
+		removeEmptyCodeTreeEntries(code_tree);
+	} while(modified);
 
 	return code_tree;
 };

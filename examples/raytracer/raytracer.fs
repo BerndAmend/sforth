@@ -1,9 +1,9 @@
 // Color
 	@constructor
 	: Color { r g b }
-		r to this.r
-		g to this.g
-		b to this.b
+		' r to this.r
+		' g to this.g
+		' b to this.b
 	;
 
 	:noname { k }
@@ -52,9 +52,9 @@ Color.black to Color.defaultColor
 // Vector
 	@constructor
 	: Vector { x y z }
-		x to this.x
-		y to this.y
-		z to this.z
+		' x to this.x
+		' y to this.y
+		' z to this.z
 	;
 
 	:noname { k }
@@ -87,7 +87,7 @@ Color.black to Color.defaultColor
 	; to Vector.prototype.dot
 
 	:noname {}
-		this this.dot Math.sqrt
+		' this this.dot Math.sqrt
 	; to Vector.prototype.mag
 
 	:noname {}
@@ -114,12 +114,12 @@ Color.black to Color.defaultColor
 
 @constructor
 : Camera { pos lookAt }
-	pos to this.pos
-	lookAt to this.lookAt
+	' pos to this.pos
+	' lookAt to this.lookAt
 	0.0 -1.0 0.0 new Vector { down }
-	pos lookAt.minus { tmp1 } tmp1.norm to this.forward
-	down this.forward.cross { tmp2 } tmp2.norm { tmp3 } 1.5 tmp3.times to this.right
-	this.right this.forward.cross  { tmp4 } tmp4.norm { tmp5 } 1.5 tmp5.times to this.up
+	' pos lookAt.minus { tmp1 } tmp1.norm to this.forward
+	' down this.forward.cross { tmp2 } tmp2.norm { tmp3 } 1.5 tmp3.times to this.right
+	' this.right this.forward.cross  { tmp4 } tmp4.norm { tmp5 } 1.5 tmp5.times to this.up
 ;
 
 
@@ -127,23 +127,23 @@ Color.black to Color.defaultColor
 	@constructor
 	: Sphere { center radius surface }
 		"Sphere to this.type
-		center to this.center
-		surface to this.surface
-		radius to this.radius
+		' center to this.center
+		' surface to this.surface
+		' radius to this.radius
 		m* radius radius to this.radius2
 	;
 	:noname { pos }
-		this.center pos.minus { tmp } tmp.norm
+		' this.center pos.minus { tmp } tmp.norm
 	; to Sphere.prototype.normal
 
 	:noname { ray }
-		ray.start this.center.minus { eo }
-		ray.dir eo.dot { v }
+		' ray.start this.center.minus { eo }
+		' ray.dir eo.dot { v }
 		0 { dist }
 		m0>= v if
-			this.radius2 eo eo.dot m* v v - - { disc }
+			' this.radius2 ' eo eo.dot m* v v - - { disc }
 			m0>= disc if
-				v disc Math.sqrt - to dist
+				' v ' disc Math.sqrt - to dist
 			endif
 		endif
 		m=== dist 0 if
@@ -157,9 +157,9 @@ Color.black to Color.defaultColor
 	@constructor
 	: Plane { norm offset surface }
 		"Plane to this.type
-		norm to this.norm
-		offset to this.offset
-		surface to this.surface
+		' norm to this.norm
+		' offset to this.offset
+		' surface to this.surface
 	;
 
 	:noname { pos }
@@ -167,11 +167,11 @@ Color.black to Color.defaultColor
 	; to Plane.prototype.normal
 
 	:noname { ray }
-		ray.dir this.norm.dot { denom }
+		' ray.dir this.norm.dot { denom }
 		m0> denom if
 			null
 		else
-			ray.start this.norm.dot this.offset + denom -1 * / { dist }
+			' ray.start this.norm.dot ' this.offset + denom -1 * / { dist }
 			:[ { thing: this, ray: ray, dist: dist } ]:
 		endif
 	; to Plane.prototype.intersect
@@ -242,20 +242,20 @@ var Surfaces;
 		Infinity { closest }
 		null { closestInter }
 		0 scene.things.length 1 do i
-			ray m@ scene.things i { tmp }
+			' ray m@ scene.things i { tmp }
 			tmp.intersect { inter }
 			m!== inter null if
 				m< inter.dist closest if
-					inter to closestInter
-					inter.dist to closest
+					' inter to closestInter
+					' inter.dist to closest
 				endif
 			endif
 		loop
-		closestInter
+		' closestInter
 	; to this.intersections
 
 	:noname { ray scene }
-		ray scene this.intersections { isect }
+		' ray ' scene this.intersections { isect }
 		m!== isect null if
 			isect.dist
 		else
@@ -264,11 +264,11 @@ var Surfaces;
 	; to this.testRay
 
 	:noname { ray scene depth }
-		ray scene this.intersections { isect }
+		' ray ' scene this.intersections { isect }
 		m=== isect null if
-			Color.background
+			' Color.background
 		else
-			isect scene depth this.shade
+			' isect ' scene ' depth this.shade
 		endif
 	; to this.traceRay
 
@@ -278,7 +278,7 @@ var Surfaces;
 		pos isect.thing.normal { normal }
 
 		2
-		d normal.dot
+		' d normal.dot
 		normal.times { tmp } tmp.times
 		d.minus
 		{ reflectDir }
@@ -288,9 +288,9 @@ var Surfaces;
 		{ naturalColor }
 
 		m>= depth this.maxDepth if
-			Color.grey
+			' Color.grey
 		else
-			isect.thing pos normal reflectDir scene depth  this.getReflectionColor
+			' isect.thing ' pos ' normal ' reflectDir ' scene ' depth  this.getReflectionColor
 		endif
 		{ reflectedColor }
 
@@ -298,45 +298,45 @@ var Surfaces;
 	; to this.shade
 
 	:noname { thing pos normal rd scene depth }
-		pos thing.surface.reflect
-		:[ { start: pos, dir: rd } ]: scene m+ depth 1 this.traceRay { tmp }
+		' pos thing.surface.reflect
+		:[ { start: pos, dir: rd } ]: ' scene m+ depth 1 this.traceRay { tmp }
 		tmp.scale
 	; to this.getReflectionColor
 
 	:noname { thing pos norm rd scene }
 		this { _this }
 		:jsnoname { col light }
-			pos light.pos.minus { ldis }
+			' pos light.pos.minus { ldis }
 			ldis.norm { livec }
 			:[ { start: pos, dir: livec } ]: scene _this.testRay { neatIsect }
 
 			m=== neatIsect null if
 				false
 			else
-				neatIsect ldis.mag <=
+				' neatIsect ldis.mag <=
 			endif
 			{ isInShadow }
 
 			isInShadow if
-				col
+				' col
 			else
 				livec norm.dot { illum }
-				illum 0 > if
-					illum light.color.scale
+				m> illum 0 if
+					' illum light.color.scale
 				else
-					Color.defaultColor
+					' Color.defaultColor
 				endif
 				{ lcolor }
 
 				rd.norm livec.dot { specular }
-				specular 0 > if
-					specular thing.surface.roughness Math.pow light.color.scale
+				m> specular 0 if
+					' specular thing.surface.roughness Math.pow light.color.scale
 				else
-					Color.defaultColor
+					' Color.defaultColor
 				endif
 				{ scolor }
 
-				col
+				' col
 				pos thing.surface.diffuse
 				lcolor.times
 				pos thing.surface.specular
@@ -363,8 +363,8 @@ var Surfaces;
 
 		y-start y-end 1 do y
 			0 width 1 do x
-				x y scene.camera getPoint { p }
-				:[ { start: scene.camera.pos, dir: p } ]: scene 0 this.traceRay { color }
+				' x ' y scene.camera getPoint { p }
+				:[ { start: scene.camera.pos, dir: p } ]: ' scene ' 0 this.traceRay { color }
 				color.toDrawingColor { c }
 
 				x 4 * { idxr }
@@ -417,21 +417,21 @@ var Surfaces;
 	str JSON.parse(1) { desc }
 
 	// things
-	desc.things.length { length }
+	' desc.things.length { length }
 	length new-array { things }
 	0 length 1 do i
 		m@ desc.things i { thing }
 
 		thing.type case
 			of "Plane
-				thing.norm.x thing.norm.y thing.norm.z new Vector
-				thing.offset
+				' thing.norm.x ' thing.norm.y ' thing.norm.z new Vector
+				' thing.offset
 				m@ Surfaces thing.surface.type
 				new Plane
 			break
 			of "Sphere
-				thing.center.x thing.center.y thing.center.z new Vector
-				thing.radius
+				' thing.center.x ' thing.center.y ' thing.center.z new Vector
+				' thing.radius
 				m@ Surfaces thing.surface.type
 				new Sphere
 			break
@@ -446,18 +446,18 @@ var Surfaces;
 	0 length 1 do j
 		m@ desc.lights j { light }
 
-		light.pos.x light.pos.y light.pos.z new Vector
-		light.color.r light.color.g light.color.b new Color
+		' light.pos.x ' light.pos.y ' light.pos.z new Vector
+		' light.color.r ' light.color.g ' light.color.b new Color
 		create-light
 		' j lights !
 	loop
 	lights to scene.lights
 
 	// camera
-	desc.camera.pos { pos }
-	pos.x pos.y pos.z new Vector
-	desc.camera.lookAt { lookAt }
-	lookAt.x lookAt.y lookAt.z new Vector
+	' desc.camera.pos { pos }
+	' pos.x ' pos.y ' pos.z new Vector
+	' desc.camera.lookAt { lookAt }
+	' lookAt.x ' lookAt.y ' lookAt.z new Vector
 	new Camera to scene.camera
 
 	scene
