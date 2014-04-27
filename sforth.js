@@ -942,11 +942,6 @@ forth.createFromForthTokens = function(tokens, context) {
 				add(new forth.FunctionJsAnonymous(args, localtree, returnValue));
 				break;
 
-			// The following functions have to check if they are called in the correct scope
-			// Question: Should this be done after the code_tree is build?
-
-			// macro definition
-			// macros can not be embedded into other macros
 			case ":macro": // macro definition
 				i++;
 
@@ -957,7 +952,7 @@ forth.createFromForthTokens = function(tokens, context) {
 
 				while(depth > 0) {
 					i++;
-					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+					if(tokens[i] == ":macro" || tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
 						depth++;
 					} else if(tokens[i] == ";" || tokens[i] == "return;") {
 						depth--;
