@@ -226,14 +226,12 @@ forth.FunctionJs = function(name, args, body, returnValue) {
 	this.name = name;
 	this.args = args;
 	this.body = body;
-	this.returnValue = returnValue;
 };
 
 forth.FunctionJsAnonymous = function(args, body, returnValue) {
 	this.type = forth.Types.FunctionJsAnonymous;
 	this.args = args;
 	this.body = body;
-	this.returnValue = returnValue;
 };
 
 forth.JsCode = function(body) {
@@ -894,13 +892,6 @@ forth.createFromForthTokens = function(tokens, context) {
 						throw new Error("Couldn't find closing ';/return;' for ':js'");
 				}
 
-				if(tokens[i] == ";")
-					returnValue = false;
-				else if(tokens[i] == "return;")
-					returnValue = true;
-				else
-					throw new Error("something went wrong ':js'");
-
 				localtree = forth.createFromForthTokens(current, context);
 
 				if(localtree.body.length > 0) {
@@ -910,6 +901,10 @@ forth.createFromForthTokens = function(tokens, context) {
 
 					values.type = forth.Types.CommentParentheses;
 					args = values.values.reverse();
+				}
+
+				if(tokens[i] == "return;") {
+					localtree.body.push(new forth.JsCode("return stack.pop()"));
 				}
 
 				add(new forth.FunctionJs(function_name, args, localtree, returnValue));
@@ -929,13 +924,6 @@ forth.createFromForthTokens = function(tokens, context) {
 						throw new Error("Couldn't find closing ';/return;' for ':jsnoname'");
 				}
 
-				if(tokens[i] == ";")
-					returnValue = false;
-				else if(tokens[i] == "return;")
-					returnValue = true;
-				else
-					throw new Error("something went wrong ':jsnoname'");
-
 				localtree = forth.createFromForthTokens(current, context);
 
 				if(localtree.body.length > 0) {
@@ -945,6 +933,10 @@ forth.createFromForthTokens = function(tokens, context) {
 
 					values.type = forth.Types.CommentParentheses;
 					args = values.values.reverse();
+				}
+
+				if(tokens[i] == "return;") {
+					localtree.body.push(new forth.JsCode("return stack.pop()"));
 				}
 
 				add(new forth.FunctionJsAnonymous(args, localtree, returnValue));
@@ -981,16 +973,6 @@ forth.createFromForthTokens = function(tokens, context) {
 
 				if(args.type != forth.Types.ValueLocal)
 					throw new Error(t + " " + function_name + " requires { .. } after the macro name");
-
-				/*if(lower_t == ":fmacro") {
-					if(!args.values)
-						throw new Error(":fmacro requires a { } (no args) after the macro name");
-
-					var localtree = forth.createFromForthTokens(current, context);
-
-					var func = new forth.FunctionForth(function_name, localtree);
-					add(func);
-				}*/
 
 				var macro = new forth.Macro(function_name, args.values, current);
 				add(macro);
@@ -1280,8 +1262,6 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append("/* jshint validthis:true */");
 				append(indent_characters + "var stack = new forth.Stack();");
 				out += generateCode(code_tree.body, level);
-				if(code_tree.returnValue)
-					append("return stack.pop();", 1);
 				append("}");
 				break;
 			case forth.Types.FunctionJsAnonymous:
@@ -1290,8 +1270,6 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				append("/* jshint validthis:true */");
 				append(indent_characters + "var stack = new forth.Stack();");
 				out += generateCode(code_tree.body, level);
-				if(code_tree.returnValue)
-					append("return stack.pop();", 1);
 				append("});");
 				break;
 
@@ -1609,6 +1587,26 @@ forth.optimizeCodeTree = function(org_code_tree) {
 								val.type = forth.Types.Empty;
 								modified = true;
 								return;
+							}
+						} else {
+							match = /^[ ]*return[ ]+stack\.pop\([ ]*\)[ ]*$/.exec(val.body);
+							if(match !== null) {
+								if(previous.type === forth.Types.Number) {
+									previous.type = forth.Types.Empty;
+									val.body = "return " + previous.value;
+									modified = true;
+									return;
+								} else if(previous.type === forth.Types.String) {
+									previous.type = forth.Types.Empty;
+									val.body = "return \"" + previous.value + "\"";
+									modified = true;
+									return;
+								} else if(previous.type === forth.Types.JsCodeWithReturn) {
+									previous.type = forth.Types.Empty;
+									val.body = "return " + previous.body;
+									modified = true;
+									return;
+								}
 							}
 						}
 					}
