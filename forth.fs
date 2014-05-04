@@ -64,7 +64,7 @@ THE SOFTWARE.
 :macro +to { name } :[ name += stack.pop() ]; ;
 :macro +!> { name } +to name ;
 
-:macro alias { name } to name ;
+:macro alias { name } value name ;
 
 :macro continue {} :[ continue ]; ;
 :macro break {} :[ break ]; ;
@@ -256,7 +256,7 @@ THE SOFTWARE.
 : count { str -- len } :[ str.toString().length ]: ;
 
 : o>string { n -- str } :[ n.toString() ]: ;
-: /string { str n -- str } n undefined str.substr ;
+: /string { str n -- str } n str.substr(1) ;
 
 : time-in-ms ( -- x ) :[ new Date() ]: { x } x.getTime ;
 
