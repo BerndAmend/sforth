@@ -63,7 +63,7 @@
 
 			workerCount { active-worker }
 
-			width 1 ctx.createImageData(2) { line }
+			' width 1 ctx.createImageData(2) { line }
 
 			»« to processing-time.value
 			time-in-ms { start-time }
@@ -72,8 +72,8 @@
 				e.data.id { id }
 				' e.data.done if
 					// Worker is done
-					active-worker 1 - to active-worker
-					active-worker 0 = if
+					' active-worker 1 - to active-worker
+					' active-worker 0 = if
 						time-in-ms start-time - { required-time }
 						required-time » ms« + to processing-time.value
 						false to is-currently-rendering
@@ -97,7 +97,7 @@
 				»web worker error: « e.message + console-log
 			;
 
-			0 workerCount 1 do i
+			0 ' workerCount 1 do i
 				"#raytracer-worker create-worker { worker }
 
 				' worker-onmessage to worker.onmessage

@@ -119,26 +119,26 @@ THE SOFTWARE.
 : roll {} ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove ;
 
 
-:macro & {} ( x1 x2 -- x3 ) :[ stack.pop() & stack.pop() ]: ;
+:macro & {} local{ x1 x2 -- x3 } :[ x1 & x2 ]: ;
 
-:macro && {} ( x1 x2 -- x3 ) { &&_x1 &&_x2 } :[ $$amp$$amp_x1 && $$amp$$amp_x2 ]: ;
+:macro && {} local{ x1 x2 -- x3 } :[ x1 && x2 ]: ;
 
-:macro | {} ( x1 x2 -- x3 ) :[ stack.pop() | stack.pop() ]: ;
+:macro | {} local{ x1 x2 -- x3 } :[ x1 | x2 ]: ;
 
-:macro || {} ( x1 x2 -- x3 ) { ||_x1 ||_x2 } :[ $$bar$$bar_x1 || $$bar$$bar_x2 ]: ;
+:macro || {} local{ x1 x2 -- x3 } :[ x1 || x2 ]: ;
 
-: xor {} ( x1 x2 -- x3 ) :[ /* jshint bitwise:false */ ]:d :[ stack.pop() ^ stack.pop() ]: ;
+:macro xor {} local{ x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
 
-: not ( x1 -- x2 ) :[ !stack.pop() ]: ;
+: not local{ x1 -- x2 } :[ ! x1 ]: ;
 
-: invert ( x1 -- x2 ) :[ /* jshint bitwise:false */ ]:d :[ ~stack.pop() ]: ;
+: invert local{ x1 -- x2 } :[ ~ x1 ]: ;
 
 : negate ( n -- -n ) -1 * ;
 
 \ math operations
 
-: deg2rad {} ( x1 -- x2 ) 180.0 / Math.PI * ;
-: rad2deg {} ( x1 -- x2 ) Math.PI / 180.0 * ;
+: deg2rad {} ( x1 -- x2 ) 180.0 / ' Math.PI * ;
+: rad2deg {} ( x1 -- x2 ) ' Math.PI / 180.0 * ;
 
 : acosdeg {} ( x1 -- x2 ) Math.acos rad2deg ;
 : asindeg {} ( x1 -- x2 ) Math.asin rad2deg ;
@@ -147,11 +147,11 @@ THE SOFTWARE.
 : sindeg {} ( x1 -- x2 ) deg2rad Math.sin ;
 : tandeg {} ( x1 -- x2 ) deg2rad Math.tan ;
 
-:macro + {} ( x1 x2 -- x3 ) { +_x2 } :[ stack.pop() + $$plus_x2 ]: ;
-:macro - {} ( x1 x2 -- x3 ) { -_x2 } :[ stack.pop() - $$minus_x2 ]: ;
-:macro * {} ( x1 x2 -- x3 ) { *_x2 } :[ stack.pop() * $$times_x2 ]: ;
-:macro / {} ( x1 x2 -- x3 ) { /_x2 } :[ stack.pop() / $$div_x2 ]: ;
-:macro mod {} ( x1 x2 -- x3 ) { %_x2 } :[ stack.pop() % $$percent_x2 ]: ;
+:macro + {} local{ x1 x2 -- x3 } :[ x1 + x2 ]: ;
+:macro - {} local{ x1 x2 -- x3 } :[ x1 - x2 ]: ;
+:macro * {} local{ x1 x2 -- x3 } :[ x1 * x2 ]: ;
+:macro / {} local{ x1 x2 -- x3 } :[ x1 / x2 ]: ;
+:macro mod {} local{ x1 x2 -- x3 } :[ x1 % x2 ]: ;
 : /mod { x1 x2 -- x3 } :[ x1 % x2 ]: :[ x1 / x2 ]: Math.floor ;
 
 :macro m+ { x1 x2 -- x3 } :[ x1 + x2 ]: ;
@@ -160,20 +160,20 @@ THE SOFTWARE.
 :macro m/ { x1 x2 -- x3 } :[ x1 / x2 ]: ;
 :macro mmod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
 
-: << { x1 x2 -- x3 } :[ /* jshint bitwise:false */ ]:d :[ x1 << x2 ]: ;
-: >> { x1 x2 -- x3 } :[ /* jshint bitwise:false */ ]:d :[ x1 >> x2 ]: ;
-: >>> { x1 x2 -- x3 } :[ /* jshint bitwise:false */ ]:d :[ x1 >>> x2 ]: ;
-: lshift << ;
-: rshift >>> ;
+:macro << {} local{ x1 x2 -- x3 } :[ x1 << x2 ]: ;
+:macro >> {} local{ x1 x2 -- x3 } :[ x1 >> x2 ]: ;
+:macro >>> {} local{ x1 x2 -- x3 } :[ x1 >>> x2 ]: ;
+:macro lshift {} << ;
+:macro rshift {} >>> ;
 
-:macro = {} ( x1 x2 -- f ) :[ stack.pop() == stack.pop() ]: ;
-:macro === {} ( x1 x2 -- f ) :[ stack.pop() === stack.pop() ]: ;
-:macro !== {} ( x1 x2 -- f ) :[ stack.pop() !== stack.pop() ]: ;
-:macro <> {} ( x1 x2 -- f ) :[ stack.pop() != stack.pop() ]: ;
-:macro > {} ( x1 x2 -- f ) :[ stack.pop() < stack.pop() ]: ;
-:macro >= {} ( x1 x2 -- f ) :[ stack.pop() <= stack.pop() ]: ;
-:macro < {} ( x1 x2 -- f ) :[ stack.pop() > stack.pop() ]: ;
-:macro <= {} ( x1 x2 -- f ) :[ stack.pop() >= stack.pop() ]: ;
+:macro = {} local{ x1 x2 -- f } :[ x1 == x2 ]: ;
+:macro === {} local{ x1 x2 -- f } :[ x1 === x2 ]: ;
+:macro !== {} local{ x1 x2 -- f } :[ x1 !== x2 ]: ;
+:macro <> {} local{ x1 x2 -- f } :[ x1 != x2 ]: ;
+:macro > {} local{ x1 x2 -- f } :[ x1 > x2 ]: ;
+:macro >= {} local{ x1 x2 -- f } :[ x1 >= x2 ]: ;
+:macro < {} local{ x1 x2 -- f } :[ x1 < x2 ]: ;
+:macro <= {} local{ x1 x2 -- f } :[ x1 <= x2 ]: ;
 
 :macro m= { x1 x2 -- f } :[ x1 == x2 ]: ;
 :macro m=== { x1 x2 -- f } :[ x1 === x2 ]: ;
@@ -185,12 +185,12 @@ THE SOFTWARE.
 :macro m<= { x1 x2 -- f } :[ x1 >= x2 ]: ;
 
 \ we provide a faster implementation for important functions
-:macro 0= {} ( x1 -- f ) :[ stack.pop() === 0 ]: ;
-:macro 0<> {} ( x1 -- f ) :[ stack.pop() != 0 ]: ;
-:macro 0> {} ( x1 -- f ) :[ stack.pop() > 0 ]: ;
-:macro 0>= {} ( x1 -- f ) :[ stack.pop() >= 0 ]: ;
-:macro 0< {} ( x1 -- f ) :[ stack.pop() < 0 ]: ;
-:macro 0<= {} ( x1 -- f ) :[ stack.pop() <= 0 ]: ;
+:macro 0= {} local{ x1 -- f } :[ x1 === 0 ]: ;
+:macro 0<> {} local{ x1 -- f } :[ x1 != 0 ]: ;
+:macro 0> {} local{ x1 -- f } :[ x1 > 0 ]: ;
+:macro 0>= {} local{ x1 -- f } :[ x1 >= 0 ]: ;
+:macro 0< {} local{ x1 -- f } :[ x1 < 0 ]: ;
+:macro 0<= {} local{ x1 -- f } :[ x1 <= 0 ]: ;
 
 :macro m0= { x1 -- f } :[ x1 == 0 ]: ;
 :macro m0=== { x1 -- f } :[ x1 === 0 ]: ;

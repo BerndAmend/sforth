@@ -21,9 +21,9 @@
 	; to Color.prototype.plus
 
 	:noname { other }
-		m* this.r other.r
-		m* this.g other.g
-		m* this.b other.b
+		' this.r ' other.r *
+		' this.g ' other.g *
+		' this.b ' other.b *
 		new Color
 	; to Color.prototype.times
 
@@ -409,7 +409,7 @@ var Surfaces;
 ;
 
 : serialize-scene { scene -- str }
-	' scene null "t JSON.stringify(3) ;
+	' scene null "\t JSON.stringify(3) ;
 
 : deserialize-scene { str -- scene }
 	create-empty-object { scene }
