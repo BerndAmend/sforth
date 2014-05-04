@@ -148,12 +148,12 @@ THE SOFTWARE.
 : sindeg {} ( x1 -- x2 ) deg2rad Math.sin ;
 : tandeg {} ( x1 -- x2 ) deg2rad Math.tan ;
 
-: + { x1 x2 -- x3 } :[ x1 + x2 ]: ;
-: - { x1 x2 -- x3 } :[ x1 - x2 ]: ;
-: * { x1 x2 -- x3 } :[ x1 * x2 ]: ;
-: / { x1 x2 -- x3 } :[ x1 / x2 ]: ;
-: mod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
-: /mod { x1 x2 -- x3 } :[ x1 % x2 ]: x1 x2 / Math.floor ;
+:macro + {} ( x1 x2 -- x3 ) { +_x2 } :[ stack.pop() + $$plus_x2 ]: ;
+:macro - {} ( x1 x2 -- x3 ) { -_x2 } :[ stack.pop() - $$minus_x2 ]: ;
+:macro * {} ( x1 x2 -- x3 ) { *_x2 } :[ stack.pop() * $$times_x2 ]: ;
+:macro / {} ( x1 x2 -- x3 ) { /_x2 } :[ stack.pop() / $$div_x2 ]: ;
+:macro mod {} ( x1 x2 -- x3 ) { %_x2 } :[ stack.pop() % $$percent_x2 ]: ;
+: /mod { x1 x2 -- x3 } :[ x1 % x2 ]: :[ x1 / x2 ]: Math.floor ;
 
 :macro m+ { x1 x2 -- x3 } :[ x1 + x2 ]: ;
 :macro m- { x1 x2 -- x3 } :[ x1 - x2 ]: ;
