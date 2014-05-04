@@ -51,8 +51,7 @@ THE SOFTWARE.
         }
     }
 ]:d
-	// separate otherwise the compiler wouldn't detect that it can be inlined
-	:[ sforth_new_helper_variable_42 ]:
+' sforth_new_helper_variable_42
 ;
 
 :macro value { name } :[ var name = stack.pop() ]; ;
