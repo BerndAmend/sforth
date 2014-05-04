@@ -122,11 +122,11 @@ THE SOFTWARE.
 
 :macro & {} ( x1 x2 -- x3 ) :[ stack.pop() & stack.pop() ]: ;
 
-:macro && {} ( x1 x2 -- x3 ) :[ stack.pop() && stack.pop() ]: ;
+:macro && {} ( x1 x2 -- x3 ) { &&_x1 &&_x2 } :[ $$amp$$amp_x1 && $$amp$$amp_x2 ]: ;
 
 :macro | {} ( x1 x2 -- x3 ) :[ stack.pop() | stack.pop() ]: ;
 
-:macro || {} ( x1 x2 -- x3 ) :[ stack.pop() || stack.pop() ]: ;
+:macro || {} ( x1 x2 -- x3 ) { ||_x1 ||_x2 } :[ $$bar$$bar_x1 || $$bar$$bar_x2 ]: ;
 
 : xor {} ( x1 x2 -- x3 ) :[ /* jshint bitwise:false */ ]:d :[ stack.pop() ^ stack.pop() ]: ;
 
