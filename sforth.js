@@ -1418,7 +1418,7 @@ forth.optimizeCodeTree = function(org_code_tree) {
 					visitNodes(func, current.defaultOf);
 					break;
 				case forth.Types.BranchIf:
-					visitNodes(func, current.body);
+					visitNodes(func, current.if_body);
 					visitNodes(func, current.else_if_bodies);
 					visitNodes(func, current.else_body);
 					break;
