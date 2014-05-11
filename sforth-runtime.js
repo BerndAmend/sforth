@@ -102,7 +102,6 @@ forth.Stack = (function () {
 	}
 
 	ForthStack.prototype.push=function(item) {
-		// TODO: should we throw an overflow?
 		this.stac[++this.pos] = item;
 	};
 
