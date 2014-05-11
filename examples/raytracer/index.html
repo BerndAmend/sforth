@@ -12,7 +12,7 @@
 	<script data-src="../../forth.fs;../../browser.fs;raytracer.fs" type="application/sforth"></script>
 
 	<script type="application/sforth" data-id="raytracer-worker" data-type="javascript/worker"
-		data-src="../../sforth-runtime.js;../../forth.fs;raytracer.fs" data-throw-on-underflow="true">
+		data-src="../../sforth-runtime.js;../../forth.fs;raytracer.fs" data-throw-on-underflow="false">
 		:jsnoname { e }
 			e.data.id { id }
 			e.data.scene deserialize-scene { scene }
