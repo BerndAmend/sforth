@@ -257,7 +257,7 @@ THE SOFTWARE.
 : o>string { n -- str } :[ n.toString() ]: ;
 : /string { str n -- str } n str.substr(1) ;
 
-: time-in-ms ( -- x ) :[ new Date() ]: { x } x.getTime ;
+: time-in-ms ( -- x ) Date.now() ;
 
 : settimeout ( jsfunction timeout -- handle ) setTimeout(2) ;
 : cleartimeout ( handle -- ) clearTimeout(1) ;
