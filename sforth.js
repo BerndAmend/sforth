@@ -1765,8 +1765,8 @@ forth.optimizeCodeTree = function(org_code_tree) {
 
 		visitNodes(fixIncompleteDoLoops, code_tree);
 		visitNodes(rewriteStackPop, code_tree);
-		visitNodes(inlineValueLocal, code_tree);
-		visitNodes(inlineValueLocalTemp, code_tree);
+		//visitNodes(inlineValueLocal, code_tree);
+		//visitNodes(inlineValueLocalTemp, code_tree);
 		visitNodes(rewriteJSCode, code_tree);
 		visitNodes(inlineValueLocalTempIntoJsOperators, code_tree);
 		visitNodes(removeEmptyCodeTreeEntries, code_tree);
