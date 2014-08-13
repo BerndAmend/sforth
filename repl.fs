@@ -83,7 +83,9 @@ null to forthconsole.onKey
 		endif
 	elseif key "\r === key "\n === || if
 		» « type
-		entered cmd_history.push
+		entered »« !== if
+			entered cmd_history.push
+		endif
 		0 to cmd_last_pos
 		entered
 
@@ -91,7 +93,9 @@ null to forthconsole.onKey
 			forth.compile
 			»« to entered
 			eval
-			» ok\n« type
+			' forthconsole.onKey null === if
+				» ok\n« type
+			endif
 		catch e
 			"\n  e.stack + .
 		endtry
@@ -99,23 +103,34 @@ null to forthconsole.onKey
 	elseif 0 key.charCodeAt 27 = if
 		1 key.charCodeAt 91 = if
 			2 key.charCodeAt case
+
 				of 65 \ up
-					cmd_history.size 0> if
-						clearcurrentline
-						cmd_last_pos cmd_history.get dup to entered .
+					cmd_last_pos 0= if
+						cmd_last_pos cmd_history.get count 0<> if
+							»« cmd_history.push
+						endif
 					endif
 					cmd_last_pos cmd_history.size 1- < if
 						cmd_last_pos 1+ to cmd_last_pos
 					endif
+					cmd_history.size 0> if
+						clearcurrentline cmd_last_pos cmd_history.get to entered
+					endif
+					entered .
 				endof
 
 				of 66 \ down
-					cmd_history.size 0> if
-						clearcurrentline
-						cmd_last_pos cmd_history.get dup to entered .
-					endif
 					cmd_last_pos 0> if
 						cmd_last_pos 1- to cmd_last_pos
+					endif
+					cmd_history.size 0> if
+						clearcurrentline cmd_last_pos cmd_history.get to entered
+					endif
+					entered .
+					cmd_last_pos 0= if
+						entered count 0<> if
+							»« cmd_history.push
+						endif
 					endif
 				endof
 
