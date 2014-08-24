@@ -8,4 +8,6 @@
 	worker
 ;
 
-: . ( string -- ) console-log ;
+: console-low-level-type { x -- }
+	console-log
+;

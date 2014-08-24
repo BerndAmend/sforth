@@ -22,13 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
+// this file expects that you have already define a console-low-level-type function
+
 10 value consolebase
 
 : type { x -- }
 	typeof x "number" = if
-		:[ process.stdout.write(x.toString(consolebase)) ];
+		:[ x.toString(consolebase) ]: console-low-level-type
 	else
-		:[ process.stdout.write(util.format(x)) ];
+		typeof util "undefined" <> if
+			:[ util.format(x) ]: console-low-level-type
+		else
+			x console-low-level-type
+		endif
 	endif
 ;
 
