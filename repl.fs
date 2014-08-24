@@ -22,24 +22,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
-include "forth.fs
+include "forth.fs"
 include »console.fs«
 include filesystem.fs
 include process.fs
 
-»sforth, Copyright (C) 2013-2014 Bernd Amend <bernd.amend+sforth@gmail.com>\n«
-»Type `bye' to exit\n« + .
+"sforth, Copyright (C) 2013-2014 Bernd Amend <bernd.amend+sforth@gmail.com>\n"
+"Type `bye' to exit\n" + .
 
 process.argv.length 2 > if
 	2 undefined process.argv.slice { sforth_repl_args }
-	:jsnoname { val } »Compile « val + "\n + . val compile-to-file ;
+	:jsnoname { val } »Compile « val + "\n" + . val compile-to-file ;
 	sforth_repl_args.forEach
 	0 process.exit
 endif
 
 true process.stdin.setRawMode
 process.stdin.resume
-"utf8 process.stdin.setEncoding
+"utf8" process.stdin.setEncoding
 
 2000 to cmd_history_save_size
 
@@ -50,40 +50,40 @@ process.stdin.resume
 	remove_element_count 0> if
 		:[ cmd_history.stac.splice(0, remove_element_count) ];
 	endif
-	".sforth_history cmd_history.toJSON writeFileSync
+	".sforth_history" cmd_history.toJSON writeFileSync
 	0 process.exit ;
 
-»« value entered
+"" value entered
 
 0 value cmd_last_pos
 new forth.Stack value cmd_history
 
 try
-	".sforth_history readFileSync cmd_history.fromJSON
+	".sforth_history" readFileSync cmd_history.fromJSON
 catch err
 endtry
 
 : forthconsole ;
 null to forthconsole.onKey
 
-"data
+"data"
 :jsnoname { key }
-	key "\u0003 === if
+	key "\u0003" === if
 		\ Control-C was pressed
 		\ restore console handler
 		null to forthconsole.onKey
 	elseif ' forthconsole.onKey null <> if
 		key forthconsole.onKey
-	elseif key "\u007f === if
+	elseif key "\u007f" === if
 		\ Backspace was pressed
 		entered.length 0> if
 			0 entered.length 1- entered.substr to entered
 		clearcurrentline
 			entered.length 0> if entered . endif
 		endif
-	elseif key "\r === key "\n === || if
-		» « type
-		entered »« !== if
+	elseif key "\r" === key "\n" === || if
+		" " type
+		entered "" !== if
 			entered cmd_history.push
 		endif
 		0 to cmd_last_pos
@@ -97,7 +97,7 @@ null to forthconsole.onKey
 				» ok\n« type
 			endif
 		catch e
-			"\n  e.stack + .
+			"\n"  e.stack + .
 		endtry
 
 	elseif 0 key.charCodeAt 27 = if
@@ -146,7 +146,7 @@ null to forthconsole.onKey
 	else
 		// If a user copies a string with new lines into the repl we are
 		// only called once.
-		"\r "\n key.replaceAll type
+		"\r" "\n" key.replaceAll type
 		entered key + to entered
 	endif
 ;

@@ -9,7 +9,7 @@
 
 : hanoi ( n -- )
   1 Math.max >r
-  "right "middle "left r> move-disk
+  "right" "middle" "left" r> move-disk
   drop drop drop ;
 
 3 hanoi

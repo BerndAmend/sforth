@@ -126,7 +126,7 @@ Color.black to Color.defaultColor
 // Sphere
 	@constructor
 	: Sphere { center radius surface }
-		"Sphere to this.type
+		"Sphere" to this.type
 		' center to this.center
 		' surface to this.surface
 		' radius to this.radius
@@ -156,7 +156,7 @@ Color.black to Color.defaultColor
 // Plane
 	@constructor
 	: Plane { norm offset surface }
-		"Plane to this.type
+		"Plane" to this.type
 		' norm to this.norm
 		' offset to this.offset
 		' surface to this.surface
@@ -409,7 +409,7 @@ var Surfaces;
 ;
 
 : serialize-scene { scene -- str }
-	' scene null "\t JSON.stringify(3) ;
+	' scene null "\t" JSON.stringify(3) ;
 
 : deserialize-scene { str -- scene }
 	create-empty-object { scene }
@@ -423,13 +423,13 @@ var Surfaces;
 		m@ desc.things i { thing }
 
 		thing.type case
-			of "Plane
+			of "Plane"
 				' thing.norm.x ' thing.norm.y ' thing.norm.z new Vector
 				' thing.offset
 				m@ Surfaces thing.surface.type
 				new Plane
 			break
-			of "Sphere
+			of "Sphere"
 				' thing.center.x ' thing.center.y ' thing.center.z new Vector
 				' thing.radius
 				m@ Surfaces thing.surface.type

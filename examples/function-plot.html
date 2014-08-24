@@ -49,7 +49,7 @@
 				x0 { xmin }
 			endif
 			ctx.beginPath(0)
-			"rgb(128,128,128) to ctx.strokeStyle
+			"rgb(128,128,128)" to ctx.strokeStyle
 			xmin y0 ctx.moveTo(2)   w y0 ctx.lineTo(2)  // X axis
 			x0    0 ctx.moveTo(2)  x0 h  ctx.lineTo(2)  // Y axis
 			ctx.stroke(0)
@@ -59,19 +59,19 @@
 		: fun1 ( x ) 3 * Math.cos ;
 
 		: draw {}
-			"canvas document.getElementById(1) { canvas }
+			"canvas" document.getElementById(1) { canvas }
 
 			create-empty-object { axes }
 
-			"2d canvas.getContext(1) { ctx }
+			"2d" canvas.getContext(1) { ctx }
 			0.5 canvas.width  * 0.5 + to axes.x0  // x0 pixels from left to x=0
 			0.5 canvas.height * 0.5 + to axes.y0 // y0 pixels from top to y=0
 			60 to axes.scale                 // 40 pixels from x=0 to x=1
 			true to axes.doNegativeX
 
 			ctx axes showAxes
-			ctx axes ' Math.sin "rgb(11,153,11) 1 funGraph
-			ctx axes ' fun1 "rgb(66,44,255) 2 funGraph
+			ctx axes ' Math.sin "rgb(11,153,11)" 1 funGraph
+			ctx axes ' fun1 "rgb(66,44,255)" 2 funGraph
 		;
 
 		draw

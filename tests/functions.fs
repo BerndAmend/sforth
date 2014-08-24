@@ -12,4 +12,4 @@ clearstack
 
 new nestedtest { nt }
 nt.answer 42 = »test if the nestedtest value answer works« assert
-nt.bla "no = »test if the nestedtest function bla works« assert
+nt.bla "no" = »test if the nestedtest function bla works« assert

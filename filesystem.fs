@@ -25,11 +25,11 @@ THE SOFTWARE.
 : readFileSync { filename -- content } :[ Filesystem.readFileSync(filename) ]: ;
 : writeFileSync { filename data -- } :[ Filesystem.writeFileSync(filename, data) ]:d ;
 
-: readLineWise ( filename ) readFileSync { content } :[ content.toString() ]: { str } "\n undefined str.split ;
+: readLineWise ( filename ) readFileSync { content } :[ content.toString() ]: { str } "\n" undefined str.split ;
 
 : dir ( folder -- ) Filesystem.readdirSync ;
 
-: compile-to-file { filename } filename readFileSync { str } :[ str.toString() ]: forth.compile filename ".js + swap writeFileSync ;
+: compile-to-file { filename } filename readFileSync { str } :[ str.toString() ]: forth.compile filename ".js" + swap writeFileSync ;
 
 (
 
@@ -43,7 +43,7 @@ THE SOFTWARE.
        " " \ the result string
        lines 0 ?DO i
          i columns * dup columns + { pos_start pos_end }
-         [ content.slice(pos_start, post_end) ] "\n + +
+         [ content.slice(pos_start, post_end) ] "\n" + +
        LOOP
 
        { result }
@@ -52,5 +52,5 @@ THE SOFTWARE.
 ;
 
 \ test
-"ps35.fbv "ps35.fs 84 42 convert-fbv-to-fs
+"ps35.fbv" "ps35.fs" 84 42 convert-fbv-to-fs
 )

@@ -60,7 +60,6 @@ forth.mangling = {
 	"{": "$$obraces",
 	"}": "$$obraces",
 	"\u00b7": "$$middot",
-	"\"": "$$quotationmark",
 	"'": "$$apostrophe"
 };
 
@@ -446,8 +445,40 @@ forth.tokenize = function(code) {
 					add(new forth.Number(replacedcommawithperiod));
 				} else if(t[0] == "'" && t.length == 2) {
 					add(new forth.Number(t.charCodeAt(1)));
-				} else if(t[0] == "\"" && t.length >= 2) {
-					add(new forth.String(t.substr(1)));
+				} else if(t[0] == "\"") {
+					var escapecounter = 0;
+					var j=0;
+					var str = "";
+					while(true) {
+						if(tokens[i].length-1==j || tokens[i].length == 0) {
+							j=0;
+							i++;
+							if(i >= tokens.length)
+								throw new Error("Couldn't find '\"'");
+							str += " ";
+							if(tokens[i].length == 0)
+								continue;
+						} else {
+							j++;
+						}
+
+						if(tokens[i][j] == "\\") {
+							escapecounter++;
+						} else {
+							for(var k=0;k<escapecounter;k++)
+								str += "\\";
+							if(escapecounter % 2 == 0 && tokens[i][j] == "\"")
+								break;
+							escapecounter=0;
+							str += tokens[i][j];
+						}
+					}
+
+					add(new forth.String(str.slice(0,str.length)
+											.replace(/ \n /gm, '\\n')
+											.replace(/ \t /gm, '\\t')
+											.replace(/ \r /gm, '\\r')
+						));
 				} else if(t[0] == "\u00bb") { // »
 					if(tokens[i].substr(tokens[i].length-1) == "\u00ab" && // «
 						tokens[i].substr(tokens[i].length-2) != "\\\u00ab" // «
@@ -478,8 +509,9 @@ forth.tokenize = function(code) {
 					}
 
 					add(new forth.String(str.slice(0,str.length-1)
-											.replace(/ \t /gm, '\t')
-											.replace(/ \r /gm, '\r')
+											.replace(/ \n /gm, '\\n')
+											.replace(/ \t /gm, '\\t')
+											.replace(/ \r /gm, '\\r')
 											.replaceAll("\"", "\\\"")
 											.replaceAll("\\\u00bb", "\u00bb")
 											.replaceAll("\\\u00ab", "\u00ab")
@@ -779,6 +811,7 @@ forth.createFromForthTokens = function(tokens, context) {
 			case "do":
 			case "+do":
 			case "-do":
+				var starti = i;
 				var start = tokens[i];
 
 				i++;

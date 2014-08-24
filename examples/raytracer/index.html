@@ -46,20 +46,20 @@
 			:[ document.getElementById('worker-count').value ]: { workerCount }
 			:[ document.getElementById('width').value ]: { width }
 			:[ document.getElementById('height').value ]: { height }
-			"processing-time document.getElementById(1) { processing-time }
+			"processing-time" document.getElementById(1) { processing-time }
 
 			// disable the render button
-			"render-button document.getElementById(1) { render-button }
+			"render-button" document.getElementById(1) { render-button }
 			true to render-button.disabled
 
-			"canvas document.getElementById(1) { canvas }
-			"2d canvas.getContext(1) { ctx }
+			"canvas" document.getElementById(1) { canvas }
+			"2d" canvas.getContext(1) { ctx }
 
 			width to canvas.width
 			height to canvas.height
 
-			"scene-desc document.getElementById(1) { scene-desc }
-			"{ scene-desc.value + "} + { scene }
+			"scene-desc" document.getElementById(1) { scene-desc }
+			"{" scene-desc.value + "}" + { scene }
 
 			workerCount { active-worker }
 
@@ -82,7 +82,7 @@
 						false to render-button.disabled
 
 						// enable the download-button
-						"download-button document.getElementById(1) { download-button }
+						"download-button" document.getElementById(1) { download-button }
 						false to download-button.disabled
 					endif
 					exit
@@ -98,7 +98,7 @@
 			;
 
 			0 ' workerCount 1 do i
-				"#raytracer-worker create-worker { worker }
+				"#raytracer-worker" create-worker { worker }
 
 				' worker-onmessage to worker.onmessage
 				' worker-onerror to worker.onerror
@@ -116,9 +116,9 @@
 		;
 
 		:js downloadImage { }
-			"canvas document.getElementById { canvas }
-			"2d canvas.getContext(1) { ctx }
-			"image/webp canvas.toDataURL(1) { image } "image/webp "image/octet-stream image.replace 'new_window' window.open
+			"canvas" document.getElementById { canvas }
+			"2d" canvas.getContext(1) { ctx }
+			"image/webp" canvas.toDataURL(1) { image } "image/webp" "image/octet-stream" image.replace 'new_window' window.open
 		;
 	</script>
 

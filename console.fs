@@ -25,7 +25,7 @@ THE SOFTWARE.
 10 value consolebase
 
 : type { x -- }
-	typeof x "number = if
+	typeof x "number" = if
 		:[ process.stdout.write(x.toString(consolebase)) ];
 	else
 		:[ process.stdout.write(util.format(x)) ];
@@ -35,57 +35,57 @@ THE SOFTWARE.
 : . { x -- }
 	typeof x { typeof-x }
 
-	typeof-x "function =
-	typeof-x "undefined =
+	typeof-x "function" =
+	typeof-x "undefined" =
 	|| if
 		' x type
 	else
 		x type
 	endif
-	typeof-x "number = if space endif
+	typeof-x "number" = if space endif
 ;
 
 : .c { x -- }
-	typeof x "number = if
-		:[ x.toString() ]: { y } ". ", y.replaceAll type space
+	typeof x "number" = if
+		:[ x.toString() ]: { y } "." "," y.replaceAll type space
 	endif
 ;
 
-: hex2str { x1 -- x2 } "$ 16 x1.toString + ;
+: hex2str { x1 -- x2 } "$" 16 x1.toString + ;
 : hex. hex2str . ;
 
 : .s
-	"< depth 1- »> « + + . depth dup 0 swap 1
+	"<" depth 1- »> « + + . depth dup 0 swap 1
 	do i
 		dup i - pick { e }
 		typeof e { typeof-e }
-		typeof-e "string = if
-			"» e "« + +
+		typeof-e "string" = if
+			"»" e "«" + +
 		else
-			typeof-e "function = typeof-e "undefined = || if
+			typeof-e "function" = typeof-e "undefined" = || if
 				' e
 			else
 				e
 			endif
 		endif
 		type space
-	LOOP
+	loop
 	drop ;
 
 : print-returnstack
 	:[ if(!this.returnStack) return ]; \ return if no return stack exists
 	this.returnStack to returnStack \ get the return stack of the caller
-	"< rdepth »> « + + . rdepth 1- rdepth 0 swap 1
+	"<" rdepth »> « + + . rdepth 1- rdepth 0 swap 1
 	do i
 		dup i - rpick type space
-	LOOP
+	loop
 	drop ;
 
 : emit ( x -- ) String.fromCharCode . ;
 
 : space ( -- ) » « . ;
 : spaces { n -- } »« 0 n 0 Math.max 1 do i » « + loop type ;
-: cr ( -- ) "\n . ;
+: cr ( -- ) "\n" . ;
 
 : clearcurrentline »\r\u001B[K« . ;
 

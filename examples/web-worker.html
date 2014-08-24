@@ -23,24 +23,24 @@
 
 	<script type="application/sforth">
 		:js sendMessage {}
-			"message document.getElementById(1) { msg }
+			"message" document.getElementById(1) { msg }
 			msg.value worker.postMessage(1)
 		;
 
 		: log { msg }
 			document.createDocumentFragment(0) { fragment }
 			msg document.createTextNode(1) fragment.appendChild(1)
-			"br document.createElement(1) fragment.appendChild(1)
-			"#log document.querySelector(1) { node } fragment node.appendChild(1)
+			"br" document.createElement(1) fragment.appendChild(1)
+			"#log" document.querySelector(1) { node } fragment node.appendChild(1)
 		;
 
-		"#worker1 create-worker { worker }
+		"#worker1" create-worker { worker }
 
 		:jsnoname { e }
 			»Received: « e.data + log
 		; to worker.onmessage
 
-		"Hi worker.postMessage
+		"Hi" worker.postMessage
 	</script>
 </body>
 </html>

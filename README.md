@@ -84,7 +84,7 @@ Checkout the examples at http://tptb.github.io/sforth/ (https://github.com/tptb/
 \ and place the result on the stack
 \ If you explicitly want or have to specify the number of arguments that should be passed to a js function
 \ you have to use parentheses e.g.
-"Test console.log(1) \ will pass one stack element to the function
+"Test" console.log(1) \ will pass one stack element to the function
 \ This is necessary since different browsers report for some functions different argument count values.
 ```
 
@@ -121,10 +121,10 @@ Macros are used to rewrite sourcecode before the code gets compiled. value and t
 ### strings
 ```forth
 \ normal strings
-»text«
+"text"
 
-\ strings without whitespaces
-"text
+\ or
+»text«
 ```
 
 ### objects
@@ -146,7 +146,7 @@ new <classname>
 \ store the value 63 at the 10 position in the array arr
 63 10 arr !
 \ store the string foo at the 31 position in the array arr
-"foo 31 arr !
+"foo" 31 arr !
 
 \ get a value
 <position> <array> @
@@ -167,9 +167,9 @@ endif
 
 \ example
 0 0 = if
-	":) .
+	":)" .
 else
-	":( .
+	":(" .
 endif
 ```
 
@@ -189,9 +189,9 @@ endif
 endcase
 
 \ e.g.
-"20 case
-	of "20
-		":) .
+"20" case
+	of "20"
+		":)" .
 	endof
 	
 	default
@@ -228,7 +228,7 @@ endtry
 
 \ e.g.
 try
-	":( new Error throw
+	":(" new Error throw
 catch err
 	err .
 endtry
@@ -266,7 +266,7 @@ endtry
 	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script>
 
 	<script type="application/sforth">
-		:js sayHello { } »Hello World!« show-alert ;
+		:js sayHello { } "Hello World!" show-alert ;
 	</script>
 	
 	<input type="button" value="Say hello!" onclick="sayHello();">
@@ -290,7 +290,7 @@ endtry
 	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script>
 
 	<script type="application/sforth">
-		:js sayHello { } »Hello World!« show-alert ;
+		:js sayHello { } "Hello World!" show-alert ;
 	</script>
 
 	<input type="button" value="Say hello!" onclick="sayHello();">
