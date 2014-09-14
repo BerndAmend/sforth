@@ -60,6 +60,7 @@ forth.mangling = {
 	"{": "$$obraces",
 	"}": "$$obraces",
 	"\u00b7": "$$middot",
+	"\"": "$$quotationmark",
 	"'": "$$apostrophe"
 };
 
