@@ -137,16 +137,6 @@ THE SOFTWARE.
 
 \ math operations
 
-: deg2rad {} ( x1 -- x2 ) 180.0 / ' Math.PI * ;
-: rad2deg {} ( x1 -- x2 ) ' Math.PI / 180.0 * ;
-
-: acosdeg {} ( x1 -- x2 ) Math.acos rad2deg ;
-: asindeg {} ( x1 -- x2 ) Math.asin rad2deg ;
-: atandeg {} ( x1 -- x2 ) Math.atan rad2deg ;
-: cosdeg {} ( x1 -- x2 ) deg2rad Math.cos ;
-: sindeg {} ( x1 -- x2 ) deg2rad Math.sin ;
-: tandeg {} ( x1 -- x2 ) deg2rad Math.tan ;
-
 :macro + {} local{ x1 x2 -- x3 } :[ x1 + x2 ]: ;
 :macro - {} local{ x1 x2 -- x3 } :[ x1 - x2 ]: ;
 :macro * {} local{ x1 x2 -- x3 } :[ x1 * x2 ]: ;
@@ -204,6 +194,16 @@ THE SOFTWARE.
 :macro 1- {} ( x1 -- x2 ) 1 - ;
 :macro 2* {} ( x1 -- x2 ) 2 * ;
 :macro 2/ {} ( x1 -- x2 ) 2 / ;
+
+: deg2rad {} ( x1 -- x2 ) 180.0 / ' Math.PI * ;
+: rad2deg {} ( x1 -- x2 ) ' Math.PI / 180.0 * ;
+
+: acosdeg {} ( x1 -- x2 ) Math.acos rad2deg ;
+: asindeg {} ( x1 -- x2 ) Math.asin rad2deg ;
+: atandeg {} ( x1 -- x2 ) Math.atan rad2deg ;
+: cosdeg {} ( x1 -- x2 ) deg2rad Math.cos ;
+: sindeg {} ( x1 -- x2 ) deg2rad Math.sin ;
+: tandeg {} ( x1 -- x2 ) deg2rad Math.tan ;
 
 \ return stack functions
 :macro >r {} ( w -- R:w ) :[ var returnStack = returnStack || new forth.Stack() ]; returnStack.push ;
