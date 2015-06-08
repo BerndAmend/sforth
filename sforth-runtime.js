@@ -82,7 +82,7 @@ forth.Stack = (function () {
 			if(realpos < 0)
 				throw new Error("Stack underflow"); //?
 			--this.pos;
-			return this.stac.splice(realpos, 1);
+			return this.stac.splice(realpos, 1)[0];
 		};
 	} else {
 		ForthStack.prototype.pop=function() {
@@ -97,7 +97,7 @@ forth.Stack = (function () {
 
 		ForthStack.prototype.remove=function(pos) {
 			--this.pos;
-			return this.stac.splice(this.pos-pos, 1);
+			return this.stac.splice(this.pos-pos, 1)[0];
 		};
 	}
 
