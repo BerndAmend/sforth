@@ -2,7 +2,7 @@
 /**
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 Bernd Amend <bernd.amend+sforth@gmail.com>
+Copyright (c) 2013-2015 Bernd Amend <bernd.amend+sforth@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -518,9 +518,9 @@ forth.tokenize = function(code) {
 											.replaceAll("\\\u00bb", "\u00bb")
 											.replaceAll("\\\u00ab", "\u00ab")
 						));
-				} else if(t[0] == "$" && t.length >= 2) {
+				} else if(t[0] == "$" && t.length >= 2) { // handle hex numbers
 					add(new forth.Number("0x" + t.substr(1)));
-				} else if(t[0] == "%" && t.length >= 2) {
+				} else if(t[0] == "%" && t.length >= 2) { // handle binary numbers
 					add(new forth.Number(parseInt(t.substr(1),2)));
 				} else {
 					add(t);
