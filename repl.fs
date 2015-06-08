@@ -42,8 +42,8 @@ process.argv.length 2 > if
 endif
 
 true process.stdin.setRawMode
-process.stdin.resume
-"utf8" process.stdin.setEncoding
+process.stdin.resume drop
+"utf8" process.stdin.setEncoding drop
 
 2000 to cmd_history_save_size
 
