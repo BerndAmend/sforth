@@ -61,7 +61,8 @@ forth.mangling = {
 	"}": "$$obraces",
 	"\u00b7": "$$middot",
 	"\"": "$$quotationmark",
-	"'": "$$apostrophe"
+	"'": "$$apostrophe",
+	"°": "$$degree"
 };
 
 forth.mangleName = function(str) {
