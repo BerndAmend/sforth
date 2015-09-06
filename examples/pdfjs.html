@@ -15,11 +15,11 @@
 	
 	<script type="application/sforth">
 		:[ new jsPDF("portrait", "mm", "a4") ]: { doc }
-		20 20 »Hello world!« undefined undefined doc.text drop
-		20 30 »This is client-side Javascript, pumping out a PDF.« undefined undefined doc.text drop
-		doc.addPage drop
-		20 20 »Do you like that?« undefined undefined doc.text drop
-		"fisch" doc.output
+		20 20 "Hello world!" doc.text(3);
+		20 30 "This is client-side Javascript written in sforth, pumping out a PDF." doc.text(3);
+		doc.addPage(0);
+		20 20 "Do you like that?" doc.text(3);
+		"fisch.pdf" doc.save(1);
 	</script>
 </body>
 </html>
