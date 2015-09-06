@@ -191,10 +191,11 @@ forth.Body = function() {
 	this.body = [];
 };
 
-forth.Call = function(name, argument_count) {
+forth.Call = function(name, argument_count, drop_result) {
 	this.type = forth.Types.Call;
 	this.name = name;
 	this.argument_count = argument_count; // optional, specifies how many arguments should be passed to a js function
+	this.drop_result = drop_result; // optional
 };
 
 forth.CommentLine = function(comment) {
@@ -1111,7 +1112,12 @@ forth.createFromForthTokens = function(tokens, context) {
 				} else {
 					var match = /^(.+)\((\d*)\)$/.exec(t);
 					if(match === null) {
-						add(new forth.Call(t));
+						var match = /^(.+)\((\d*)\);$/.exec(t);
+						if(match === null) {
+							add(new forth.Call(t));
+						} else {
+							add(new forth.Call(match[1], match[2], true));
+						}
 					} else {
 						add(new forth.Call(match[1], match[2]));
 					}
@@ -1233,14 +1239,23 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 					append("if(!" + name + ".forth_function) { stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", stack.getTopElements(" + name + ".length)));");
 					append("} else { " + name + "(stack); }");
 					append("} else { stack.push(" + name + ");}");
-				} else {
+				} else if(code_tree.drop_result === undefined) {
 					if(code_tree.argument_count === "") {
 						append("if(!" + name + ".forth_function) { stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", stack.getTopElements(" + name + ".length)));");
-					append("} else { " + name + "(stack); }");
+						append("} else { " + name + "(stack); }");
 					} else if(code_tree.argument_count === 0) {
 						append("stack.pushIfNotUndefined(" + name + "());");
 					} else {
 						append("stack.pushIfNotUndefined(" + name + ".apply(" + ctxt + ", stack.getTopElements(" + code_tree.argument_count + ")));");
+					}
+				} else {
+					if(code_tree.argument_count === "") {
+						append("if(!" + name + ".forth_function) { " + name + ".apply(" + ctxt + ", stack.getTopElements(" + name + ".length));");
+						append("} else { " + name + "(stack); }");
+					} else if(code_tree.argument_count === 0) {
+						append(name + "();");
+					} else {
+						append(name + ".apply(" + ctxt + ", stack.getTopElements(" + code_tree.argument_count + "));");
 					}
 				}
 
