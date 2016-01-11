@@ -45,7 +45,7 @@ true process.stdin.setRawMode
 process.stdin.resume drop
 "utf8" process.stdin.setEncoding drop
 
-2000 to cmd_history_save_size
+2000 value cmd_history_save_size
 
 : bye ( -- )
 	\ save the cmd_history
