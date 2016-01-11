@@ -29,7 +29,6 @@ THE SOFTWARE.
 include "forth.fs"
 include »console.fs«
 include filesystem.fs
-include process.fs
 
 "sforth, Copyright (C) 2013-2016 Bernd Amend <bernd.amend+sforth@gmail.com>\n"
 "Type `bye' to exit\n" + .

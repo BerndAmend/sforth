@@ -30,27 +30,3 @@ THE SOFTWARE.
 : dir ( folder -- ) Filesystem.readdirSync ;
 
 : compile-to-file { filename } filename readFileSync { str } :[ str.toString() ]: forth.compile filename ".js" + swap writeFileSync ;
-
-(
-
-
-\ Some tests, should be moved into a different file
-
-: convert-fbv-to-fs { input_file output_file columns rows -- }
-    input_file readFileSync { input_data } \ read content from file
-    :[ content.toString() ]: { content }
-    [ content.length ] columns / { lines } \ calculate how many lines have to be read
-       " " \ the result string
-       lines 0 ?DO i
-         i columns * dup columns + { pos_start pos_end }
-         [ content.slice(pos_start, post_end) ] "\n" + +
-       LOOP
-
-       { result }
-
-       output_file result writeFileSync
-;
-
-\ test
-"ps35.fbv" "ps35.fs" 84 42 convert-fbv-to-fs
-)
