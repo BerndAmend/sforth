@@ -35,4 +35,4 @@ include "filesystem.fs"
 	:[ file.toString() ]: forth.compile vm.runInThisContext(1);
 loop
 
-»\nDone\n« .
+»Done\n« .
