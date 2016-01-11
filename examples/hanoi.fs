@@ -3,7 +3,7 @@
   1-       >r
   rot swap r@ ( t v f n-1 ) move-disk
   rot swap
-  2dup "\n »Move disk from « + swap + » to « + swap + .
+  2dup "\nMove disk from " swap + » to « + swap + .
   swap rot r> ( f t v n-1 ) move-disk
   swap rot ;
 
