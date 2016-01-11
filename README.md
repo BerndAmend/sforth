@@ -15,7 +15,7 @@ or
 node nodeForth.js
 
 
-## Firefox / Chromium / Google Chrome
+## Firefox (>=44) / Chromium / Google Chrome
 
 The examples require that they are served using a static webserver.
 A test webserver is included that only requires node.js.
