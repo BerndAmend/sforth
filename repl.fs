@@ -27,7 +27,7 @@ include »console.fs«
 include filesystem.fs
 
 »sforth, Copyright (C) 2013-2016 Bernd Amend <bernd.amend+sforth@gmail.com>
-Type `bye' to exit« .
+Type `bye' to exit\n« .
 
 true process.stdin.setRawMode
 process.stdin.resume drop
@@ -36,11 +36,12 @@ process.stdin.resume drop
 2000 value cmd_history_save_size
 
 : bye ( -- )
+    cr
 	\ save the cmd_history
 	\ this won't handle concurrent instances
 	cmd_history.size cmd_history_save_size - { remove_element_count }
 	remove_element_count 0> if
-		:[ cmd_history.stac.splice(0, remove_element_count) ];
+		0 remove_element_count cmd_history.stac.splice(2);
 	endif
 	".sforth_history" cmd_history.toJSON writeFileSync
 	0 process.exit ;
