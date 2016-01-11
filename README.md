@@ -259,7 +259,7 @@ endtry
 	<script>sforthThrowOnUnderflow=true</script>
 	<script src="../ext/jquery-2.1.0.min.js"></script>
 	<script src="../sforth-runtime.js"></script>
-	<script src="../sforth.js"></script>
+	<script src="../sforth-compiler.js"></script>
 </head>
 <body>
 	<!-- include the base system -->
@@ -283,7 +283,7 @@ endtry
 	<!-- throw an exception if a stack underflow occurs -->
 	<script>sforthThrowOnUnderflow=true</script>
 	<script src="../sforth-runtime.js"></script>
-	<script src="../sforth.js"></script>
+	<script src="../sforth-compiler.js"></script>
 </head>
 <body onload="forth.compileAllScriptRegions();">
 	<!-- include the base system -->

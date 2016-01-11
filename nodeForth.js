@@ -33,10 +33,10 @@ global.vm = global.vm || require('vm');
 global.util = global.util || require('util');
 global.Filesystem = global.Filesystem || require('fs');
 
-//require("./sforth.js");
+//require("./sforth-compiler.js");
 //require("./sforth-runtime.js");
 
 vm.runInThisContext(Filesystem.readFileSync('sforth-runtime.js').toString());
-vm.runInThisContext(Filesystem.readFileSync('sforth.js').toString());
+vm.runInThisContext(Filesystem.readFileSync('sforth-compiler.js').toString());
 
 vm.runInThisContext(forth.compile(Filesystem.readFileSync("repl.fs").toString()));
