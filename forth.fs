@@ -70,6 +70,7 @@ THE SOFTWARE.
 :macro break {} :[ break ]; ;
 :macro leave {} :[ break ]; ;
 :macro exit {} :[ return ]; ;
+:macro return {} :[ return ]; ;
 
 \ TODO: fix the case handling
 :macro of { key } :[ case key : ]:d ;
@@ -130,9 +131,9 @@ THE SOFTWARE.
 
 :macro xor {} local{ x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
 
-: not local{ x1 -- x2 } :[ ! x1 ]: ;
+: not { x1 -- x2 } :[ ! x1 ]: ;
 
-: invert local{ x1 -- x2 } :[ ~ x1 ]: ;
+: invert { x1 -- x2 } :[ ~ x1 ]: ;
 
 : negate ( n -- -n ) -1 * ;
 
