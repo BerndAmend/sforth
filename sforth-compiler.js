@@ -499,8 +499,6 @@ forth.tokenize = function(code) {
 								else
 									str += tokens[i];
 								break;
-							} else if(tokens[i] == "\n") {
-								str += "\n";
 							} else {
 								str += tokens[i] + " ";
 							}
@@ -510,7 +508,6 @@ forth.tokenize = function(code) {
 								throw new Error("Couldn't find closing '\u00ab' for '\u00bb'");
 						}
 					}
-
 					add(new forth.String(str.slice(0,str.length-1)
 											.replace(/ \n /gm, '\\n')
 											.replace(/ \t /gm, '\\t')

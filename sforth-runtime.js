@@ -29,8 +29,7 @@ forth.macros = forth.macros || {};
 
 // TODO optimize functions
 String.prototype.replaceAll = function(search, replacement) {
-    let target = this;
-    return target.split(search).join(replacement);
+    return this.split(search).join(replacement);
 };
 
 // TODO. ugly hack
