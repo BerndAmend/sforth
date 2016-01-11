@@ -1,7 +1,7 @@
 (
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 Bernd Amend <bernd.amend+sforth@gmail.com>
+Copyright (c) 2013-2016 Bernd Amend <bernd.amend+sforth@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ include »console.fs«
 include filesystem.fs
 include process.fs
 
-"sforth, Copyright (C) 2013-2014 Bernd Amend <bernd.amend+sforth@gmail.com>\n"
+"sforth, Copyright (C) 2013-2016 Bernd Amend <bernd.amend+sforth@gmail.com>\n"
 "Type `bye' to exit\n" + .
 
 process.argv.length 2 > if
