@@ -118,6 +118,7 @@ forth.Types = {
 	JsCodeWithReturn: "JsCodeWithReturn",
 	Macro: "Macro",
 	Number: "Number",
+	Screen: "Screen",
 	String: "String",
 	TryCatchFinally: "TryCatchFinally",
 	ValueLocal: "ValueLocal",
@@ -267,6 +268,11 @@ forth.Number = function(value) {
 	this.value = value;
 };
 
+forth.Screen = function(comment) {
+	this.type = forth.Types.Screen;
+	this.comment = comment;
+};
+
 forth.String = function(value) {
 	this.type = forth.Types.String;
 	this.value = value;
@@ -331,11 +337,28 @@ forth.tokenize = function(code) {
 			case "\r":
 				break;
 
-			case "\\\\":
+            case "////": // start a new screen
+                while(tokens[i] != "\n") {
+					i++;
+
+					if(i >= tokens.length)
+						break;
+
+					if(tokens[i] != "\n")
+						str += tokens[i] + " ";
+				}
+				add(new forth.Screen(str.slice(0,str.length-1)));
+                break;
+
+			case "\\\\": // \\ comments
 				i++;
 				while(i < tokens.length) {
 					str += tokens[i] + " ";
 					i++;
+
+                    if(i+1 < tokens.length && tokens[i+1] == "////") {
+                        break;
+                    }
 				}
 				add(new forth.CommentParentheses(str.slice(0, str.length-1)));
 				break;
@@ -569,6 +592,7 @@ forth.createFromForthTokens = function(tokens, context) {
 			case forth.Types.ValueLocal:
 			case forth.Types.ValueLocalTemp:
 			case forth.Types.Number:
+            case forth.Types.Screen:
 			case forth.Types.String:
 				add(t);
 				token_handled = true;
@@ -1259,6 +1283,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 				break;
 
 			// we ignore CommentLines and CommentParentheses
+            case forth.Types.Screen:
 			case forth.Types.CommentLine:
 			case forth.Types.CommentParentheses:
 				break;
@@ -1486,6 +1511,7 @@ forth.optimizeCodeTree = function(org_code_tree) {
 				case forth.Types.NumberToVarTemp:
 				case forth.Types.NumberAssignToVar:
 				case forth.Types.NumberAddToVar:
+                case forth.Types.Screen:
 				case forth.Types.String:
 				case forth.Types.StringToVar:
 				case forth.Types.StringToVarTemp:

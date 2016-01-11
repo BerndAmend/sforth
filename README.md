@@ -301,5 +301,7 @@ endtry
 ( comment )
 /* comment */
 /** comment */
-\\ ignore the rest of the file
+
+//// Start a new screen
+\\ ignore the rest of the screen or file
 ```
