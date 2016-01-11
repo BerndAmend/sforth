@@ -82,8 +82,9 @@ null to forthconsole.onKey
 		0 to cmd_last_pos
 
 		try
-			entered forth.compile(1)
+			entered
 			»« to entered
+			forth.compile(1)
 			vm.runInThisContext(1);
 			' forthconsole.onKey null === if
 				» ok\n« type
