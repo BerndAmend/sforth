@@ -1434,7 +1434,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 		return out;
 	}
 
-	return generateCode(code_tree, -1);
+	return "\"use strict\";\n" + generateCode(code_tree, -1);
 };
 
 forth.optimizeCodeTree = function(org_code_tree) {
