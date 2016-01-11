@@ -54,6 +54,7 @@ THE SOFTWARE.
 ' sforth_new_helper_variable_42
 ;
 
+:macro let { name } :[ let name = stack.pop() ]; ;
 :macro value { name } :[ var name = stack.pop() ]; ;
 :macro const { name } :[ const name = stack.pop() ];  ;
 
