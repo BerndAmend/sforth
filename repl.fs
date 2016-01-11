@@ -22,10 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
-: console-low-level-type { x -- }
-	:[ process.stdout.write(x) ];
-;
-
 include "forth.fs"
 include »console.fs«
 include filesystem.fs

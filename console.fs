@@ -23,6 +23,16 @@ THE SOFTWARE.
 )
 
 // this file expects that you have already define a console-low-level-type function
+typeof console-low-level-type "function" !== if
+    typeof process "undefined" !== if
+        // automatically define console-low-level-type if node.js is used
+        :noname { x -- }
+            x process.stdout.write(1);
+        ; to global.console-low-level-type
+    else
+        "console-low-level-type needs to be defined" console.log(1);
+    endif
+endif
 
 10 value consolebase
 
@@ -31,7 +41,7 @@ THE SOFTWARE.
 		:[ x.toString(consolebase) ]: console-low-level-type
 	else
 		typeof util "undefined" <> if
-			:[ util.format(x) ]: console-low-level-type
+			x util.format(1) console-low-level-type
 		else
 			x console-low-level-type
 		endif
