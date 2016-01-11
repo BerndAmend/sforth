@@ -28,7 +28,7 @@ THE SOFTWARE.
 	"tests/" i test-files @ + { filename }
 	cr »Execute « filename + . cr
 	filename readFileSync { file }
-	:[ file.toString() ]: forth.compile eval
+	:[ file.toString() ]: forth.compile vm.runInThisContext(1);
 loop
 
 »\nDone« .

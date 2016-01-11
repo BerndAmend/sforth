@@ -26,31 +26,17 @@ THE SOFTWARE.
 
 global.sforthThrowOnUnderflow = true;
 
-// has to be done in the main file :(
-try {
-	global.util = require('util');
-} catch(e) {}
+// forward require that it can be called from sforth code
+global.require = require;
 
-try {
-	global.Filesystem = require('fs');
-} catch(e) {}
-
-try {
-	global.PDFDocument = require("pdfkit");
-} catch(e) {}
-
-try {
-	global.SerialPort = require("serialport").SerialPort;
-} catch(e) {}
-
-try {
-	global.PNG = require('pngjs').PNG;
-} catch(e) {}
+global.vm = global.vm || require('vm');
+global.util = global.util || require('util');
+global.Filesystem = global.Filesystem || require('fs');
 
 //require("./sforth.js");
 //require("./sforth-runtime.js");
 
-global.eval(Filesystem.readFileSync('sforth-runtime.js').toString());
-global.eval(Filesystem.readFileSync('sforth.js').toString());
+vm.runInThisContext(Filesystem.readFileSync('sforth-runtime.js').toString());
+vm.runInThisContext(Filesystem.readFileSync('sforth.js').toString());
 
-global.eval(forth.compile(Filesystem.readFileSync("repl.fs").toString()));
+vm.runInThisContext(forth.compile(Filesystem.readFileSync("repl.fs").toString()));

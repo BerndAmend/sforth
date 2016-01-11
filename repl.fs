@@ -90,12 +90,11 @@ null to forthconsole.onKey
 			entered cmd_history.push
 		endif
 		0 to cmd_last_pos
-		entered
 
 		try
-			forth.compile
+			entered forth.compile(1)
 			»« to entered
-			eval
+			vm.runInThisContext(1);
 			' forthconsole.onKey null === if
 				» ok\n« type
 			endif
