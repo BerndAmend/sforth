@@ -26,15 +26,8 @@ include "forth.fs"
 include »console.fs«
 include filesystem.fs
 
-"sforth, Copyright (C) 2013-2016 Bernd Amend <bernd.amend+sforth@gmail.com>\n"
-"Type `bye' to exit\n" + .
-
-process.argv.length 2 > if
-	2 undefined process.argv.slice { sforth_repl_args }
-	:jsnoname { val } »Compile « val + "\n" + . val compile-to-file ;
-	sforth_repl_args.forEach
-	0 process.exit
-endif
+»sforth, Copyright (C) 2013-2016 Bernd Amend <bernd.amend+sforth@gmail.com>
+Type `bye' to exit« .
 
 true process.stdin.setRawMode
 process.stdin.resume drop
