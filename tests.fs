@@ -22,13 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+include "forth.fs"
+include »console.fs«
+include "filesystem.fs"
+
 "tests" dir { test-files }
 
 0 test-files.length 1 do i
 	"tests/" i test-files @ + { filename }
-	cr »Execute « filename + . cr
+	»Execute « filename + . cr
 	filename readFileSync { file }
 	:[ file.toString() ]: forth.compile vm.runInThisContext(1);
 loop
 
-»\nDone« .
+»\nDone\n« .
