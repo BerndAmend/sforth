@@ -22,7 +22,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-// example app for nodejs
+
+// handle command line arguments
+var sforthArguments = [];
+
+for(let i=0; i<process.argv.length; i+=1) {
+    if(process.argv[i] == __filename) {
+        sforthArguments = process.argv.slice(i+1);
+        break;
+    }
+}
 
 global.sforthThrowOnUnderflow = true;
 
@@ -39,4 +48,8 @@ global.Filesystem = global.Filesystem || require('fs');
 vm.runInThisContext(Filesystem.readFileSync('sforth-runtime.js').toString());
 vm.runInThisContext(Filesystem.readFileSync('sforth-compiler.js').toString());
 
-vm.runInThisContext(forth.compile(Filesystem.readFileSync("repl.fs").toString()));
+if(sforthArguments.length === 0) {
+    vm.runInThisContext(forth.compile(Filesystem.readFileSync("repl.fs").toString()));
+} else {
+    vm.runInThisContext(forth.compile(Filesystem.readFileSync(sforthArguments[0]).toString()));
+}
