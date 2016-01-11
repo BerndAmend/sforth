@@ -21,12 +21,7 @@ The examples require that they are served using a static webserver.
 A test webserver is included that only requires node.js.
 Start it and follow the printed instructions
 
-./start-webserver.sh
-
-or
-
-node webserver.js
-
+./sforth webserver.fs
 
 To test the raytracer locally go to http://localhost:8080/examples/raytracer/
 
