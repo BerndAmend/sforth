@@ -29,16 +29,16 @@ forth.macros = forth.macros || {};
 
 // TODO optimize functions
 String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
+    let target = this;
     return target.split(search).join(replacement);
 };
 
 // TODO. ugly hack
 String.prototype.replaceWholeWord = function(search, replacement, ch) {
-    var target = this;
+    let target = this;
 	ch = ch || [" ", "\t", "\n"];
-	for(var i=0;i<ch.length;++i)
-		for(var j=0;j<ch.length;++j)
+	for(let i=0;i<ch.length;++i)
+		for(let j=0;j<ch.length;++j)
 			target = target.split(ch[i] + search + ch[j]).join(ch[i] + replacement + ch[j]);
 
 	// handle the case where the search word is at the beginning
@@ -70,7 +70,7 @@ forth.Stack = (function () {
 		};
 
 		ForthStack.prototype.getTopElements=function(count) {
-			var realpos = this.pos-count+1;
+			let realpos = this.pos-count+1;
 			if(realpos < 0)
 				throw new Error("Stack underflow");
 			this.pos -= count;
@@ -78,7 +78,7 @@ forth.Stack = (function () {
 		};
 
 		ForthStack.prototype.remove=function(pos) {
-			var realpos = this.pos-pos;
+			let realpos = this.pos-pos;
 			if(realpos < 0)
 				throw new Error("Stack underflow"); //?
 			--this.pos;
@@ -90,7 +90,7 @@ forth.Stack = (function () {
 		};
 
 		ForthStack.prototype.getTopElements=function(count) {
-			var realpos = this.pos-count+1;
+			let realpos = this.pos-count+1;
 			this.pos -= count;
 			return this.stac.slice(realpos, realpos+count);
 		};
@@ -123,7 +123,7 @@ forth.Stack = (function () {
 	};
 
 	ForthStack.prototype.get=function(pos) {
-		var realpos = this.pos-pos;
+		let realpos = this.pos-pos;
 		if(realpos < 0)
 			throw new Error("Stack underflow"); //?
 		return this.stac[realpos];
@@ -147,9 +147,9 @@ forth.Stack = (function () {
 	};
 
 	ForthStack.prototype.fromJSON=function(str) {
-		var l = JSON.parse(str);
+		let l = JSON.parse(str);
 		this.clear();
-		for(var i=0;i<l.length;++i)
+		for(let i=0;i<l.length;++i)
 			this.push(l[i]);
 	};
 

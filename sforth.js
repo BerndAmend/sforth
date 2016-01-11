@@ -66,13 +66,13 @@ forth.mangling = {
 };
 
 forth.mangleName = function(str) {
-	var result = str;
+	let result = str;
 
 	if(Number.isNumeric(str.charAt(0))) {
 		result = "$$" + result;
 	}
 
-	for(var s in forth.mangling) {
+	for(let s in forth.mangling) {
 		if (forth.mangling.hasOwnProperty(s)) {
 			result = result.replaceAll(s, forth.mangling[s]);
 		}
@@ -87,8 +87,8 @@ forth.mangleName = function(str) {
 };
 
 forth.demangleName = function (str) {
-	var result = str;
-	for(var s in forth.mangling) {
+	let result = str;
+	for(let s in forth.mangling) {
 		if (forth.mangling.hasOwnProperty(s)) {
 			result = result.replaceAll(forth.mangling[s], s);
 		}
@@ -301,26 +301,26 @@ forth.ValueToStack = function(name) {
 // later version will also keep track where the tokens are fetched from
 forth.tokenize = function(code) {
 	// unify line endings
-	var clean_code = code.replace(/\r\n/gm, '\n')
+	let clean_code = code.replace(/\r\n/gm, '\n')
 		.replace(/\n/gm, ' \n ')
 		.replace(/\t/gm, ' \t ')
 		.replace(/\r/gm, ' \n ');
 
 	// tokenize code
-	var tokens=clean_code.split(" ");
+	let tokens=clean_code.split(" ");
 
 	// merge tokens
-	var merged_tokens = [];
+	let merged_tokens = [];
 
 	function add(something) {
 		merged_tokens.push(something);
 	}
 
 	var str;
-	var depth;
+	let depth;
 
-	for( var i = 0 ; i < tokens.length; i++ ) {
-		var t = tokens[i];
+	for( let i = 0 ; i < tokens.length; i++ ) {
+		let t = tokens[i];
 		str = "";
 		depth = 1;
 
@@ -535,23 +535,23 @@ forth.tokenize = function(code) {
 forth.createFromForthTokens = function(tokens, context) {
 	context = context || {}; //forth.forthClone(parent_context);
 
-	var out = new forth.Body();
+	let out = new forth.Body();
 
 	function add(something) {
 		out.body.push(something);
 	}
 
-	var current;
-	var depth;
-	var localtree;
-	var args;
-	var function_name;
-	var returnValue;
-	var token_handled;
-	var values;
+	let current;
+	let depth;
+	let localtree;
+	let args;
+	let function_name;
+	let returnValue;
+	let token_handled;
+	let values;
 
-	for( var i = 0 ; i < tokens.length; i++ ) {
-		var t = tokens[i];
+	for( let i = 0 ; i < tokens.length; i++ ) {
+		let t = tokens[i];
 
 		depth = 1;
 		current = [];
@@ -652,9 +652,9 @@ forth.createFromForthTokens = function(tokens, context) {
 					}
 				}
 
-				var compiledIf = null;
-				var compiledElseIf = null;
-				var compiledElse = null;
+				let compiledIf = null;
+				let compiledElseIf = null;
+				let compiledElse = null;
 
 				if(tokensIf)
 					compiledIf = forth.createFromForthTokens(tokensIf, context);
@@ -663,8 +663,8 @@ forth.createFromForthTokens = function(tokens, context) {
 					/*jshint loopfunc:true */
 					compiledElseIf = [];
 					tokensElseIf.forEach(function(entry) {
-						var condition = forth.createFromForthTokens(entry.condition, context);
-						var body = forth.createFromForthTokens(entry.body, context);
+						let condition = forth.createFromForthTokens(entry.condition, context);
+						let body = forth.createFromForthTokens(entry.body, context);
 						compiledElseIf.push(new forth.BranchIfBody(condition, body));
 					});
 				}
@@ -675,11 +675,11 @@ forth.createFromForthTokens = function(tokens, context) {
 				add(new forth.BranchIf(compiledIf, compiledElseIf, compiledElse));
 				break;
 			case "try":
-				var tokensBody = current;
-				var tokensCatch = null;
-				var tokensFinally = null;
+				let tokensBody = current;
+				let tokensCatch = null;
+				let tokensFinally = null;
 
-				var catchVar = null;
+				let catchVar = null;
 
 				while(depth > 0) {
 					i++;
@@ -780,7 +780,7 @@ forth.createFromForthTokens = function(tokens, context) {
 				break;
 			case "case":
 				// TODO: we have to parse the of entries
-				var defaultOf = null;
+				let defaultOf = null;
 				while(depth > 0) {
 					i++;
 
@@ -814,8 +814,8 @@ forth.createFromForthTokens = function(tokens, context) {
 			case "do":
 			case "+do":
 			case "-do":
-				var starti = i;
-				var start = tokens[i];
+				let starti = i;
+				let start = tokens[i];
 
 				i++;
 
@@ -1138,7 +1138,7 @@ forth.generateJsCode = function(code_tree, indent_characters) {
 
 	function generateCode(code_tree, level) {
 
-		var out = "";
+		let out = "";
 
 		var lp =  "";
 		for(var i = 0; i < level; i++)
@@ -1826,31 +1826,31 @@ forth.optimizeCodeTree = function(org_code_tree) {
 };
 
 forth.compile = function(code) {
-	var tokens = forth.tokenize(code);
+	let tokens = forth.tokenize(code);
 	//Filesystem.writeFileSync("generated-tokens.json", JSON.stringify(tokens, null, "\t"));
-	var code_tree = forth.createFromForthTokens(tokens);
+	let code_tree = forth.createFromForthTokens(tokens);
 	//Filesystem.writeFileSync("generated-code_tree.json", JSON.stringify(code_tree, null, "\t"));
-	var optimized_code_tree = forth.optimizeCodeTree(code_tree);
+	let optimized_code_tree = forth.optimizeCodeTree(code_tree);
 	//Filesystem.writeFileSync("optimized-code_tree.json", JSON.stringify(optimized_code_tree, null, "\t"));
-	var generated_code = forth.generateJsCode(optimized_code_tree);
+	let generated_code = forth.generateJsCode(optimized_code_tree);
 	//Filesystem.writeFileSync("generated-code.js", generated_code);
 	return generated_code;
 };
 
 forth.compileWithContext = function(code, context) {
-	var tokens = forth.tokenize(code);
-	var code_tree = forth.createFromForthTokens(tokens, context);
-	var optimized_code_tree = forth.optimizeCodeTree(code_tree);
-	var generated_code = forth.generateJsCode(optimized_code_tree);
+	let tokens = forth.tokenize(code);
+	let code_tree = forth.createFromForthTokens(tokens, context);
+	let optimized_code_tree = forth.optimizeCodeTree(code_tree);
+	let generated_code = forth.generateJsCode(optimized_code_tree);
 	return generated_code;
 };
 
 // allows embedding sforth into normal websites
 forth.compileAllScriptRegions = function() {
-	var nodes = document.querySelectorAll('script[type="application/sforth"]');
+	let nodes = document.querySelectorAll('script[type="application/sforth"]');
 
 	function addToDOM(i, id, target_type, src) {
-		var script = document.createElement("script");
+		let script = document.createElement("script");
 		if(id)
 			script.id = id;
 		if(target_type)
@@ -1873,7 +1873,7 @@ forth.compileAllScriptRegions = function() {
 			addToDOM(i, id, target_type, src);
 			compileNode(i+1);
 		} else {
-			var xmlhttp = new XMLHttpRequest();
+			let xmlhttp = new XMLHttpRequest();
 			xmlhttp.onreadystatechange = function() {
 				if (xmlhttp.readyState === 4){
 					if(xmlhttp.status == 200) {
@@ -1904,15 +1904,15 @@ forth.compileAllScriptRegions = function() {
 		if(i >= nodes.length) // Done
 			return;
 
-		var filenames = nodes[i].getAttribute("data-src") || "";
-		var target_type = nodes[i].getAttribute("data-type");
-		var id = nodes[i].getAttribute("data-id");
-		var throw_on_underflow=nodes[i].getAttribute("data-throw-on-underflow");
+		let filenames = nodes[i].getAttribute("data-src") || "";
+		let target_type = nodes[i].getAttribute("data-type");
+		let id = nodes[i].getAttribute("data-id");
+		let throw_on_underflow=nodes[i].getAttribute("data-throw-on-underflow");
 
 		if(throw_on_underflow === null)
 			throw_on_underflow = true;
 
-		var src = "\"use strict\";\n";
+		let src = "\"use strict\";\n";
 		src += "var sforthThrowOnUnderflow=" + throw_on_underflow + ";";
 
 		compileRegion(i, src, filenames.split(";"), target_type, id, {});
