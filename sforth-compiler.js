@@ -120,6 +120,7 @@ forth.Types = {
 	Number: "Number",
 	Screen: "Screen",
 	String: "String",
+	Token: "Token",
 	TryCatchFinally: "TryCatchFinally",
 	ValueLocal: "ValueLocal",
 	ValueLocalTemp: "ValueLocalTemp",
@@ -275,6 +276,11 @@ forth.Screen = function(comment) {
 
 forth.String = function(value) {
 	this.type = forth.Types.String;
+	this.value = value;
+};
+
+forth.Token = function(value) {
+	this.type = forth.Types.Token;
 	this.value = value;
 };
 
@@ -544,7 +550,7 @@ forth.tokenize = function(code) {
 				} else if(t[0] == "%" && t.length >= 2) { // handle binary numbers
 					add(new forth.Number(parseInt(t.substr(1),2)));
 				} else {
-					add(t);
+					add(new forth.Token(t));
 				}
 		}
 	}
@@ -602,7 +608,7 @@ forth.createFromForthTokens = function(tokens, context) {
 		if(token_handled)
 			continue;
 
-		switch (t.toLowerCase()) {
+		switch (t.value.toLowerCase()) {
 			case "if":
 				var tokensIf = current;
 				var tokensElseIf = null;
@@ -616,12 +622,12 @@ forth.createFromForthTokens = function(tokens, context) {
 						throw new Error("Couldn't find closing 'endif/then' for 'if'");
 					}
 
-					if(tokens[i].type) {
+					if(tokens[i].type !== forth.Types.Token) {
 						current.push(tokens[i]);
 						continue;
 					}
 
-					switch(tokens[i].toLowerCase()) {
+					switch(tokens[i].value.toLowerCase()) {
 						case "if":
 							depth++;
 							current.push(tokens[i]);
@@ -642,7 +648,7 @@ forth.createFromForthTokens = function(tokens, context) {
 										forth.compiler_message_handler("tokens=" + JSON.stringify(tokens));
 										throw new Error("Couldn't find closing 'if' for 'elseif'");
 									}
-									if(!tokens[i].type && tokens[i].toLowerCase() == "if")
+									if(tokens[i].type === forth.Types.Token && tokens[i].value.toLowerCase() == "if")
 										break;
 
 									current.push(tokens[i]);
@@ -710,12 +716,12 @@ forth.createFromForthTokens = function(tokens, context) {
 						throw new Error("Couldn't find 'endtry' for 'try'");
 					}
 
-					if(tokens[i].type) {
+					if(tokens[i].type !== forth.Types.Token) {
 						current.push(tokens[i]);
 						continue;
 					}
 
-					switch(tokens[i].toLowerCase()) {
+					switch(tokens[i].value.toLowerCase()) {
 						case "try":
 							depth++;
 							current.push(tokens[i]);
@@ -723,7 +729,7 @@ forth.createFromForthTokens = function(tokens, context) {
 						case "catch":
 							if(depth == 1) {
 								i++;
-								catchVar = tokens[i];
+								catchVar = tokens[i].value;
 								tokensCatch = [];
 								current = tokensCatch;
 							} else {
@@ -770,12 +776,12 @@ forth.createFromForthTokens = function(tokens, context) {
 					if(i >= tokens.length)
 						throw new Error("Couldn't find closing 'again/until' for 'begin'");
 
-					if(tokens[i].type) {
+					if(tokens[i].type !== forth.Types.Token) {
 						current.push(tokens[i]);
 						continue;
 					}
 
-					switch(tokens[i].toLowerCase()) {
+					switch(tokens[i].value.toLowerCase()) {
 						case "begin":
 							depth++;
 							current.push(tokens[i]);
@@ -791,7 +797,7 @@ forth.createFromForthTokens = function(tokens, context) {
 					}
 				}
 
-				var ltoken = tokens[i].toLowerCase();
+				var ltoken = tokens[i].value.toLowerCase();
 				if(ltoken.toLowerCase() == "until")
 					add(new forth.BeginUntil(forth.createFromForthTokens(current, context)));
 				else if(ltoken == "again")
@@ -808,12 +814,12 @@ forth.createFromForthTokens = function(tokens, context) {
 					if(i >= tokens.length)
 						throw new Error("Couldn't find closing 'endcase' for 'case'");
 
-					if(tokens[i].type) {
+					if(tokens[i].type !== forth.Types.Token) {
 						current.push(tokens[i]);
 						continue;
 					}
 
-					switch(tokens[i].toLowerCase()) {
+					switch(tokens[i].value.toLowerCase()) {
 						case "case":
 							depth++;
 							current.push(tokens[i]);
@@ -841,22 +847,22 @@ forth.createFromForthTokens = function(tokens, context) {
 				i++;
 
 				if(i >= tokens.length)
-						throw new Error("Couldn't find closing element for '" + start + "'");
+						throw new Error("Couldn't find closing element for '" + start.value + "'");
 
-				var idx = tokens[i];
+				var idx = tokens[i].value;
 
 				while(depth > 0) {
 					i++;
 
 					if(i >= tokens.length)
-						throw new Error("Couldn't find closing element for '" + start + "'");
+						throw new Error("Couldn't find closing element for '" + start.value + "'");
 
-					if(tokens[i].type) {
+					if(tokens[i].type !== forth.Types.Token) {
 						current.push(tokens[i]);
 						continue;
 					}
 
-					switch(tokens[i].toLowerCase()) {
+					switch(tokens[i].value.toLowerCase()) {
 						case "do":
 						case "+do":
 						case "-do":
@@ -873,10 +879,10 @@ forth.createFromForthTokens = function(tokens, context) {
 					}
 				}
 
-				if(tokens[i].toLowerCase() != "loop") {
+				if(tokens[i].value.toLowerCase() != "loop") {
 					throw new Error("Internal compiler error: last closing element in a '" + start + "' loop was invalid");
 				}
-				switch(start.toLowerCase()) {
+				switch(start.value.toLowerCase()) {
 					case "do":
 						add(new forth.DoLoop(idx, forth.createFromForthTokens(current, context), null));
 						break;
@@ -900,7 +906,7 @@ forth.createFromForthTokens = function(tokens, context) {
 					if(tokens[i].type == forth.Types.String) {
 						add(forth.createFromForth(Filesystem.readFileSync(tokens[i].value).toString(), context));
 					} else {
-						add(forth.createFromForth(Filesystem.readFileSync(tokens[i]).toString(), context));
+						add(forth.createFromForth(Filesystem.readFileSync(tokens[i].value).toString(), context));
 					}
 				} else {
 					throw new Error("Include is not available e.g. if used inside a web browser");
@@ -913,13 +919,13 @@ forth.createFromForthTokens = function(tokens, context) {
 				if(i >= tokens.length)
 					throw new Error("Couldn't find closing ';' for ':'");
 
-				function_name = tokens[i];
+				function_name = tokens[i].value;
 
 				while(depth > 0) {
 					i++;
-					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+					if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
 						depth++;
-					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+					} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
 						depth--;
 					}
 					if(depth > 0)
@@ -934,9 +940,9 @@ forth.createFromForthTokens = function(tokens, context) {
 			case ":noname": // function definition
 				while(depth > 0) {
 					i++;
-					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+					if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
 						depth++;
-					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+					} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
 						depth--;
 					}
 					if(depth > 0)
@@ -953,13 +959,13 @@ forth.createFromForthTokens = function(tokens, context) {
 				if(i >= tokens.length)
 					throw new Error("Couldn't find closing ';/return;' for ':js'");
 
-				function_name = tokens[i];
+				function_name = tokens[i].value;
 
 				while(depth > 0) {
 					i++;
-					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+					if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
 						depth++;
-					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+					} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
 						depth--;
 					}
 					if(depth > 0)
@@ -980,7 +986,7 @@ forth.createFromForthTokens = function(tokens, context) {
 					args = values.values.reverse();
 				}
 
-				if(tokens[i] == "return;") {
+				if(tokens[i].value == "return;") {
 					localtree.body.push(new forth.JsCode("return stack.pop()"));
 				}
 
@@ -989,9 +995,9 @@ forth.createFromForthTokens = function(tokens, context) {
 			case ":jsnoname": // function definition
 				while(depth > 0) {
 					i++;
-					if(tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+					if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
 						depth++;
-					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+					} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
 						depth--;
 					}
 					if(depth > 0)
@@ -1012,7 +1018,7 @@ forth.createFromForthTokens = function(tokens, context) {
 					args = values.values.reverse();
 				}
 
-				if(tokens[i] == "return;") {
+				if(tokens[i].value == "return;") {
 					localtree.body.push(new forth.JsCode("return stack.pop()"));
 				}
 
@@ -1025,13 +1031,13 @@ forth.createFromForthTokens = function(tokens, context) {
 				if(i >= tokens.length)
 					throw new Error("Couldn't find closing ';' for ':'");
 
-				function_name = tokens[i];
+				function_name = tokens[i].value;
 
 				while(depth > 0) {
 					i++;
-					if(tokens[i] == ":macro" || tokens[i] == ":" || tokens[i] == ":noname" || tokens[i] == ":js" || tokens[i] == ":jsnoname") {
+					if(tokens[i].value == ":macro" || tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
 						depth++;
-					} else if(tokens[i] == ";" || tokens[i] == "return;") {
+					} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
 						depth--;
 					}
 					if(depth > 0)
@@ -1069,7 +1075,7 @@ forth.createFromForthTokens = function(tokens, context) {
 				forth.compiler_message_handler("Unexpected token " + t + " found");
 				break;
 			default:
-				var mangledT = forth.mangleName(t);
+				var mangledT = forth.mangleName(t.value);
 				var dmacro = null;
 				// TODO: resolve macro
 				// first try to find the macro within the current list
@@ -1096,46 +1102,42 @@ forth.createFromForthTokens = function(tokens, context) {
 										case forth.Types.JsCodeDirect:
 										case forth.Types.JsCode:
 										case forth.Types.JsCodeWithReturn:
-											if(typeof tokens[i] == "undefined") {
-												forth.compiler_message_handler("Can not find required macro argument for " + dmacro.name);
-											}
-											if(typeof tokens[i].type != "undefined") {
-												switch(tokens[i].type) {
-													case forth.Types.Number:
-														entry.body = entry.body.replaceWholeWord(dmacro.args[k], tokens[i].value);
-														break;
-													case forth.Types.String:
-														entry.body = entry.body.replaceWholeWord(dmacro.args[k], "\"" + tokens[i].value + "\"");
-														break;
-													default:
-														throw new Error("I don't know what I should do with " + JSON.stringify(tokens[i]) + " as a macro argument");
-												}
-											} else {
-												// TODO: mangeling should only be done in the generateJsCode function
-												entry.body = entry.body.replaceWholeWord(dmacro.args[k], forth.mangleName(tokens[i])).replaceAll("#" + dmacro.args[k], forth.mangleName(tokens[i]));
+											switch(tokens[i].type) {
+												case forth.Types.Token:
+													// TODO: mangeling should only be done in the generateJsCode function
+													entry.body = entry.body.replaceWholeWord(dmacro.args[k], forth.mangleName(tokens[i].value)).replaceAll("#" + dmacro.args[k], forth.mangleName(tokens[i].value));
+													break;
+												case forth.Types.Number:
+													entry.body = entry.body.replaceWholeWord(dmacro.args[k], tokens[i].value);
+													break;
+												case forth.Types.String:
+													entry.body = entry.body.replaceWholeWord(dmacro.args[k], "\"" + tokens[i].value + "\"");
+													break;
+												default:
+												throw new Error("I don't know what I should do with " + JSON.stringify(tokens[i]) + " as a macro argument");
 											}
 											break;
 									}
 								} else {
 									if(entry == dmacro.args[k]) {
-										gcode[n] = tokens[i];
+										gcode[n] = tokens[i].value;
 									} else if(entry == ("#" + dmacro.args[k])) {
-										gcode[n] = new forth.String(tokens[i]);
+										gcode[n] = new forth.String(tokens[i].value);
 									}
 								}
 							}
 						}
 
 						var cgcode = forth.createFromForthTokens(gcode, context);
-						cgcode.extendedMacro=t;
+						cgcode.extendedMacro=t.value;
 						add(cgcode);
 					}
 				} else {
-					var match = /^(.+)\((\d*)\)$/.exec(t);
+					var match = /^(.+)\((\d*)\)$/.exec(t.value);
 					if(match === null) {
-						var match = /^(.+)\((\d*)\);$/.exec(t);
+						var match = /^(.+)\((\d*)\);$/.exec(t.value);
 						if(match === null) {
-							add(new forth.Call(t));
+							add(new forth.Call(t.value));
 						} else {
 							add(new forth.Call(match[1], match[2], true));
 						}
