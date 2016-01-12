@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
-: readFileSync { filename -- content } :[ Filesystem.readFileSync(filename) ]: ;
-: writeFileSync { filename data -- } :[ Filesystem.writeFileSync(filename, data) ]:d ;
+: readFileSync { filename -- content } filename Filesystem.readFileSync(1) ;
+: writeFileSync { filename data -- } filename data Filesystem.writeFileSync(2); ;
 
-: readLineWise ( filename ) readFileSync { content } :[ content.toString() ]: { str } "\n" undefined str.split ;
+: readLineWise ( filename ) readFileSync { content } content.toString(0) { str } "\n" str.split(1) ;
 
-: dir ( folder -- ) Filesystem.readdirSync ;
+: dir ( folder -- ) Filesystem.readdirSync(1) ;
 
-: compile-to-file { filename } filename readFileSync { str } :[ str.toString() ]: forth.compile filename ".js" + swap writeFileSync ;
+: compile-to-file { filename } filename readFileSync { str } str.toString(0) forth.compile filename ".js" + swap writeFileSync ;

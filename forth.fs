@@ -209,9 +209,9 @@ THE SOFTWARE.
 
 \ return stack functions
 :macro >r {} ( w -- R:w ) :[ var returnStack = returnStack || new forth.Stack() ]; returnStack.push ;
-:macro r> {} ( R:w -- w ) returnStack.pop ;
+:macro r> {} ( R:w -- w ) returnStack.pop(0) ;
 :macro r@ {} ( -- w R: w -- w ) returnStack.top ;
-:macro rdrop {} ( R:w -- ) :[ returnStack.pop() ]; ;
+:macro rdrop {} ( R:w -- ) returnStack.pop(0); ;
 :macro rdepth {} ( -- n ) returnStack.size ;
 :macro rpick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) returnStack.get ;
 
@@ -226,7 +226,7 @@ THE SOFTWARE.
 
 :macro create-empty-object {} :[ {} ]: ;
 
-: create-array { num -- new Array } :[ stack.getTopElements(num) ]: ;
+: create-array { num -- new Array } num stack.getTopElements(1) ;
 
 : new-empty-array ( -- ) :[ [] ]: ;
 : new-array { size -- } :[ new Array(size) ]: ;
@@ -256,7 +256,7 @@ THE SOFTWARE.
 
 : count { str -- len } :[ str.toString().length ]: ;
 
-: o>string { n -- str } :[ n.toString() ]: ;
+: o>string { n -- str } n.toString(0) ;
 : /string { str n -- str } n str.substr(1) ;
 
 : time-in-ms ( -- x ) Date.now() ;

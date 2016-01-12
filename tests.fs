@@ -32,7 +32,7 @@ include "filesystem.fs"
 	"tests/" i test-files @ + { filename }
 	»Execute « filename + . cr
 	filename readFileSync { file }
-	:[ file.toString() ]: forth.compile vm.runInThisContext(1);
+	file.toString(0) forth.compile vm.runInThisContext(1);
 loop
 
 »Done\n« .

@@ -38,7 +38,7 @@ endif
 
 : type { x -- }
 	typeof x "number" = if
-		:[ x.toString(consolebase) ]: console-low-level-type
+		' consolebase x.toString(1) console-low-level-type
 	else
 		typeof util "undefined" <> if
 			x util.format(1) console-low-level-type
@@ -63,7 +63,7 @@ endif
 
 : .c { x -- }
 	typeof x "number" = if
-		:[ x.toString() ]: { y } "." "," y.replaceAll type space
+		x.toString(0) { y } "." "," y.replaceAll type space
 	endif
 ;
 
