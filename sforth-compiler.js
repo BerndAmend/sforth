@@ -23,6 +23,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+// TODO. ugly hack
+String.prototype.replaceWholeWord = function(search, replacement, ch) {
+    let target = this;
+	ch = ch || [" ", "\t", "\n"];
+	for(let i=0;i<ch.length;++i)
+		for(let j=0;j<ch.length;++j)
+			target = target.split(ch[i] + search + ch[j]).join(ch[i] + replacement + ch[j]);
+
+	// handle the case where the search word is at the beginning
+	if(target.substr(0, search.length) == search)
+		target = replacement + target.substr(search.length);
+
+	// or the end
+	if(target.substr(target.length - search.length) == search)
+		target = target.substr(0, target.length - search.length) + replacement;
+
+	return target;
+};
+
+forth.isNumeric = function( obj ) {
+	return !isNaN( parseFloat(obj) ) && isFinite( obj );
+};
+
 forth.forthClone = function(other) {
 	return JSON.parse(JSON.stringify(other));
 };
@@ -68,7 +91,7 @@ forth.mangling = {
 forth.mangleName = function(str) {
 	let result = str;
 
-	if(Number.isNumeric(str.charAt(0))) {
+	if(forth.isNumeric(str.charAt(0))) {
 		result = "$$" + result;
 	}
 
@@ -473,7 +496,7 @@ forth.tokenize = function(code) {
 				break;
 			default:
 				var replacedcommawithperiod = t.replaceAll(",", ".");
-				if(Number.isNumeric(replacedcommawithperiod)) {
+				if(forth.isNumeric(replacedcommawithperiod)) {
 					add(new forth.Number(replacedcommawithperiod));
 				} else if(t[0] == "'" && t.length == 2) {
 					add(new forth.Number(t.charCodeAt(1)));

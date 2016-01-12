@@ -32,29 +32,6 @@ String.prototype.replaceAll = function(search, replacement) {
     return this.split(search).join(replacement);
 };
 
-// TODO. ugly hack
-String.prototype.replaceWholeWord = function(search, replacement, ch) {
-    let target = this;
-	ch = ch || [" ", "\t", "\n"];
-	for(let i=0;i<ch.length;++i)
-		for(let j=0;j<ch.length;++j)
-			target = target.split(ch[i] + search + ch[j]).join(ch[i] + replacement + ch[j]);
-
-	// handle the case where the search word is at the beginning
-	if(target.substr(0, search.length) == search)
-		target = replacement + target.substr(search.length);
-
-	// or the end
-	if(target.substr(target.length - search.length) == search)
-		target = target.substr(0, target.length - search.length) + replacement;
-
-	return target;
-};
-
-Number.isNumeric = function( obj ) {
-	return !isNaN( parseFloat(obj) ) && isFinite( obj );
-};
-
 forth.Stack = (function () {
 	function ForthStack() {
 		this.stac=new Array(32);
