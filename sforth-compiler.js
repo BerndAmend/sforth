@@ -195,7 +195,8 @@ const Mangling = {
 	mangle: function(str) {
 		let result = str;
 
-		if(isNumeric(str.charAt(0))) {
+		const start = str.charAt(0);
+		if(start >= '0' && start <= '9') {
 			result = "$$" + result;
 		}
 
