@@ -185,7 +185,7 @@ const Mangling = {
 		"(": "$$oparentheses",
 		")": "$$cparentheses",
 		"{": "$$obraces",
-		"}": "$$obraces",
+		"}": "$$cbraces",
 		"\u00b7": "$$middot",
 		"\"": "$$quotationmark",
 		"'": "$$apostrophe",
