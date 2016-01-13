@@ -49,7 +49,7 @@ process.stdin.resume drop
 "" value entered
 
 0 value cmd_last_pos
-new forth.Stack value cmd_history
+new SForthStack value cmd_history
 
 try
 	".sforth_history" readFileSync cmd_history.fromJSON
@@ -84,8 +84,8 @@ null to forthconsole.onKey
 		try
 			entered
 			»« to entered
-			forth.compile(1)
-			vm.runInThisContext(1);
+			sforth.compile(1) let res
+			res.generated_code vm.runInThisContext(1);
 			' forthconsole.onKey null === if
 				» ok\n« type
 			endif

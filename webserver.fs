@@ -34,16 +34,18 @@ include filesystem.fs
 8080 value port
 
 :[ {
-	".htm" : "text/html",
-	".html" : "text/html",
-	".css" : "text/css",
-	".fs" : "application/sforth",
-	".js" : "application/javascript",
-	".json" : "application/json",
-	".png" : "image/png",
-	".gif" : "image/gif",
-	".jpg" : "image/jpeg",
-	".svg" : "image/svg+xml"
+	".htm" : {enc: "utf8", mime: "text/html"},
+	".html" : {enc: "utf8", mime: "text/html"},
+	".css" : {enc: "utf8", mime: "text/css"},
+	".fs" : {enc: "utf8", mime: "application/javascript"},
+	".js" : {enc: "utf8", mime: "application/javascript"},
+	".json" : {enc: "utf8", mime: "application/json"},
+	".png" : {enc: "binary", mime: "image/png"},
+	".gif" : {enc: "binary", mime: "image/gif"},
+	".jpg" : {enc: "binary", mime: "image/jpeg"},
+	".svg" : {enc: "binary", mime: "image/svg+xml"},
+	".ttf" : {enc: "binary", mime: "image/truetype"},
+	".woff" : {enc: "binary", mime: "application/font-woff"}
 } ]: let extensions
 
 :js getDirectoryListening { pathname }
@@ -83,8 +85,11 @@ return;
 :jsnoname { request response }
  	:[ url.parse(request.url).pathname ]: let uri
     process.cwd() uri path.join(2) let filename
-    
+
     :js func { exists }
+
+        filename path.extname(1) let ext
+        filename path.dirname(1) let dirname
 
 		exists not if
 			404 :[ {"Content-Type": "text/plain"} ]: response.writeHead(2);
@@ -96,6 +101,7 @@ return;
 		:[ fs.statSync(filename).isDirectory() ]: if
 			filename "/index.html" + fs.existsSync(1) if
 				"/index.html" +to filename
+				".html" to ext
 			else
 				// Directory listening
 				200 :[ {"Content-Type": "text/html"} ]: response.writeHead(2);
@@ -105,9 +111,14 @@ return;
 			endif
 		endif
 
-		filename path.extname(1) value ext
-        
-        filename "binary"
+		"text/plain" let content_type
+		"utf8" let encoding
+		:[ extensions[ext] ]: if
+			:[ content_type = extensions[ext].mime ];
+			:[ encoding = extensions[ext].enc ];
+        endif
+
+        filename encoding
         :jsnoname { err file }
 			' err if
 				500 :[ {"Content-Type": "text/plain"} ]: response.writeHead(2);
@@ -116,12 +127,25 @@ return;
 				return
 			endif
 
-			"text/plain" let content_type
-			:[ extensions[ext] ]: if
-				:[ content_type = extensions[ext] ];
+            ext ".fs" = if
+                "Compile " filename + "\n" + .
+                try
+                	SForthCompiler.getDefaultOptions() let options
+                	false to options.sforthThrowOnUnderflow
+                	:[ [".", dirname] ]: to options.includeDirectories
+                	:[ new SForthCompiler(options) ]: let compiler
+                    file compiler.compile(1) let compiled
+                    200 :[ {"Content-Type": content_type} ]: response.writeHead(2);
+                    compiled.generated_code encoding response.write(2);
+                catch e
+                    "\n"  e.stack + "\n" + .
+                    500 :[ {"Content-Type": content_type} ]: response.writeHead(2);
+                endtry
+            else
+                200 :[ {"Content-Type": content_type} ]: response.writeHead(2);
+                file encoding response.write(2);
             endif
-			200 :[ {"Content-Type": content_type} ]: response.writeHead(2);
-			file "binary" response.write(2);
+
 			response.end(0);
 		;
 		fs.readFile(3);

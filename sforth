@@ -1,3 +1,77 @@
-#!/bin/sh
+#!/bin/env node
+"use strict";
+/**
+The MIT License (MIT)
 
-node nodeForth.js $@
+Copyright (c) 2013-2016 Bernd Amend <bernd.amend+sforth@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
+// handle command line arguments
+var sforthArguments = [];
+
+for(let i=0; i<process.argv.length; i+=1) {
+    if(process.argv[i] == __filename) {
+        sforthArguments = process.argv.slice(i+1);
+        break;
+    }
+}
+
+// forward require that it can be called from sforth code
+global.require = require;
+
+global.vm = global.vm || require('vm');
+global.util = global.util || require('util');
+global.Filesystem = global.Filesystem || require('fs');
+
+global.SForthCompiler = (require("./sforth-compiler.js")).Compiler;
+global.sforth = new SForthCompiler();
+
+let filename = "repl.fs"
+{
+	if(sforthArguments.length > 0) {
+		filename = sforthArguments[sforthArguments.length-1];
+
+		for(let i = 0; i < sforthArguments.length-1; i++) {
+			switch(sforthArguments[i]) {
+				case "--compile":
+					{
+						let compiler = new SForthCompiler();
+						let result = compiler.compileFile(filename);
+						Filesystem.writeFileSync(filename + ".js", result.generated_code);
+						return;
+					}
+				break;
+				case "--dump":
+					{
+						let compiler = new SForthCompiler();
+						let result = compiler.compileFile(filename);
+						Filesystem.writeFileSync(filename + ".js", result.generated_code);
+						Filesystem.writeFileSync(filename + ".json", JSON.stringify(result, null, "\t"));
+						return;
+					}
+				break;
+			}
+		}
+	}
+}
+
+let compileResult = sforth.compileFile(filename);
+vm.runInThisContext(compileResult.generated_code);

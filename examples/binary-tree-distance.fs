@@ -1,3 +1,5 @@
+include forth.fs
+include console.fs
 // Program to find distance between n1 and n2 using one traversal
 // inspired by http://www.geeksforgeeks.org/find-distance-two-given-nodes/
 

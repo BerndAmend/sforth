@@ -1,3 +1,6 @@
+include forth.fs
+include console.fs
+
 : move-disk ( v t f n -- v t f )
   dup 0= if drop exit then
   1-       >r

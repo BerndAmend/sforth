@@ -1,5 +1,4 @@
 // Color
-	@constructor
 	: Color { r g b }
 		' r to this.r
 		' g to this.g
@@ -50,7 +49,6 @@ Color.black to Color.defaultColor
 
 
 // Vector
-	@constructor
 	: Vector { x y z }
 		' x to this.x
 		' y to this.y
@@ -112,7 +110,6 @@ Color.black to Color.defaultColor
 	return; to Vector.prototype.toString
 
 
-@constructor
 : Camera { pos lookAt }
 	' pos to this.pos
 	' lookAt to this.lookAt
@@ -124,7 +121,6 @@ Color.black to Color.defaultColor
 
 
 // Sphere
-	@constructor
 	: Sphere { center radius surface }
 		"Sphere" to this.type
 		' center to this.center
@@ -154,7 +150,6 @@ Color.black to Color.defaultColor
 	; to Sphere.prototype.intersect
 
 // Plane
-	@constructor
 	: Plane { norm offset surface }
 		"Plane" to this.type
 		' norm to this.norm
@@ -234,7 +229,6 @@ var Surfaces;
 
 ]:d
 
-@constructor
 : RayTracer { }
 	5 to this.maxDepth
 

@@ -1,3 +1,6 @@
+include forth.fs
+include console.fs
+
 : stars ( mask -- )
   begin
     dup 1 & if '* else 32 then emit

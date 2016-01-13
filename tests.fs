@@ -26,13 +26,13 @@ include "forth.fs"
 include »console.fs«
 include "filesystem.fs"
 
-"tests" dir { test-files }
+"tests" Filesystem.readdirSync(1) { test-files }
 
 0 test-files.length 1 do i
-	"tests/" i test-files @ + { filename }
-	»Execute « filename + . cr
-	filename readFileSync { file }
-	file.toString(0) forth.compile vm.runInThisContext(1);
+		"tests/" i test-files @ + { filename }
+		»Execute « filename + . cr
+		filename readFileSync { file }
+		file.toString(0) sforth.compile { res } res.generated_code vm.runInThisContext(1);
 loop
 
 »Done\n« .

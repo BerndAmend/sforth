@@ -10,11 +10,6 @@ Get the source code and start the sforth repl
 
 ./sforth
 
-or
-
-node nodeForth.js
-
-
 ## Firefox (>=44) / Chromium / Google Chrome
 
 The examples require that they are served using a static webserver.
@@ -242,56 +237,6 @@ endtry
 :[ <javascript code> ];
 ```
 
-### embed into html
-
-#### with jquery (recommended)
-```html
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<!-- throw an exception if a stack underflow occurs -->
-	<script>sforthThrowOnUnderflow=true</script>
-	<script src="../ext/jquery-2.1.0.min.js"></script>
-	<script src="../sforth-runtime.js"></script>
-	<script src="../sforth-compiler.js"></script>
-</head>
-<body>
-	<!-- include the base system -->
-	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script>
-
-	<script type="application/sforth">
-		:js sayHello { } "Hello World!" show-alert ;
-	</script>
-	
-	<input type="button" value="Say hello!" onclick="sayHello();">
-</body>
-</html>
-```
-
-#### without jquery
-```html
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<!-- throw an exception if a stack underflow occurs -->
-	<script>sforthThrowOnUnderflow=true</script>
-	<script src="../sforth-runtime.js"></script>
-	<script src="../sforth-compiler.js"></script>
-</head>
-<body onload="forth.compileAllScriptRegions();">
-	<!-- include the base system -->
-	<script data-src="../forth.fs;../browser.fs" type="application/sforth"></script>
-
-	<script type="application/sforth">
-		:js sayHello { } "Hello World!" show-alert ;
-	</script>
-
-	<input type="button" value="Say hello!" onclick="sayHello();">
-</body>
-</html>
-```
 
 ### comments
 

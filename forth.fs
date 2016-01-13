@@ -22,12 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
-\ base functions
+
+\ numbers
+:macro Infinity {} :[ Infinity ]: ;
+:macro NaN {} :[ NaN ]: ;
+
+\ Literals
 :macro true {} :[ true ]: ;
 :macro false {} :[ false ]: ;
 :macro undefined {} :[ undefined ]: ;
 :macro null {} :[ null ]: ;
-:macro Infinity {} :[ Infinity ]: ;
+
+:macro continue {} :[ continue ]; ;
+:macro break {} :[ break ]; ;
+:macro leave {} :[ break ]; ;
+:macro exit {} :[ return ]; ;
+:macro return {} :[ return ]; ;
 
 :macro new { name }
 // spaces are used to circumvent "Mixed spaces and tabs." warnings from jshint
@@ -66,12 +76,6 @@ THE SOFTWARE.
 
 :macro alias { name } value name ;
 
-:macro continue {} :[ continue ]; ;
-:macro break {} :[ break ]; ;
-:macro leave {} :[ break ]; ;
-:macro exit {} :[ return ]; ;
-:macro return {} :[ return ]; ;
-
 \ TODO: fix the case handling
 :macro of { key } :[ case key : ]:d ;
 :macro endof {} :[ break ]; ;
@@ -85,7 +89,6 @@ THE SOFTWARE.
 \ dummy function
 : ok {} ;
 
-: output-stack-info { id -- only debugging } :[ console.log(id + ": stack size=" + stack.size() + " content=" + JSON.stringify(stack.stac)) ]; ;
 : clearstack ( -- ) stack.clear ;
 
 \ data stack operations
@@ -208,7 +211,7 @@ THE SOFTWARE.
 : tandeg {} ( x1 -- x2 ) deg2rad Math.tan ;
 
 \ return stack functions
-:macro >r {} ( w -- R:w ) :[ var returnStack = returnStack || new forth.Stack() ]; returnStack.push ;
+:macro >r {} ( w -- R:w ) :[ var returnStack = returnStack || new SForthStack() ]; returnStack.push ;
 :macro r> {} ( R:w -- w ) returnStack.pop(0) ;
 :macro r@ {} ( -- w R: w -- w ) returnStack.top ;
 :macro rdrop {} ( R:w -- ) returnStack.pop(0); ;
@@ -222,25 +225,12 @@ THE SOFTWARE.
 
 : execute { x1 -- } x1 ;
 
-:macro @constructor {} :[ /** @constructor */ ]:d ;
-
 :macro create-empty-object {} :[ {} ]: ;
 
 : create-array { num -- new Array } num stack.getTopElements(1) ;
 
 : new-empty-array ( -- ) :[ [] ]: ;
 : new-array { size -- } :[ new Array(size) ]: ;
-
-: new-int8-array { size -- } :[ new Int8Array(size) ]: ;
-: new-int16-array { size -- } :[ new Int16Array(size) ]: ;
-: new-int32-array { size -- } :[ new Int32Array(size) ]: ;
-
-: new-uint8-array { size -- } :[ new Uint8Array(size) ]: ;
-: new-uint16-array { size -- } :[ new Uint16Array(size) ]: ;
-: new-uint32-array { size -- } :[ new Uint32Array(size) ]: ;
-
-: new-float32-array { size -- } :[ new Float32Array(size) ]: ;
-: new-float64-array { size -- } :[ new Float64Array(size) ]: ;
 
 : ! { value index variable -- } :[ variable[index] = value ]; ;
 : @ { index variable -- value } :[ variable[index] ]: ;
@@ -260,9 +250,3 @@ THE SOFTWARE.
 : /string { str n -- str } n str.substr(1) ;
 
 : time-in-ms ( -- x ) Date.now() ;
-
-: settimeout ( jsfunction timeout -- handle ) setTimeout(2) ;
-: cleartimeout ( handle -- ) clearTimeout(1) ;
-
-: setinterval ( jsfunction timeout -- handle ) setInterval(2) ;
-: clearinterval ( handle ) clearInterval(1) ;
