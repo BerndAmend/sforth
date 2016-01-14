@@ -551,6 +551,8 @@ class Compiler {
 			let fullfilename = i + "/" + filename;
 			if(Filesystem.existsSync(fullfilename)) {
 				return Filesystem.readFileSync(fullfilename).toString();
+			} else {
+				throw new Error(`Could not load file ${filename}`);
 			}
 		}
 	}
