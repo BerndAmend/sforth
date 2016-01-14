@@ -576,22 +576,22 @@ class Compiler {
 			merged_tokens.push(something);
 		}
 
-		var str;
 		let depth;
 
 		for( let i = 0 ; i < tokens.length; i++ ) {
 			let t = tokens[i];
-			str = "";
 			depth = 1;
 
 			switch (t.toLowerCase()) {
 				case "": // ignore empty/whitespace tokens
 				case "\n":
 				case "\t":
-				case "\r":
+				case "\r": {
 					break;
+				}
 
-	            case "////": // start a new screen
+	            case "////": { // start a new screen
+                    let str = "";
 	                while(tokens[i] != "\n") {
 						i++;
 
@@ -603,8 +603,10 @@ class Compiler {
 					}
 					add(new AST.Screen(str.slice(0,str.length-1)));
 	                break;
+	            }
 
-				case "\\\\": // \\ comments
+				case "\\\\": { // \\ comments
+					let str = "";
 					i++;
 					while(i < tokens.length) {
 						str += tokens[i] + " ";
@@ -616,9 +618,11 @@ class Compiler {
 					}
 					add(new AST.CommentParentheses(str.slice(0, str.length-1)));
 					break;
+				}
 
 				case "\\": // line comments
-				case "//":
+				case "//": {
+					let str = "";
 					while(tokens[i] != "\n") {
 						i++;
 
@@ -630,7 +634,10 @@ class Compiler {
 					}
 					add(new AST.CommentLine(str.slice(0,str.length-1)));
 					break;
-				case "(": // comment start
+				}
+
+				case "(": { // comment start
+					let str = "";
 					while(depth > 0) {
 						i++;
 
@@ -648,8 +655,11 @@ class Compiler {
 					}
 					add(new AST.CommentParentheses(str.slice(0, str.length-1)));
 					break;
+				}
+
 				case "/*": // comment start
-				case "/**":
+				case "/**": {
+					let str = "";
 					while(depth > 0) {
 						i++;
 
@@ -667,7 +677,10 @@ class Compiler {
 					}
 					add(new AST.CommentParentheses(str.slice(0, str.length-1)));
 					break;
-				case ":[": // execute js code start
+				}
+
+				case ":[": { // execute js code start
+					let str = "";
 					i++;
 					while(tokens[i] != "]:" && tokens[i] != "]:d" && tokens[i] != "];") {
 						str += tokens[i] + " ";
@@ -676,7 +689,7 @@ class Compiler {
 						if(i >= tokens.length)
 							throw new Error("Couldn't find closing ']:' or ']:d' or '];' for ':[");
 					}
-					var localjscode = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
+					let localjscode = str.slice(0,str.length-1).replace(/ \t /gm, '\t');
 					if(tokens[i] == "]:")
 						add(new AST.JsCodeWithReturn(localjscode));
 					else if(tokens[i] == "]:d")
@@ -684,12 +697,14 @@ class Compiler {
 					else //if(tokens[i] == "];")
 						add(new AST.JsCode(localjscode));
 					break;
+				}
+
 				case "{": // local variable start
-				case "local{": // local variable start
-					var start = tokens[i];
-					var done = false;
-					var localvars = [];
-					var comment = "";
+				case "local{": { // local variable start
+					let start = tokens[i];
+					let done = false;
+					let localvars = [];
+					let comment = "";
 					i++;
 					while(tokens[i] != "}") {
 						if(tokens[i] == "--") {
@@ -716,19 +731,22 @@ class Compiler {
 							break;
 					}
 					break;
-				case "{}":
+				}
+
+				case "{}": {
 					add(new AST.ValueLocal([], ""));
 					break;
-				default:
-					var replacedcommawithperiod = t.replaceAll(",", ".");
+				}
+				default: {
+					let replacedcommawithperiod = t.replaceAll(",", ".");
 					if(isNumeric(replacedcommawithperiod)) {
 						add(new AST.Number(replacedcommawithperiod));
 					} else if(t[0] == "'" && t.length == 2) {
 						add(new AST.Number(t.charCodeAt(1)));
 					} else if(t[0] == "\"") {
-						var escapecounter = 0;
-						var j=0;
-						var str = "";
+						let escapecounter = 0;
+						let j=0;
+						let str = "";
 						while(true) {
 							if(tokens[i].length-1==j || tokens[i].length == 0) {
 								j=0;
@@ -745,7 +763,7 @@ class Compiler {
 							if(tokens[i][j] == "\\") {
 								escapecounter++;
 							} else {
-								for(var k=0;k<escapecounter;k++)
+								for(let k=0;k<escapecounter;k++)
 									str += "\\";
 								if(escapecounter % 2 == 0 && tokens[i][j] == "\"")
 									break;
@@ -760,6 +778,7 @@ class Compiler {
 												.replace(/ \r /gm, '\\r')
 							));
 					} else if(t[0] == "\u00bb") { // »
+						let str = "";
 						if(tokens[i].substr(tokens[i].length-1) == "\u00ab" && // «
 							tokens[i].substr(tokens[i].length-2) != "\\\u00ab" // «
 						) {
@@ -800,6 +819,7 @@ class Compiler {
 					} else {
 						add(new AST.Token(t));
 					}
+				}
 			}
 		}
 
@@ -856,10 +876,10 @@ class Compiler {
 				continue;
 
 			switch (t.value.toLowerCase()) {
-				case "if":
-					var tokensIf = current;
-					var tokensElseIf = null;
-					var tokensElse = null;
+				case "if": {
+					let tokensIf = current;
+					let tokensElseIf = null;
+					let tokensElse = null;
 
 					while(depth > 0) {
 						i++;
@@ -946,7 +966,9 @@ class Compiler {
 
 					add(new AST.BranchIf(compiledIf, compiledElseIf, compiledElse));
 					break;
-				case "try":
+				}
+
+				case "try": {
 					let tokensBody = current;
 					let tokensCatch = null;
 					let tokensFinally = null;
@@ -998,9 +1020,9 @@ class Compiler {
 						}
 					}
 
-					var compiledBody = null;
-					var compiledCatch = null;
-					var compiledFinally = null;
+					let compiledBody = null;
+					let compiledCatch = null;
+					let compiledFinally = null;
 
 					if(tokensBody)
 						compiledBody = this.createFromForthTokens(tokensBody);
@@ -1013,7 +1035,9 @@ class Compiler {
 
 					add(new AST.TryCatchFinally(compiledBody, catchVar, compiledCatch, compiledFinally));
 					break;
-				case "begin":
+				}
+
+				case "begin": {
 					while(depth > 0) {
 						i++;
 
@@ -1041,7 +1065,7 @@ class Compiler {
 						}
 					}
 
-					var ltoken = tokens[i].value.toLowerCase();
+					let ltoken = tokens[i].value.toLowerCase();
 					if(ltoken.toLowerCase() == "until")
 						add(new AST.BeginUntil(this.createFromForthTokens(current)));
 					else if(ltoken == "again")
@@ -1049,7 +1073,9 @@ class Compiler {
 					else
 						throw new Error("Internal compiler error: last closing element in a begin loop was invalid");
 					break;
-				case "case":
+				}
+
+				case "case": {
 					// TODO: we have to parse the of entries
 					let defaultOf = null;
 					while(depth > 0) {
@@ -1082,9 +1108,11 @@ class Compiler {
 
 					add(new AST.BranchCase(this.createFromForthTokens(current), defaultOf));
 					break;
+				}
+
 				case "do":
 				case "+do":
-				case "-do":
+				case "-do": {
 					let starti = i;
 					let start = tokens[i];
 
@@ -1093,7 +1121,7 @@ class Compiler {
 					if(i >= tokens.length)
 							throw new Error("Couldn't find closing element for '" + start.value + "'");
 
-					var idx = tokens[i].value;
+					let idx = tokens[i].value;
 
 					while(depth > 0) {
 						i++;
@@ -1140,8 +1168,10 @@ class Compiler {
 							throw new Error("Internal compiler error: start element in a '" + start + "' loop was invalid");
 					}
 					break;
-				case "include":
-					var str = "";
+				}
+
+				case "include": {
+					let str = "";
 					i++;
 
 					if(i >= tokens.length)
@@ -1149,8 +1179,9 @@ class Compiler {
 
 					add(this.createFromForth(this.loadFile(tokens[i].value)));
 					break;
+				}
 
-				case ":": // function definition
+				case ":": { // function definition
 					i++;
 
 					if(i >= tokens.length)
@@ -1179,7 +1210,9 @@ class Compiler {
 
 					add(new AST.FunctionForth(function_name, this.createFromForthTokens(current)));
 					break;
-				case ":noname": // function definition
+				}
+
+				case ":noname": { // function definition
 					while(depth > 0) {
 						i++;
 						if(tokens[i].type === AST.Types.Token) {
@@ -1198,7 +1231,9 @@ class Compiler {
 
 					add(new AST.FunctionForthAnonymous(this.createFromForthTokens(current)));
 					break;
-				case ":js": // function definition
+				}
+
+				case ":js": { // function definition
 					i++;
 					if(i >= tokens.length)
 						throw new Error("Couldn't find closing ';/return;' for ':js'");
@@ -1241,7 +1276,9 @@ class Compiler {
 
 					add(new AST.FunctionJs(function_name, args, localtree, returnValue));
 					break;
-				case ":jsnoname": // function definition
+				}
+
+				case ":jsnoname": { // function definition
 					while(depth > 0) {
 						i++;
 						if(tokens[i].type === AST.Types.Token) {
@@ -1275,8 +1312,9 @@ class Compiler {
 
 					add(new AST.FunctionJsAnonymous(args, localtree, returnValue));
 					break;
+				}
 
-				case ":macro": // macro definition
+				case ":macro": { // macro definition
 					i++;
 
 					if(i >= tokens.length)
@@ -1311,11 +1349,12 @@ class Compiler {
 					if(function_name.indexOf(".") != -1)
 						throw new Error("Macro names can not contain .");
 
-					var macro = new AST.Macro(function_name, args.values, current);
+					let macro = new AST.Macro(function_name, args.values, current);
 					add(macro);
 
 					this.macros[Mangling.mangle(function_name)] = macro;
 					break;
+				}
 
 				// forbidden tokens
 				case ")": // comment end
@@ -1327,12 +1366,14 @@ class Compiler {
 				case "endcase":
 				case ";":
 				case "return;":
-				case "}": // local variable end
+				case "}": { // local variable end
 					throw new Error("Unexpected token " + JSON.stringify(t) + " found");
 					break;
-				default:
-					var mangledT = Mangling.mangle(t.value);
-					var dmacro = null;
+				}
+
+				default: {
+					let mangledT = Mangling.mangle(t.value);
+					let dmacro = null;
 					// TODO: resolve macro
 					// first try to find the macro within the current list
 					if(this.macros[mangledT]) {
@@ -1340,16 +1381,16 @@ class Compiler {
 					}
 
 					if(dmacro) {
-						var gcode = null;
+						let gcode = null;
 						if(dmacro.args.length === 0) {
 							gcode = this.createFromForthTokens(dmacro.body);
 							add(gcode);
 						} else {
 							gcode = cloneObject(dmacro.body);
-							for(var k=dmacro.args.length-1;k>=0;--k) {
+							for(let k=dmacro.args.length-1;k>=0;--k) {
 								i++;
-								for(var n=0; n<gcode.length;++n) {
-									var entry = gcode[n];
+								for(let n=0; n<gcode.length;++n) {
+									let entry = gcode[n];
 									if(typeof entry.type != "undefined") {
 										switch(entry.type) {
 											case AST.Types.JsCodeDirect:
@@ -1381,14 +1422,14 @@ class Compiler {
 								}
 							}
 
-							var cgcode = this.createFromForthTokens(gcode);
+							let cgcode = this.createFromForthTokens(gcode);
 							cgcode.extendedMacro=t.value;
 							add(cgcode);
 						}
 					} else {
-						var match = /^(.+)\((\d*)\)$/.exec(t.value);
+						let match = /^(.+)\((\d*)\)$/.exec(t.value);
 						if(match === null) {
-							var match = /^(.+)\((\d*)\);$/.exec(t.value);
+							let match = /^(.+)\((\d*)\);$/.exec(t.value);
 							if(match === null) {
 								add(new AST.Call(t.value));
 							} else {
@@ -1398,6 +1439,7 @@ class Compiler {
 							add(new AST.Call(match[1], match[2]));
 						}
 					}
+				}
 			}
 		}
 
@@ -1416,45 +1458,42 @@ class Compiler {
 
 			let out = "";
 
-			var lp =  "";
-			for(var i = 0; i < level; i++)
+			let lp =  "";
+			for(let i = 0; i < level; i++)
 				lp += indent_characters;
 
 			function append(str, add_level) {
 				if(add_level === undefined)
 					add_level = 0;
-				var tlp = lp;
-				for(var i = 0; i < add_level; i++)
-				tlp += indent_characters;
 				if(str && str !== "")
-					out += tlp + str + "\n";
+					out += lp + indent_characters.repeat(add_level) + str + "\n";
 			}
 
-			var name = null;
-			var clean = null;
-			var args = null;
-
 			switch(code_tree.type) {
-				case AST.Types.Empty:
+				case AST.Types.Empty: {
 					break;
-				case AST.Types.BeginAgain:
+				}
+				case AST.Types.BeginAgain: {
 					append("do {");
 					out += generateCode(code_tree.body, level);
 					append("} while(true);");
 					break;
-				case AST.Types.BeginUntil:
+				}
+				case AST.Types.BeginUntil: {
 					append("do {");
 					out += generateCode(code_tree.body, level);
 					append("} while(!stack.pop());");
 					break;
-				case AST.Types.BeginWhileRepeat:
+				}
+				case AST.Types.BeginWhileRepeat: {
 					append("do {");
 					out += generateCode(code_tree.condition, level);
 					append("if(!stack.pop()) break;");
 					out += generateCode(code_tree.body, level);
 					append("} while(true);");
 					break;
-				case AST.Types.BranchCase:
+				}
+				case AST.Types.BranchCase: {
 					append("switch(stack.pop()) {");
 					//code_tree.body.forEach(function(entry) {
 					//	out += generateCode(entry, level+1);
@@ -1466,14 +1505,16 @@ class Compiler {
 					}
 					append("}");
 					break;
-				case AST.Types.BranchCaseOf:
+				}
+				case AST.Types.BranchCaseOf: {
 					append("case " + code_tree.condition + ":");
 					out += generateCode(code_tree.body, level+1);
 					append("break;");
 					break;
-				case AST.Types.BranchIf:
-					var openingBrackets = 0;
-					var identLevel = "";
+				}
+				case AST.Types.BranchIf: {
+					let openingBrackets = 0;
+					let identLevel = "";
 					append("if(stack.pop()) {");
 					out += generateCode(code_tree.if_body, level);
 					if(code_tree.else_if_bodies) {
@@ -1490,24 +1531,26 @@ class Compiler {
 						append(identLevel + "} else {");
 						out += generateCode(code_tree.else_body, level+openingBrackets);
 					}
-					for(var j=0;j<openingBrackets+1;++j) {
+					for(let j=0;j<openingBrackets+1;++j) {
 						append(identLevel + "}");
 						identLevel = identLevel.substr(0,identLevel.length-1);
 					}
 					break;
-				case AST.Types.Body:
-					code_tree.body.forEach(function(entry) {
-						var l = level;
+				}
+				case AST.Types.Body: {
+					code_tree.body.forEach((entry) => {
+						let l = level;
 						if(!entry.extendedMacro)
 							l++;
 						out += generateCode(entry, l);
 					});
 					break;
+				}
 
-				case AST.Types.Call:
-					name = Mangling.mangle(code_tree.name);
-					var splitted = name.split(".");
-					var ctxt = splitted.slice(0, splitted.length-1).join(".");
+				case AST.Types.Call: {
+					let name = Mangling.mangle(code_tree.name);
+					let splitted = name.split(".");
+					let ctxt = splitted.slice(0, splitted.length-1).join(".");
 					if(ctxt === "")
 						ctxt = "this";
 					if(code_tree.argument_count === undefined) {
@@ -1536,39 +1579,41 @@ class Compiler {
 					}
 
 					break;
+				}
 
 				// we ignore CommentLines and CommentParentheses
 	            case AST.Types.Screen:
 				case AST.Types.CommentLine:
-				case AST.Types.CommentParentheses:
+				case AST.Types.CommentParentheses: {
 					break;
+				}
 
-				case AST.Types.DoLoop:
-					var idx = Mangling.mangle(code_tree.index);
+				case AST.Types.DoLoop: {
+					let idx = Mangling.mangle(code_tree.index);
 
 					if(code_tree.increment === null) {
 						if(code_tree.compareOperation === null) {
 							throw new Error("Can not deduce in which direction the loop should go either use +do, -do, or use a constant increment");
 						}
 
-						append("var " + idx + "_increment=stack.pop();");
-						append("var " + idx + "_end=stack.pop();");
+						append("let " + idx + "_increment=stack.pop();");
+						append("let " + idx + "_end=stack.pop();");
 
-						append("for(var " + idx + "=stack.pop(); " + idx + code_tree.compareOperation + idx + "_end;" + idx + "+= " + idx + "_increment) {");
+						append("for(let " + idx + "=stack.pop(); " + idx + code_tree.compareOperation + idx + "_end;" + idx + "+= " + idx + "_increment) {");
 							out += generateCode(code_tree.body, level);
 						append("}");
 					} else {
-						append("var " + idx + "_end=stack.pop();");
+						append("let " + idx + "_end=stack.pop();");
 
 						if(code_tree.increment == 1) {
-							append("for(var " + idx + "=stack.pop(); " + idx + "<" + idx + "_end; ++" + idx + ") {");
+							append("for(let " + idx + "=stack.pop(); " + idx + "<" + idx + "_end; ++" + idx + ") {");
 						} else if(code_tree.increment == -1) {
-							append("for(var " + idx + "=stack.pop(); " + idx + ">" + idx + "_end; --" + idx + ") {");
+							append("for(let " + idx + "=stack.pop(); " + idx + ">" + idx + "_end; --" + idx + ") {");
 						} else {
 							if(code_tree.increment >= 0) {
-								append("for(var " + idx + "=stack.pop(); " + idx + "<" + idx + "_end;" + idx + "+= " + code_tree.increment + ") {");
+								append("for(let " + idx + "=stack.pop(); " + idx + "<" + idx + "_end;" + idx + "+= " + code_tree.increment + ") {");
 							} else {
-								append("for(var " + idx + "=stack.pop(); " + idx + ">" + idx + "_end;" + idx + "+= " + code_tree.increment + ") {");
+								append("for(let " + idx + "=stack.pop(); " + idx + ">" + idx + "_end;" + idx + "+= " + code_tree.increment + ") {");
 							}
 						}
 							out += generateCode(code_tree.body, level);
@@ -1576,9 +1621,10 @@ class Compiler {
 					}
 
 					break;
+				}
 
-				case AST.Types.FunctionForth:
-					name = Mangling.mangle(code_tree.name);
+				case AST.Types.FunctionForth: {
+					let name = Mangling.mangle(code_tree.name);
 					if(name.indexOf(".") != -1)
 						throw new Error("Function names can not contain .");
 					append("function " + name + "(stack) {");
@@ -1586,89 +1632,110 @@ class Compiler {
 					append("}");
 					append(name + ".forth_function=true;\n");
 					break;
-				case AST.Types.FunctionForthAnonymous:
+				}
+
+				case AST.Types.FunctionForthAnonymous: {
 					append("stack.push(function(stack) {");
 					out += generateCode(code_tree.body, level);
 					append("});\n");
 					append("stack.top().forth_function=true;");
 					break;
+				}
 
-				case AST.Types.FunctionJs:
-					name = Mangling.mangle(code_tree.name);
+				case AST.Types.FunctionJs: {
+					let name = Mangling.mangle(code_tree.name);
 					if(name.indexOf(".") != -1)
 						throw new Error("Function names can not contain .");
-					args = code_tree.args.map(Mangling.mangle).join(", ");
+					let args = code_tree.args.map(Mangling.mangle).join(", ");
 					append("function " + name + "(" + args + ") {");
 					append(indent_characters + "var stack = new SForthStack();");
 					out += generateCode(code_tree.body, level);
 					append("}");
 					break;
-				case AST.Types.FunctionJsAnonymous:
-					args = code_tree.args.map(Mangling.mangle).join(", ");
+				}
+
+				case AST.Types.FunctionJsAnonymous: {
+					let args = code_tree.args.map(Mangling.mangle).join(", ");
 					append("stack.push(function(" + args + ") {");
 					append(indent_characters + "var stack = new SForthStack();");
 					out += generateCode(code_tree.body, level);
 					append("});");
 					break;
+				}
 
-				case AST.Types.JsCode:
-					clean = code_tree.body.replaceAll(" ", "").replaceAll("\t", "").replaceAll("\n", "").replaceAll("\r", "");
+				case AST.Types.JsCode: {
+					let clean = code_tree.body.replaceAll(" ", "").replaceAll("\t", "").replaceAll("\n", "").replaceAll("\r", "");
 					if(clean && clean !== "")
 						append(code_tree.body + ";");
 					break;
-				case AST.Types.JsCodeDirect:
-					clean = code_tree.body.replaceAll(" ", "").replaceAll("\t", "").replaceAll("\n", "").replaceAll("\r", "");
+				}
+				case AST.Types.JsCodeDirect: {
+					let clean = code_tree.body.replaceAll(" ", "").replaceAll("\t", "").replaceAll("\n", "").replaceAll("\r", "");
 					if(clean && clean !== "")
 						append(code_tree.body);
 					break;
-				case AST.Types.JsCodeWithReturn:
+				}
+				case AST.Types.JsCodeWithReturn: {
 					append("stack.push(" + code_tree.body + ");");
 					break;
+				}
 
 				case AST.Types.JsCodeWithReturnToVar:
-				case AST.Types.JsCodeWithReturnToVarTemp:
+				case AST.Types.JsCodeWithReturnToVarTemp: {
 					append("var " + Mangling.mangle(code_tree.value) + " = " + code_tree.body + ";");
 					break;
-				case AST.Types.JsCodeWithReturnAssignToVar:
+				}
+				case AST.Types.JsCodeWithReturnAssignToVar: {
 					append(Mangling.mangle(code_tree.value) + " = " + code_tree.body + ";");
 					break;
-				case AST.Types.JsCodeWithReturnAddToVar:
+				}
+				case AST.Types.JsCodeWithReturnAddToVar: {
 					append(Mangling.mangle(code_tree.value) + " += " + code_tree.body + ";");
 					break;
+				}
 
-				case AST.Types.Macro:
+				case AST.Types.Macro: {
 					// macros don't result in code
 					break;
+				}
 
-				case AST.Types.Number:
+				case AST.Types.Number: {
 					append("stack.push(" + code_tree.value + ");");
 					break;
+				}
 				case AST.Types.NumberToVar:
-				case AST.Types.NumberToVarTemp:
+				case AST.Types.NumberToVarTemp: {
 					append("var " + Mangling.mangle(code_tree.name) + " = " + code_tree.value + ";");
 					break;
-				case AST.Types.NumberAssignToVar:
+				}
+				case AST.Types.NumberAssignToVar: {
 					append(Mangling.mangle(code_tree.name) + " = " + code_tree.value + ";");
 					break;
-				case AST.Types.NumberAddToVar:
+				}
+				case AST.Types.NumberAddToVar: {
 					append(Mangling.mangle(code_tree.name) + " += " + code_tree.value + ";");
 					break;
+				}
 
-				case AST.Types.String:
+				case AST.Types.String: {
 					append("stack.push(\"" + code_tree.value + "\");");
 					break;
+				}
 				case AST.Types.StringToVar:
-				case AST.Types.StringToVarTemp:
+				case AST.Types.StringToVarTemp: {
 					append("var " + Mangling.mangle(code_tree.name) + " = \"" + code_tree.value + "\";");
 					break;
-				case AST.Types.StringAssignToVar:
+				}
+				case AST.Types.StringAssignToVar: {
 					append(Mangling.mangle(code_tree.name) + " = \"" + code_tree.value + "\";");
 					break;
-				case AST.Types.StringAddToVar:
+				}
+				case AST.Types.StringAddToVar: {
 					append(Mangling.mangle(code_tree.name) + " += \"" + code_tree.value + "\";");
 					break;
+				}
 
-				case AST.Types.TryCatchFinally:
+				case AST.Types.TryCatchFinally: {
 					append("try {");
 						out += generateCode(code_tree.body, level+1);
 					append("} catch( " + code_tree.catchVar + ") {");
@@ -1679,19 +1746,23 @@ class Compiler {
 					}
 					append("}");
 					break;
+				}
 				case AST.Types.ValueLocal:
-				case AST.Types.ValueLocalTemp:
-					code_tree.values.forEach(function(entry) {
-						var varname = Mangling.mangle(entry);
-						append("var " + varname + " = stack.pop();");
+				case AST.Types.ValueLocalTemp: {
+					code_tree.values.forEach((entry) => {
+						let name = Mangling.mangle(entry);
+						append("var " + name + " = stack.pop();");
 					});
 					break;
-				case AST.Types.ValueToStack:
-					name = Mangling.mangle(code_tree.name);
+				}
+				case AST.Types.ValueToStack: {
+					let name = Mangling.mangle(code_tree.name);
 					append("stack.push(" + name + ");");
 					break;
-				default:
+				}
+				default: {
 					throw new Error("Unknown type=" + code_tree.type + " Unknown " + JSON.stringify(code_tree, null, "\t"));
+				}
 			}
 
 			return out;
@@ -1713,9 +1784,9 @@ class Compiler {
 	};
 
 	optimizeCodeTree(org_code_tree) {
-		var code_tree = cloneObject(org_code_tree);
+		let code_tree = cloneObject(org_code_tree);
 
-		var modified;
+		let modified;
 
 		function visitNodes(func, current, previous) {
 			if(current === null || current === undefined) {
@@ -1786,8 +1857,8 @@ class Compiler {
 
 		// rewrite do without a compare operation to do with an increment
 		function fixIncompleteDoLoops(current, previous) {
-			for (var i=0;i<current.length;++i) {
-				var val = current[i];
+			for (let i=0;i<current.length;++i) {
+				let val = current[i];
 				if(val.type === AST.Types.DoLoop &&
 					val.compareOperation === null && val.increment === null &&
 					previous !== null && previous !== undefined && previous.type === AST.Types.Number) {
@@ -1810,10 +1881,10 @@ class Compiler {
 
 		// rewrite var <something> = stack.pop() to ValueLocal
 		function rewriteStackPop(current, previous) {
-			for (var i=0;i<current.length;++i) {
-				var val = current[i];
+			for (let i=0;i<current.length;++i) {
+				let val = current[i];
 				if(val.type === AST.Types.JsCode) {
-					var match = /^[ ]*var[ ]+(.+)[ ]+=[ ]+stack\.pop\([ ]*\)[ ;]*$/.exec(val.body);
+					let match = /^[ ]*var[ ]+(.+)[ ]+=[ ]+stack\.pop\([ ]*\)[ ;]*$/.exec(val.body);
 					if(match !== null) {
 						modified = true;
 						val.type = AST.Types.ValueLocal;
@@ -1827,8 +1898,8 @@ class Compiler {
 
 		// remove empty code tree entries
 		function removeEmptyCodeTreeEntries(current) {
-			for (var i=0;i<current.length;++i) {
-				var val = current[i];
+			for (let i=0;i<current.length;++i) {
+				let val = current[i];
 				if((val.type === AST.Types.ValueLocal && val.values.length === 0) ||
 					(val.type === AST.Types.ValueLocalTemp && val.values.length === 0) ||
 					(val.type === AST.Types.Body && val.body.length == 0) ||
@@ -1842,8 +1913,8 @@ class Compiler {
 		}
 
 		function inlineValueLocal(current, previous) {
-			for (var i=0;i<current.length;++i) {
-				var val = current[i];
+			for (let i=0;i<current.length;++i) {
+				let val = current[i];
 				if(previous !== null && previous !== undefined &&
 					(
 						(val.type === AST.Types.ValueLocal && val.values.length > 0)
@@ -1885,8 +1956,8 @@ class Compiler {
 		}
 
 		function inlineValueLocalTemp(current, previous) {
-			for (var i=0;i<current.length;++i) {
-				var val = current[i];
+			for (let i=0;i<current.length;++i) {
+				let val = current[i];
 				if(previous !== null && previous !== undefined &&
 					(
 						(val.type === AST.Types.ValueLocalTemp && val.values.length > 0)
@@ -1928,10 +1999,10 @@ class Compiler {
 		}
 
 		function rewriteJSCode(current, previous) {
-			for (var i=0;i<current.length;++i) {
-				var val = current[i];
+			for (let i=0;i<current.length;++i) {
+				let val = current[i];
 				if(val.type === AST.Types.JsCode && previous !== null && previous !== undefined) {
-					var match = /^[ ]*(.+)[ ]+=[ ]+stack\.pop\([ ]*\)[ ;]*$/.exec(val.body);
+					let match = /^[ ]*(.+)[ ]+=[ ]+stack\.pop\([ ]*\)[ ;]*$/.exec(val.body);
 					if(match !== null) {
 						if(previous.type === AST.Types.Number) {
 							previous.type = AST.Types.NumberAssignToVar;
@@ -1953,7 +2024,7 @@ class Compiler {
 							return;
 						}
 					} else {
-						match = /^[ ]*(.+)[ ]+\+=[ ]+stack\.pop\([ ]*\)[ ;]*$/.exec(val.body);
+						let match = /^[ ]*(.+)[ ]+\+=[ ]+stack\.pop\([ ]*\)[ ;]*$/.exec(val.body);
 						if(match !== null) {
 							if(previous.type === AST.Types.Number) {
 								previous.type = AST.Types.NumberAddToVar;
@@ -1975,7 +2046,7 @@ class Compiler {
 								return;
 							}
 						} else {
-							match = /^[ ]*return[ ]+stack\.pop\([ ]*\)[ ]*$/.exec(val.body);
+							let match = /^[ ]*return[ ]+stack\.pop\([ ]*\)[ ]*$/.exec(val.body);
 							if(match !== null) {
 								if(previous.type === AST.Types.Number) {
 									previous.type = AST.Types.Empty;
@@ -2011,8 +2082,8 @@ class Compiler {
 		}
 
 		function inlineValueLocalTempIntoJsOperators(current, previous) {
-			for (var i=0;i<current.length;++i) {
-				var val = current[i];
+			for (let i=0;i<current.length;++i) {
+				let val = current[i];
 				if((val.type === AST.Types.JsCodeWithReturn ||
 					val.type === AST.Types.JsCodeWithReturnAddToVar ||
 					val.type === AST.Types.JsCodeWithReturnToVar ||
@@ -2020,9 +2091,9 @@ class Compiler {
 					val.type === AST.Types.JsCodeWithReturnAssignToVar
 					) &&
 					previous !== null && previous !== undefined) {
-					var match = /^[ ]*(.+)[ ]+(.+)[ ]+(.+)[ ]*$/.exec(val.body);
+					let match = /^[ ]*(.+)[ ]+(.+)[ ]+(.+)[ ]*$/.exec(val.body);
 					if(match !== null) {
-						var previous_used = false;
+						let previous_used = false;
 						switch(previous.type) {
 							case AST.Types.NumberToVarTemp:
 								if(match[1] === previous.name) {
