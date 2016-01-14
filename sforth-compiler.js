@@ -1154,14 +1154,19 @@ class Compiler {
 					if(i >= tokens.length)
 						throw new Error("Couldn't find closing ';' for ':'");
 
+					if(tokens[i].type !== AST.Types.Token)
+						throw new Error("Unexpected token type found after :");
+
 					function_name = tokens[i].value;
 
 					while(depth > 0) {
 						i++;
-						if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
-							depth++;
-						} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
-							depth--;
+						if(tokens[i].type === AST.Types.Token) {
+							if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
+								depth++;
+							} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
+								depth--;
+							}
 						}
 						if(depth > 0)
 							current.push(tokens[i]);
@@ -1175,10 +1180,12 @@ class Compiler {
 				case ":noname": // function definition
 					while(depth > 0) {
 						i++;
-						if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
-							depth++;
-						} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
-							depth--;
+						if(tokens[i].type === AST.Types.Token) {
+							if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
+								depth++;
+							} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
+								depth--;
+							}
 						}
 						if(depth > 0)
 							current.push(tokens[i]);
@@ -1194,14 +1201,19 @@ class Compiler {
 					if(i >= tokens.length)
 						throw new Error("Couldn't find closing ';/return;' for ':js'");
 
+					if(tokens[i].type !== AST.Types.Token)
+						throw new Error("Unexpected token type found after :js");
+
 					function_name = tokens[i].value;
 
 					while(depth > 0) {
 						i++;
-						if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
-							depth++;
-						} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
-							depth--;
+						if(tokens[i].type === AST.Types.Token) {
+							if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
+								depth++;
+							} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
+								depth--;
+							}
 						}
 						if(depth > 0)
 							current.push(tokens[i]);
@@ -1230,10 +1242,12 @@ class Compiler {
 				case ":jsnoname": // function definition
 					while(depth > 0) {
 						i++;
-						if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
-							depth++;
-						} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
-							depth--;
+						if(tokens[i].type === AST.Types.Token) {
+							if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
+								depth++;
+							} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
+								depth--;
+							}
 						}
 						if(depth > 0)
 							current.push(tokens[i]);
@@ -1266,14 +1280,19 @@ class Compiler {
 					if(i >= tokens.length)
 						throw new Error("Couldn't find closing ';' for ':'");
 
+					if(tokens[i].type !== AST.Types.Token)
+						throw new Error("Unexpected token type found after :macro");
+
 					function_name = tokens[i].value;
 
 					while(depth > 0) {
 						i++;
-						if(tokens[i].value == ":macro" || tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
-							depth++;
-						} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
-							depth--;
+						if(tokens[i].type === AST.Types.Token) {
+							if(tokens[i].value == ":macro" || tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
+								depth++;
+							} else if(tokens[i].value == ";" || tokens[i].value == "return;") {
+								depth--;
+							}
 						}
 						if(depth > 0)
 							current.push(tokens[i]);
@@ -1307,7 +1326,7 @@ class Compiler {
 				case ";":
 				case "return;":
 				case "}": // local variable end
-					throw new Error("Unexpected token " + t + " found");
+					throw new Error("Unexpected token " + JSON.stringify(t) + " found");
 					break;
 				default:
 					var mangledT = Mangling.mangle(t.value);
