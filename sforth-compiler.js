@@ -879,27 +879,17 @@ class Compiler {
 			out.body.push(something);
 		}
 
-		let current;
-		let depth;
-		let localtree;
-		let args;
-		let function_name;
-		let returnValue;
-		let token_handled;
-		let values;
-
 		for( let i = 0 ; i < tokens.length; i++ ) {
 			let t = tokens[i];
 
-			depth = 1;
-			current = [];
-			localtree = null;
-			args = null;
-			function_name = null;
-			returnValue = false;
-			values = null;
+			let depth = 1;
+			let current = [];
+			let localtree = null;
+			let function_name = null;
+			let returnValue = false;
+			let values = null;
 
-			token_handled = false;
+			let token_handled = false;
 
 			switch(t.type) {
 				case AST.Types.CommentLine:
@@ -1307,6 +1297,8 @@ class Compiler {
 
 					localtree = this.createFromForthTokens(current);
 
+					let args = null;
+
 					if(localtree.body.length > 0) {
 						values = localtree.body[0];
 						if(values.type !== AST.Types.ValueLocal)
@@ -1342,6 +1334,8 @@ class Compiler {
 					}
 
 					localtree = this.createFromForthTokens(current);
+
+					let args = null;
 
 					if(localtree.body.length > 0) {
 						values = localtree.body[0];
@@ -1387,7 +1381,7 @@ class Compiler {
 							current.push(tokens[i]);
 					}
 
-					args = current.splice(0,1)[0];
+					let args = current.splice(0,1)[0];
 
 					if(args.type != AST.Types.ValueLocal)
 						throw new Error(t + " " + function_name + " requires { .. } after the macro name");
