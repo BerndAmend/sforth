@@ -90,7 +90,7 @@ null to forthconsole.onKey
 				» ok\n« type
 			endif
 		catch e
-			"\n"  e.stack + .
+			`\n ${e.stack}\n` .
 		endtry
 
 	elseif 0 key.charCodeAt 27 = if
