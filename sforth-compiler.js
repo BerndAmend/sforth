@@ -1429,33 +1429,33 @@ class Compiler {
 								i++;
 								for(let n=0; n<gcode.length;++n) {
 									let entry = gcode[n];
-									if(typeof entry.type != "undefined") {
-										switch(entry.type) {
-											case AST.Types.JsCodeDirect:
-											case AST.Types.JsCode:
-											case AST.Types.JsCodeWithReturn:
-												switch(tokens[i].type) {
-													case AST.Types.Token:
-														// TODO: mangeling should only be done in the generateJsCode function
-														entry.body = entry.body.replaceWholeWord(dmacro.args[k], Mangling.mangle(tokens[i].value)).replaceAll("#" + dmacro.args[k], Mangling.mangle(tokens[i].value));
-														break;
-													case AST.Types.Number:
-														entry.body = entry.body.replaceWholeWord(dmacro.args[k], tokens[i].value);
-														break;
-													case AST.Types.String:
-														entry.body = entry.body.replaceWholeWord(dmacro.args[k], "\"" + tokens[i].value + "\"");
-														break;
-													default:
-													throw new Error("I don't know what I should do with " + JSON.stringify(tokens[i]) + " as a macro argument");
-												}
-												break;
+									switch(entry.type) {
+										case AST.Types.Token: {
+											if(entry.value == dmacro.args[k]) {
+												gcode[n].value = tokens[i].value;
+											} else if(entry.value == ("#" + dmacro.args[k])) {
+												gcode[n] = new AST.String(tokens[i].value);
+											}
+											break;
 										}
-									} else {
-										if(entry == dmacro.args[k]) {
-											gcode[n] = tokens[i].value;
-										} else if(entry == ("#" + dmacro.args[k])) {
-											gcode[n] = new AST.String(tokens[i].value);
-										}
+										case AST.Types.JsCodeDirect:
+										case AST.Types.JsCode:
+										case AST.Types.JsCodeWithReturn:
+											switch(tokens[i].type) {
+												case AST.Types.Token:
+													// TODO: mangeling should only be done in the generateJsCode function
+													entry.body = entry.body.replaceWholeWord(dmacro.args[k], Mangling.mangle(tokens[i].value)).replaceAll("#" + dmacro.args[k], Mangling.mangle(tokens[i].value));
+													break;
+												case AST.Types.Number:
+													entry.body = entry.body.replaceWholeWord(dmacro.args[k], tokens[i].value);
+													break;
+												case AST.Types.String:
+													entry.body = entry.body.replaceWholeWord(dmacro.args[k], "\"" + tokens[i].value + "\"");
+													break;
+												default:
+												throw new Error("I don't know what I should do with " + JSON.stringify(tokens[i]) + " as a macro argument");
+											}
+											break;
 									}
 								}
 							}
