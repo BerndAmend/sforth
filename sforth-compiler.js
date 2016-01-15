@@ -474,9 +474,10 @@ AST.Types = {
 	};
 
 	AST.String = class String extends AST.Node {
-		constructor(value) {
+		constructor(value, interpolate) {
 			super(String);
 			this.value = value;
+			this.interpolate = interpolate;
 		}
 	};
 
@@ -577,6 +578,9 @@ class Compiler {
 		}
 
 		let depth;
+
+		let line = 0;
+		let column = 0;
 
 		for( let i = 0 ; i < tokens.length; i++ ) {
 			let t = tokens[i];
@@ -775,8 +779,42 @@ class Compiler {
 						add(new AST.String(str.slice(0,str.length)
 												.replace(/ \n /gm, '\\n')
 												.replace(/ \t /gm, '\\t')
-												.replace(/ \r /gm, '\\r')
-							));
+												.replace(/ \r /gm, '\\r'), false)
+							);
+					} else if(t[0] == "`") {
+						let escapecounter = 0;
+						let j=0;
+						let str = "";
+						while(true) {
+							if(tokens[i].length-1==j || tokens[i].length == 0) {
+								j=0;
+								i++;
+								if(i >= tokens.length)
+									throw new Error("Couldn't find '`'");
+								str += " ";
+								if(tokens[i].length == 0)
+									continue;
+							} else {
+								j++;
+							}
+
+							if(tokens[i][j] == "\\") {
+								escapecounter++;
+							} else {
+								for(let k=0;k<escapecounter;k++)
+									str += "\\";
+								if(escapecounter % 2 == 0 && tokens[i][j] == "`")
+									break;
+								escapecounter=0;
+								str += tokens[i][j];
+							}
+						}
+
+						add(new AST.String(str.slice(0,str.length)
+												.replace(/ \n /gm, '\\n')
+												.replace(/ \t /gm, '\\t')
+												.replace(/ \r /gm, '\\r'), true)
+							);
 					} else if(t[0] == "\u00bb") { // »
 						let str = "";
 						if(tokens[i].substr(tokens[i].length-1) == "\u00ab" && // «
@@ -810,8 +848,8 @@ class Compiler {
 												.replace(/ \r /gm, '\\r')
 												.replaceAll("\"", "\\\"")
 												.replaceAll("\\\u00bb", "\u00bb")
-												.replaceAll("\\\u00ab", "\u00ab")
-							));
+												.replaceAll("\\\u00ab", "\u00ab"), false)
+							);
 					} else if(t[0] == "$" && t.length >= 2) { // handle hex numbers
 						add(new AST.Number("0x" + t.substr(1)));
 					} else if(t[0] == "%" && t.length >= 2) { // handle binary numbers
@@ -1700,38 +1738,42 @@ class Compiler {
 				}
 
 				case AST.Types.Number: {
-					append("stack.push(" + code_tree.value + ");");
+					append(`stack.push(${code_tree.value});`);
 					break;
 				}
 				case AST.Types.NumberToVar:
 				case AST.Types.NumberToVarTemp: {
-					append("var " + Mangling.mangle(code_tree.name) + " = " + code_tree.value + ";");
+					append(`var ${Mangling.mangle(code_tree.name)} = ${code_tree.value};`);
 					break;
 				}
 				case AST.Types.NumberAssignToVar: {
-					append(Mangling.mangle(code_tree.name) + " = " + code_tree.value + ";");
+					append(`${Mangling.mangle(code_tree.name)} = ${code_tree.value};`);
 					break;
 				}
 				case AST.Types.NumberAddToVar: {
-					append(Mangling.mangle(code_tree.name) + " += " + code_tree.value + ";");
+					append(`${Mangling.mangle(code_tree.name)} += ${code_tree.value};`);
 					break;
 				}
 
 				case AST.Types.String: {
-					append("stack.push(\"" + code_tree.value + "\");");
+					let ch = code_tree.interpolate?"`":"\"";
+					append(`stack.push(${ch}${code_tree.value}${ch});`);
 					break;
 				}
 				case AST.Types.StringToVar:
 				case AST.Types.StringToVarTemp: {
-					append("var " + Mangling.mangle(code_tree.name) + " = \"" + code_tree.value + "\";");
+					let ch = code_tree.interpolate?"`":"\"";
+					append(`var ${Mangling.mangle(code_tree.name)} = ${ch}${code_tree.value}${ch};`);
 					break;
 				}
 				case AST.Types.StringAssignToVar: {
-					append(Mangling.mangle(code_tree.name) + " = \"" + code_tree.value + "\";");
+					let ch = code_tree.interpolate?"`":"\"";
+					append(`${Mangling.mangle(code_tree.name)} = ${ch}${code_tree.value}${ch};`);
 					break;
 				}
 				case AST.Types.StringAddToVar: {
-					append(Mangling.mangle(code_tree.name) + " += \"" + code_tree.value + "\";");
+					let ch = code_tree.interpolate?"`":"\"";
+					append(`${Mangling.mangle(code_tree.name)} += ${ch}${code_tree.value}${ch};`);
 					break;
 				}
 
@@ -1750,14 +1792,12 @@ class Compiler {
 				case AST.Types.ValueLocal:
 				case AST.Types.ValueLocalTemp: {
 					code_tree.values.forEach((entry) => {
-						let name = Mangling.mangle(entry);
-						append("var " + name + " = stack.pop();");
+						append(`var ${Mangling.mangle(entry)} = stack.pop();`);
 					});
 					break;
 				}
 				case AST.Types.ValueToStack: {
-					let name = Mangling.mangle(code_tree.name);
-					append("stack.push(" + name + ");");
+					append(`stack.push(${Mangling.mangle(code_tree.name)});`);
 					break;
 				}
 				default: {
