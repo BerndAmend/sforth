@@ -50,10 +50,10 @@ repository:
   literal-string:
     patterns:
     - name: string.quoted.fs
-      begin: (")
+      begin: ((^|[ \t\n])")
       beginCaptures:
         '0': {name: punctuation.definition.string.begin.fs}
-      end: (\1)
+      end: (")
       endCaptures:
         '1': {name: punctuation.definition.string.end.fs}
       patterns:
@@ -62,7 +62,7 @@ repository:
   literal-string-2:
     patterns:
     - name: string.quoted.fs
-      begin: (»)
+      begin: ((^|[ \t\n])»)
       beginCaptures:
         '0': {name: punctuation.definition.string.begin.fs}
       end: («)
