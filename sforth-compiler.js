@@ -221,6 +221,13 @@ const Mangling = {
 				result = result.replaceAll(Mangling.Characters[s], s);
 			}
 		}
+
+		result = result.replaceAll("$$dot", ".");
+
+		if(result.startsWith("$$") && result.charAt(2) >= '0' && result.charAt(2) <= '9') {
+			result = result.substr(2);
+		}
+
 		return result;
 	}
 };
