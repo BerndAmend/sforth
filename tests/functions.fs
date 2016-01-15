@@ -20,3 +20,7 @@ nt.bla "no" = »test if the nestedtest function bla works« assert
 :jsnoname {} ";" ;
 :noname ";" ;
 :noname »;« ;
+
+:macro test-to { name } to name ;
+0 let bla
+2 test-to bla
