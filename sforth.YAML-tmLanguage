@@ -1,0 +1,153 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+---
+name: sforth
+scopeName: source.sforth
+fileTypes: [fs]
+uuid: 8fcc2fbe-ca66-4fe2-8da2-013ae96c5535
+
+patterns:
+- include: '#core'
+
+repository:
+  core:
+    patterns:
+    - include: '#expression'
+
+  expression:
+    patterns:
+    - include: "#literal-keyword-storage"
+    - include: "#literal-keywords"
+    - include: "#literal-language-constant"
+    - include: '#literal-number'
+    - include: '#literal-string'
+    - include: '#literal-string-2'
+    - include: '#comments'
+
+  literal-number:
+    patterns:
+    - name: invalid.illegal.numeric.hex.fs
+      match: (?i)(?:\B[-+]|\b)0x[0-9a-f]*\.(\B|\b[0-9]+)
+
+    - name: invalid.illegal.numeric.octal.fs
+      match: (?:\B[-+]|\b)0[0-9]+\.(\B|\b[0-9]+)
+
+    - name: constant.numeric.fs
+      match: >-
+        (?xi)
+          (?:\B[-+])?
+          (?:
+            \b0b[0-1]*|                 # binary
+            \b0o[0-7]*|                 # octal
+            \b0x[0-9a-f]*|              # hex
+            (
+              \B\.[0-9]+|               # e.g. .999
+              \b[0-9]+(\.[0-9]*)?       # e.g. 999.999, 999. or 999
+            )(e[-+]?[0-9]+)?            # e.g. e+123, E-123
+          )
+    - name: constant.language.infinity.fs
+      match: (?:\B[-+]|\b)(Infinity)\b
+
+  literal-string:
+    patterns:
+    - name: string.quoted.fs
+      begin: (")
+      beginCaptures:
+        '0': {name: punctuation.definition.string.begin.fs}
+      end: (\1)
+      endCaptures:
+        '1': {name: punctuation.definition.string.end.fs}
+      patterns:
+      - include: '#string-content'
+
+  literal-string-2:
+    patterns:
+    - name: string.quoted.fs
+      begin: (»)
+      beginCaptures:
+        '0': {name: punctuation.definition.string.begin.fs}
+      end: («)
+      endCaptures:
+        '1': {name: punctuation.definition.string.end.fs}
+      patterns:
+      - include: '#string-content'
+
+  string-content:
+    # https://mathiasbynens.be/notes/javascript-escapes
+    patterns:
+    - name: constant.character.escape.newline.fs
+      match: \\\s*\n
+
+    - name: constant.character.escape.fs
+      match: \\([1-7][0-7]{0,2}|[0-7]{2,3}|[bfnrtv0'"\\]|x\h{2}|u\{\h+\}|u\h{4})
+
+  literal-language-constant:
+    patterns:
+    - name: constant.language.boolean.true.fs
+      match: (?<!\.)\b(true)\b
+
+    - name: constant.language.boolean.false.fs
+      match: (?<!\.)\b(false)\b
+
+    - name: constant.language.null.fs
+      match: (?<!\.)\b(null)\b
+
+    - name: constant.language.undefined.fs
+      match: (?<!\.)\b(undefined)\b
+
+    - name: constant.language.nan.fs
+      match: (?<!\.)\b(NaN)\b
+
+  literal-keyword-storage:
+    patterns:
+    - name: storage.type.fs
+      match: (?<!\.)\b(?>const|let|value)\b
+
+  literal-keywords:
+    patterns:
+    - include: '#literal-keyword-storage'
+
+    - name: keyword.control.flow.fs
+      match: (?<!\.)\b(return)\b
+
+    - name: keyword.control.conditional.fs
+      match: (?<!\.)\b(?>elseif|if|else|endif)\b
+
+    - name: keyword.control.trycatch.fs
+      match: (?<!\.)\b(?>catch|finally|throw|try|endtry)\b
+
+    - name: keyword.control.loop.fs
+      match: (?<!\.)\b(?>break|endof|continue|do|goto|while|of|case|default|leave|exit)\b
+
+  comments:
+    patterns:
+    - name: comment.block.documentation.fs
+      begin: /\*\*(?!/)
+      captures:
+        '0': {name: punctuation.definition.comment.fs}
+      end: \*/
+
+    - name: comment.block.fs
+      begin: /\*
+      beginCaptures:
+        '0': {name: punctuation.definition.comment.begin.fs}
+      end: \*/
+      endCaptures:
+        '0': {name: punctuation.definition.comment.end.fs}
+
+    - name: comment.block2.fs
+      begin: ((^|[ \t])\([ \t\n])
+      beginCaptures:
+        '0': {name: punctuation.definition.comment.begin.fs}
+      end: ((^|[ \t])\)[ \t\n])
+      endCaptures:
+        '0': {name: punctuation.definition.comment.end.fs}
+
+    - name: comment.line.double-slash.fs
+      match: (//).*$\n?
+      captures:
+        '1': {name: punctuation.definition.comment.fs}
+
+    - name: comment.line.back-slash.fs
+      match: (\\).*$\n?
+      captures:
+        '1': {name: punctuation.definition.comment.fs}
