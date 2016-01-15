@@ -1239,6 +1239,10 @@ class Compiler {
 
 					while(depth > 0) {
 						i++;
+
+						if(i >= tokens.length)
+							throw new Error("Couldn't find closing ';' for ':'");
+
 						if(tokens[i].type === AST.Types.Token) {
 							if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
 								depth++;
@@ -1248,9 +1252,6 @@ class Compiler {
 						}
 						if(depth > 0)
 							current.push(tokens[i]);
-
-						if(i >= tokens.length)
-							throw new Error("Couldn't find closing ';' for ':'");
 					}
 
 					add(new AST.FunctionForth(function_name, this.createFromForthTokens(current)));
@@ -1260,6 +1261,9 @@ class Compiler {
 				case ":noname": { // function definition
 					while(depth > 0) {
 						i++;
+						if(i >= tokens.length)
+							throw new Error("Couldn't find closing ';' for ':noname'");
+
 						if(tokens[i].type === AST.Types.Token) {
 							if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
 								depth++;
@@ -1269,9 +1273,6 @@ class Compiler {
 						}
 						if(depth > 0)
 							current.push(tokens[i]);
-
-						if(i >= tokens.length)
-							throw new Error("Couldn't find closing ';' for ':noname'");
 					}
 
 					add(new AST.FunctionForthAnonymous(this.createFromForthTokens(current)));
@@ -1290,6 +1291,9 @@ class Compiler {
 
 					while(depth > 0) {
 						i++;
+						if(i >= tokens.length)
+							throw new Error("Couldn't find closing ';/return;' for ':js'");
+
 						if(tokens[i].type === AST.Types.Token) {
 							if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
 								depth++;
@@ -1299,9 +1303,6 @@ class Compiler {
 						}
 						if(depth > 0)
 							current.push(tokens[i]);
-
-						if(i >= tokens.length)
-							throw new Error("Couldn't find closing ';/return;' for ':js'");
 					}
 
 					localtree = this.createFromForthTokens(current);
@@ -1326,6 +1327,9 @@ class Compiler {
 				case ":jsnoname": { // function definition
 					while(depth > 0) {
 						i++;
+						if(i >= tokens.length)
+							throw new Error("Couldn't find closing ';/return;' for ':jsnoname'");
+
 						if(tokens[i].type === AST.Types.Token) {
 							if(tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
 								depth++;
@@ -1335,9 +1339,6 @@ class Compiler {
 						}
 						if(depth > 0)
 							current.push(tokens[i]);
-
-						if(i >= tokens.length)
-							throw new Error("Couldn't find closing ';/return;' for ':jsnoname'");
 					}
 
 					localtree = this.createFromForthTokens(current);
@@ -1372,6 +1373,9 @@ class Compiler {
 
 					while(depth > 0) {
 						i++;
+						if(i >= tokens.length)
+							throw new Error("Couldn't find closing ';' for ':'");
+
 						if(tokens[i].type === AST.Types.Token) {
 							if(tokens[i].value == ":macro" || tokens[i].value == ":" || tokens[i].value == ":noname" || tokens[i].value == ":js" || tokens[i].value == ":jsnoname") {
 								depth++;
@@ -1381,9 +1385,6 @@ class Compiler {
 						}
 						if(depth > 0)
 							current.push(tokens[i]);
-
-						if(i >= tokens.length)
-							throw new Error("Couldn't find closing ';' for ':'");
 					}
 
 					args = current.splice(0,1)[0];
