@@ -41,8 +41,8 @@ global.vm = global.vm || require('vm');
 global.util = global.util || require('util');
 global.Filesystem = global.Filesystem || require('fs');
 
-global.SForthCompiler = (require("./sforth-compiler.js")).Compiler;
-global.sforth = new SForthCompiler();
+global.SForthSystem = require("./sforth-compiler.js");
+global.sforth = new SForthSystem.Compiler();
 
 let filename = "repl.fs"
 {

@@ -2228,7 +2228,7 @@ class Compiler {
 			res.optimized_code_tree = this.optimizeCodeTree(res.code_tree);
 			res.generated_code = this.generateJsCode(res.optimized_code_tree);
 		} catch(err) {
-			console.error(res);
+			err.stack = Mangling.demangle(err.stack);
 			err.res = res;
 			throw err;
 		}
