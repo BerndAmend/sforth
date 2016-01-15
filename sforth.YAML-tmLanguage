@@ -59,6 +59,16 @@ repository:
       patterns:
       - include: '#string-content'
 
+    - name: string.quoted.interpolation.fs
+      begin: ((^|[ \t\n])`)
+      beginCaptures:
+        '0': {name: punctuation.definition.string.begin.fs}
+      end: (`)
+      endCaptures:
+        '1': {name: punctuation.definition.string.end.fs}
+      patterns:
+      - include: '#string-content'
+
   literal-string-2:
     patterns:
     - name: string.quoted.fs
