@@ -53,7 +53,7 @@ let filename = "repl.fs"
 			switch(sforthArguments[i]) {
 				case "--compile":
 					{
-						let compiler = new SForthCompiler();
+						let compiler = new SForthSystem.Compiler();
 						let result = compiler.compileFile(filename);
 						Filesystem.writeFileSync(filename + ".js", result.generated_code);
 						return;
@@ -61,7 +61,7 @@ let filename = "repl.fs"
 				break;
 				case "--dump":
 					{
-						let compiler = new SForthCompiler();
+						let compiler = new SForthSystem.Compiler();
 						let result = compiler.compileFile(filename);
 						Filesystem.writeFileSync(filename + ".js", result.generated_code);
 						Filesystem.writeFileSync(filename + ".json", JSON.stringify(result, null, "\t"));
