@@ -724,7 +724,9 @@ class Compiler {
 							continue;
 						}
 						if(!done) {
-							localvars.push(tokens[i]);
+							if(tokens[i] !== "") {
+								localvars.push(tokens[i]);
+							}
 						} else {
 							comment += tokens[i] + " ";
 						}
