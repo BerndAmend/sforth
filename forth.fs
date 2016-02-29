@@ -218,7 +218,7 @@ THE SOFTWARE.
 :macro rdepth {} ( -- n ) returnStack.size ;
 :macro rpick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) returnStack.get ;
 
-: assert { flag text -- } flag not if text . endif ;
+: assert { flag text -- } flag not if text "\n" + . endif ;
 
 \ Exceptions
 :macro throw {} ( obj -- ) :[ throw stack.pop() ]; ;
