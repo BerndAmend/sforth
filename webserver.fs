@@ -130,10 +130,10 @@ return;
             ext ".fs" = if
                 "Compile " filename + "\n" + .
                 try
-                	SForthCompiler.getDefaultOptions() let options
-                	false to options.sforthThrowOnUnderflow
-                	:[ [".", dirname] ]: to options.includeDirectories
-                	:[ new SForthCompiler(options) ]: let compiler
+                    SForthSystem.Compiler.getDefaultOptions() let options
+				    false to options.sforthThrowOnUnderflow
+                    :[ [".", dirname] ]: to options.includeDirectories
+                    :[ new SForthSystem.Compiler(options) ]: let compiler
                     file compiler.compile(1) let compiled
                     200 :[ {"Content-Type": content_type} ]: response.writeHead(2);
                     compiled.generated_code encoding response.write(2);
