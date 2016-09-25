@@ -9,7 +9,7 @@ Get the source code and start the sforth repl
 
 ./sforth
 
-## Firefox (>=44) / Chromium / Google Chrome
+## Firefox / Chromium / Google Chrome / Edge / IE11
 
 The examples require that they are served using a static webserver.
 A test webserver is included that only requires node.js.

@@ -55,7 +55,7 @@ false { is-currently-rendering }
 		e.data.y { y }
 		e.data.data { data }
 		data line.data.set(1)
-		' line 0 y ctx.putImageData
+		' line 0 y ctx.putImageData(3)
 	;
 
 	:js worker-onerror { e }

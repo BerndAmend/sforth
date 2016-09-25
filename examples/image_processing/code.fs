@@ -34,7 +34,7 @@ include forth.fs
 		loop
 	loop
 
-	' output 0 0 ctx.putImageData
+	' output 0 0 ctx.putImageData(3)
 	 /* 20 20 800 400 ctx.rect
 	"1 to ctx.lineWidth
 	"red to ctx.strokeStyle
