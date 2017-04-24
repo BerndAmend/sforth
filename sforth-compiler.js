@@ -1637,13 +1637,16 @@ class Compiler {
 							throw new Error("Can not deduce in which direction the loop should go either use +do, -do, or use a constant increment");
 						}
 
+						append("(() => {");
 						append("let " + idx + "_increment=stack.pop();");
 						append("let " + idx + "_end=stack.pop();");
 
 						append("for(let " + idx + "=stack.pop(); " + idx + code_tree.compareOperation + idx + "_end;" + idx + "+= " + idx + "_increment) {");
 							out += generateCode(code_tree.body, level);
 						append("}");
+						append("})();");
 					} else {
+						append("(() => {");
 						append("let " + idx + "_end=stack.pop();");
 
 						if(code_tree.increment == 1) {
@@ -1659,6 +1662,7 @@ class Compiler {
 						}
 							out += generateCode(code_tree.body, level);
 						append("}");
+						append("})();");
 					}
 
 					break;
