@@ -1,0 +1,27 @@
+{
+  "name": "sforth",
+  "version": "1.0.0",
+  "description": "sforth is a script language with a forth like syntax that compiles to javascript ",
+  "main": "sforth-compiler.js",
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "./sforth tests.fs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tptb/sforth.git"
+  },
+  "keywords": [
+    "forth",
+    "sforth"
+  ],
+  "author": "Bernd Amend <bernd.amend+sforth@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tptb/sforth/issues"
+  },
+  "homepage": "https://github.com/tptb/sforth#readme"
+}
