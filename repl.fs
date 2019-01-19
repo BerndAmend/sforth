@@ -29,7 +29,7 @@ include filesystem.fs
 »sforth, Copyright (C) 2013-2019 Bernd Amend <bernd.amend+sforth@gmail.com>
 Type `bye' to exit\n« .
 
-true process.stdin.setRawMode
+true process.stdin.setRawMode(1);
 process.stdin.resume drop
 "utf8" process.stdin.setEncoding drop
 
