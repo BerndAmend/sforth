@@ -867,9 +867,17 @@ THE SOFTWARE.
 								.replaceAll("\\\u00ab", "\u00ab"), false)
 							)
 						} else if (t[0] === "$" && t.length >= 2) { // handle hex numbers
-							add(new AST.Number("0x" + t.substr(1)))
+							if(t.substr(1,1) === "-") {
+								add(new AST.Number("-0x" + t.substr(2)))
+							} else {
+								add(new AST.Number("0x" + t.substr(1)))
+							}
 						} else if (t[0] === "%" && t.length >= 2) { // handle binary numbers
-							add(new AST.Number(parseInt(t.substr(1), 2)))
+							if(t.substr(1,1) === "-") {
+								add(new AST.Number("-0b" + t.substr(2)))
+							} else {
+								add(new AST.Number("0b" + t.substr(1)))
+							}
 						} else {
 							add(new AST.Token(t))
 						}
