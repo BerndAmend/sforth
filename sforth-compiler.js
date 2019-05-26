@@ -49,6 +49,14 @@ THE SOFTWARE.
 	}
 
 	function isNumeric(obj) {
+        if(BigInt && obj.endsWith("n")) {
+            try {
+                BigInt(obj.substr(0,obj.length-1))
+            } catch {
+                return false
+            }
+            return true
+        }
 		return !isNaN(parseFloat(obj)) && isFinite(obj)
 	}
 
