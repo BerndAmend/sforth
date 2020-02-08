@@ -254,4 +254,4 @@ THE SOFTWARE.
 :macro await {} :[ await stack.pop() ]: ;
 :macro await; {} :[ await stack.pop() ]; ;
 
-:async sleep { milliseconds } :[ new Promise(resolve => setTimeout(resolve, milliseconds)) ]: return;
+:js sleep { milliseconds } :[ new Promise(resolve => setTimeout(resolve, milliseconds)) ]: return;
