@@ -428,19 +428,21 @@ THE SOFTWARE.
 		}
 
 		AST.FunctionJs = class FunctionJs extends AST.Node {
-			constructor(name, args, body, returnValue) {
+			constructor(name, args, body, returnValue, isAsync) {
 				super(FunctionJs)
 				this.name = name
 				this.args = args
 				this.body = body
+				this.isAsync = isAsync
 			}
 		}
 
 		AST.FunctionJsAnonymous = class FunctionJsAnonymous extends AST.Node {
-			constructor(args, body, returnValue) {
+			constructor(args, body, returnValue, isAsync) {
 				super(FunctionJsAnonymous)
 				this.args = args
 				this.body = body
+				this.isAsync = isAsync
 			}
 		}
 
@@ -896,6 +898,12 @@ THE SOFTWARE.
 				out.body.push(something)
 			}
 
+			function isFunctionStart(str) {
+				return str === ":" || str === ":noname" ||
+						str === ":js" || str === ":jsnoname" ||
+						str === ":async" || str === ":asyncnoname"
+			}
+
 			for (let i = 0; i < tokens.length; i++) {
 				let t = tokens[i]
 
@@ -1235,7 +1243,6 @@ THE SOFTWARE.
 
 					case ":": { // function definition
 						i++
-
 						if (i >= tokens.length)
 							throw new Error("Couldn't find closing ';' for ':'")
 
@@ -1246,12 +1253,11 @@ THE SOFTWARE.
 
 						while (depth > 0) {
 							i++
-
 							if (i >= tokens.length)
 								throw new Error("Couldn't find closing ';' for ':'")
 
 							if (tokens[i].type === AST.Types.Token) {
-								if (tokens[i].value === ":" || tokens[i].value === ":noname" || tokens[i].value === ":js" || tokens[i].value === ":jsnoname") {
+								if (isFunctionStart(tokens[i].value)) {
 									depth++
 								} else if (tokens[i].value === ";" || tokens[i].value === "return;") {
 									depth--
@@ -1272,7 +1278,7 @@ THE SOFTWARE.
 								throw new Error("Couldn't find closing ';' for ':noname'")
 
 							if (tokens[i].type === AST.Types.Token) {
-								if (tokens[i].value === ":" || tokens[i].value === ":noname" || tokens[i].value === ":js" || tokens[i].value === ":jsnoname") {
+								if (isFunctionStart(tokens[i].value)) {
 									depth++
 								} else if (tokens[i].value === ";" || tokens[i].value === "return;") {
 									depth--
@@ -1286,7 +1292,9 @@ THE SOFTWARE.
 						break
 					}
 
+					case ":async":
 					case ":js": { // function definition
+						let isAsync = tokens[i].value === ":async"
 						i++
 						if (i >= tokens.length)
 							throw new Error("Couldn't find closing ';/return;' for ':js'")
@@ -1302,7 +1310,7 @@ THE SOFTWARE.
 								throw new Error("Couldn't find closing ';/return;' for ':js'")
 
 							if (tokens[i].type === AST.Types.Token) {
-								if (tokens[i].value === ":" || tokens[i].value === ":noname" || tokens[i].value === ":js" || tokens[i].value === ":jsnoname") {
+								if (isFunctionStart(tokens[i].value)) {
 									depth++
 								} else if (tokens[i].value === ";" || tokens[i].value === "return;") {
 									depth--
@@ -1329,18 +1337,20 @@ THE SOFTWARE.
 							localtree.body.push(new AST.JsCode("return stack.pop()"))
 						}
 
-						add(new AST.FunctionJs(function_name, args, localtree, returnValue))
+						add(new AST.FunctionJs(function_name, args, localtree, returnValue, isAsync))
 						break
 					}
 
+					case ":asyncnoname":
 					case ":jsnoname": { // function definition
+						let isAsync = tokens[i].value === ":asyncnoname"
 						while (depth > 0) {
 							i++
 							if (i >= tokens.length)
 								throw new Error("Couldn't find closing ';/return;' for ':jsnoname'")
 
 							if (tokens[i].type === AST.Types.Token) {
-								if (tokens[i].value === ":" || tokens[i].value === ":noname" || tokens[i].value === ":js" || tokens[i].value === ":jsnoname") {
+								if (isFunctionStart(tokens[i].value)) {
 									depth++
 								} else if (tokens[i].value === ";" || tokens[i].value === "return;") {
 									depth--
@@ -1367,7 +1377,7 @@ THE SOFTWARE.
 							localtree.body.push(new AST.JsCode("return stack.pop()"))
 						}
 
-						add(new AST.FunctionJsAnonymous(args, localtree, returnValue))
+						add(new AST.FunctionJsAnonymous(args, localtree, returnValue, isAsync))
 						break
 					}
 
@@ -1707,7 +1717,7 @@ THE SOFTWARE.
 						if (name.indexOf(".") !== -1)
 							throw new Error("Function names can not contain .")
 						let args = code_tree.args.map(Mangling.mangle).join(", ")
-						append("function " + name + "(" + args + ") {")
+						append(`${code_tree.isAsync?"async ":""}function ${name}(${args}) {`)
 						append(indent_characters + "var stack = new SForthStack();")
 						out += generateCode(code_tree.body, level)
 						append("}")
@@ -1716,7 +1726,7 @@ THE SOFTWARE.
 
 					case AST.Types.FunctionJsAnonymous: {
 						let args = code_tree.args.map(Mangling.mangle).join(", ")
-						append("stack.push(function(" + args + ") {")
+						append(`stack.push(${code_tree.isAsync?"async ":""}function(${args}) {`)
 						append(indent_characters + "var stack = new SForthStack();")
 						out += generateCode(code_tree.body, level)
 						append("});")

@@ -250,3 +250,8 @@ THE SOFTWARE.
 : /string { str n -- str } n str.substr(1) ;
 
 : time-in-ms ( -- x ) Date.now() ;
+
+:macro await {} :[ await stack.pop() ]: ;
+:macro await; {} :[ await stack.pop() ]; ;
+
+:async sleep { milliseconds } :[ new Promise(resolve => setTimeout(resolve, milliseconds)) ]: return;
