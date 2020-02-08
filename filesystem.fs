@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
-' Filesystem.readFile util.promisify(1) { readFile }
-' Filesystem.writeFile util.promisify(1) { writeFile }
+' Filesystem.promises.readFile { readFile }
+' Filesystem.promises.writeFile { writeFile }
 
 : readFileSync { filename -- content } filename Filesystem.readFileSync(1) ;
 : writeFileSync { filename data -- } filename data Filesystem.writeFileSync(2); ;
