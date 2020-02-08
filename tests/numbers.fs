@@ -29,7 +29,7 @@ clearstack
 
 0.2 Math.floor 0 = »floor result should be 0« assert
 
-13 3 /mod 4 = 1 = && »/mod result should be 4 1« assert
+13 3 /mod 4 = swap 1 = && »/mod result should be 4 1« assert
 
 2 Math.PI * rad2deg 360 = »result should be 360« assert
 180 deg2rad Math.PI = »result should be PI« assert
