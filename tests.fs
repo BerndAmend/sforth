@@ -30,6 +30,7 @@ include "filesystem.fs"
 
 0 test-files.length 1 do i
 		"tests/" i test-files @ + { filename }
+		".fs" filename.endsWith(1) not if continue endif
 		»Execute « filename + . cr
 		filename readFileSync { file }
 		file.toString(0) sforth.compile { res } res.generated_code vm.runInThisContext(1);
