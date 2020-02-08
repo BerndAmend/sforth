@@ -14,7 +14,7 @@ dup
 depth 4 = »dup added more than 1 element to the stack« assert
 
 3 = »dup result is wrong« assert
-3 = »the stack element that should have been doublicated is gone« assert
+3 = »the stack element that should have been duplicated is gone« assert
 2 = »the previous stack was corrupted 1« assert
 1 = »the previous stack was corrupted 2« assert
 
