@@ -1,5 +1,6 @@
 :async fisch { v } v return;
-:async testfunc {} 42 fisch await console.log(1) ;
-:async testfunc {} "Hello" console.log(1) 1000 sleep await; "World" console.log(1) ;
+:async testfunc {} 42 fisch await 42 = "fisch returns the correct value" assert ;
+:async testfunc2 {} "Hello" . 1000 sleep await; "World" . ;
 
 testfunc(0)
+testfunc2(0)
