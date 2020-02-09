@@ -146,6 +146,7 @@ THE SOFTWARE.
 :macro / {} local{ x1 x2 -- x3 } :[ x1 / x2 ]: ;
 :macro mod {} local{ x1 x2 -- x3 } :[ x1 % x2 ]: ;
 : /mod { x1 x2 -- x3 } :[ x1 % x2 ]: :[ x1 / x2 ]: Math.floor ;
+:macro ** {} local{ x1 x2 -- x3 } :[ x1 ** x2 ]: ;
 
 : negate ( n -- -n ) -1 * ;
 
@@ -154,6 +155,7 @@ THE SOFTWARE.
 :macro m* { x1 x2 -- x3 } :[ x1 * x2 ]: ;
 :macro m/ { x1 x2 -- x3 } :[ x1 / x2 ]: ;
 :macro mmod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
+:macro m** { x1 x2 -- x3 } :[ x1 ** x2 ]: ;
 
 :macro << {} local{ x1 x2 -- x3 } :[ x1 << x2 ]: ;
 :macro >> {} local{ x1 x2 -- x3 } :[ x1 >> x2 ]: ;
