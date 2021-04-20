@@ -3,7 +3,7 @@
 /**
 The MIT License (MIT)
 
-Copyright (c) 2013-2020 Bernd Amend <bernd.amend+sforth@gmail.com>
+Copyright (c) 2013-2021 Bernd Amend <bernd.amend+sforth@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,11 @@ THE SOFTWARE.
 // handle command line arguments
 var sforthArguments = [];
 
-for(let i=0; i<process.argv.length; i+=1) {
-    if(process.argv[i] == __filename) {
-        sforthArguments = process.argv.slice(i+1);
-        break;
-    }
+for (let i = 0; i < process.argv.length; i += 1) {
+	if (process.argv[i] == __filename) {
+		sforthArguments = process.argv.slice(i + 1);
+		break;
+	}
 }
 
 // forward require that it can be called from sforth code
@@ -46,11 +46,11 @@ global.sforth = new SForthSystem.Compiler();
 
 let filename = "repl.fs"
 {
-	if(sforthArguments.length > 0) {
-		filename = sforthArguments[sforthArguments.length-1];
+	if (sforthArguments.length > 0) {
+		filename = sforthArguments[sforthArguments.length - 1];
 
-		for(let i = 0; i < sforthArguments.length-1; i++) {
-			switch(sforthArguments[i]) {
+		for (let i = 0; i < sforthArguments.length - 1; i++) {
+			switch (sforthArguments[i]) {
 				case "--compile":
 					{
 						let compiler = new SForthSystem.Compiler();
@@ -58,7 +58,7 @@ let filename = "repl.fs"
 						Filesystem.writeFileSync(filename + ".js", result.generated_code);
 						return;
 					}
-				break;
+					break;
 				case "--dump":
 					{
 						let compiler = new SForthSystem.Compiler();
@@ -67,7 +67,7 @@ let filename = "repl.fs"
 						Filesystem.writeFileSync(filename + ".json", JSON.stringify(result, null, "\t"));
 						return;
 					}
-				break;
+					break;
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 (
 The MIT License (MIT)
 
-Copyright (c) 2013-2020 Bernd Amend <bernd.amend+sforth@gmail.com>
+Copyright (c) 2013-2021 Bernd Amend <bernd.amend+sforth@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +61,7 @@ pathname +
 <body>
 <h1>Index of « +
 pathname +
-»</h1>\n« + value html 
+»</h1>\n« + value html
 
 	:js addRow { filename }
 		pathname filename path.join(2) let fullfilename
@@ -69,7 +69,7 @@ pathname +
 			"/" +to filename
 		endif
 
-		html »<a href="« + filename + »">« + filename + »</a><br>« + to html 
+		html »<a href="« + filename + »">« + filename + »</a><br>« + to html
 	;
 
 	"." addRow

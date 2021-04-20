@@ -1,7 +1,7 @@
 # sforth
 
 sforth is a script language with a forth like syntax that compiles to javascript.
-It allows a seemless integration into normal javascript applications and websites.
+It allows a seamless integration into normal javascript applications and websites.
 
 ## node.js
 
@@ -9,7 +9,7 @@ Get the source code and start the sforth repl
 
 ./sforth
 
-## Firefox / Chromium / Google Chrome / Edge / IE11
+## Firefox / Chromium / Google Chrome / Edge / ...
 
 The examples require that they are served using a static webserver.
 A test webserver is included that only requires node.js.
@@ -72,7 +72,7 @@ Macros are used to rewrite sourcecode before the code gets compiled. value and t
 ```forth
 :macro <name> { <arguments> } <body> ;
 
-\ e.g. the value implemention
+\ e.g. the value implementation
 :macro value { name } :[ var name = stack.pop() ]; ;
 \ usage example
 30 value test-name
@@ -172,9 +172,9 @@ endcase
 	of "20"
 		":)" .
 	endof
-	
+
 	default
-		
+
 endcase
 ```
 
