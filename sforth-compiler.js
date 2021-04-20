@@ -2,7 +2,7 @@
 /**
 The MIT License (MIT)
 
-Copyright (c) 2013-2020 Bernd Amend <bernd.amend+sforth@gmail.com>
+Copyright (c) 2013-2021 Bernd Amend <bernd.amend+sforth@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -49,14 +49,14 @@ THE SOFTWARE.
 	}
 
 	function isNumeric(obj) {
-        if(BigInt && obj.endsWith("n")) {
-            try {
-                BigInt(obj.substr(0,obj.length-1))
-            } catch {
-                return false
-            }
-            return true
-        }
+		if (BigInt && obj.endsWith("n")) {
+			try {
+				BigInt(obj.substr(0, obj.length - 1))
+			} catch {
+				return false
+			}
+			return true
+		}
 		return !isNaN(parseFloat(obj)) && isFinite(obj)
 	}
 
@@ -217,7 +217,7 @@ THE SOFTWARE.
 			if (result[0] === ".")
 				result = "$$dot" + result.substr(1)
 			if (result[result.length - 1] === ".")
-				result = "$$dot" + result.substr(0, result.length - 1)
+				result = result.substr(0, result.length - 1) + "$$dot"
 
 			return result
 		},
@@ -869,13 +869,13 @@ THE SOFTWARE.
 								.replaceAll("\\\u00ab", "\u00ab"), false)
 							)
 						} else if (t[0] === "$" && t.length >= 2) { // handle hex numbers
-							if(t.substr(1,1) === "-") {
+							if (t.substr(1, 1) === "-") {
 								add(new AST.Number("-0x" + t.substr(2)))
 							} else {
 								add(new AST.Number("0x" + t.substr(1)))
 							}
 						} else if (t[0] === "%" && t.length >= 2) { // handle binary numbers
-							if(t.substr(1,1) === "-") {
+							if (t.substr(1, 1) === "-") {
 								add(new AST.Number("-0b" + t.substr(2)))
 							} else {
 								add(new AST.Number("0b" + t.substr(1)))
@@ -900,8 +900,8 @@ THE SOFTWARE.
 
 			function isFunctionStart(str) {
 				return str === ":" || str === ":noname" ||
-						str === ":js" || str === ":jsnoname" ||
-						str === ":async" || str === ":asyncnoname"
+					str === ":js" || str === ":jsnoname" ||
+					str === ":async" || str === ":asyncnoname"
 			}
 
 			for (let i = 0; i < tokens.length; i++) {
@@ -1717,7 +1717,7 @@ THE SOFTWARE.
 						if (name.indexOf(".") !== -1)
 							throw new Error("Function names can not contain .")
 						let args = code_tree.args.map(Mangling.mangle).join(", ")
-						append(`${code_tree.isAsync?"async ":""}function ${name}(${args}) {`)
+						append(`${code_tree.isAsync ? "async " : ""}function ${name}(${args}) {`)
 						append(indent_characters + "var stack = new SForthStack();")
 						out += generateCode(code_tree.body, level)
 						append("}")
@@ -1726,7 +1726,7 @@ THE SOFTWARE.
 
 					case AST.Types.FunctionJsAnonymous: {
 						let args = code_tree.args.map(Mangling.mangle).join(", ")
-						append(`stack.push(${code_tree.isAsync?"async ":""}function(${args}) {`)
+						append(`stack.push(${code_tree.isAsync ? "async " : ""}function(${args}) {`)
 						append(indent_characters + "var stack = new SForthStack();")
 						out += generateCode(code_tree.body, level)
 						append("});")
