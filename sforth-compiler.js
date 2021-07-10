@@ -610,6 +610,7 @@ THE SOFTWARE.
 						break
 					}
 
+					case "\f":
 					case "////": { // start a new screen
 						let str = ""
 						while (tokens[i] !== "\n") {
@@ -632,7 +633,7 @@ THE SOFTWARE.
 							str += tokens[i] + " "
 							i++
 
-							if (i + 1 < tokens.length && tokens[i + 1] === "////") {
+							if (i + 1 < tokens.length && (tokens[i + 1] === "////" || tokens[i + 1] === "\f")) {
 								break
 							}
 						}
