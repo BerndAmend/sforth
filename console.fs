@@ -30,7 +30,15 @@ typeof console-low-level-type "function" !== if
             x process.stdout.write(1);
         ; to global.console-low-level-type
     else
-        "console-low-level-type needs to be defined" console.log(1);
+        typeof Deno.stdout "undefined" !== if
+            // automatically define console-low-level-type if deno is used
+            :noname { x -- }
+                :[ const contentBytes = new TextEncoder().encode(x);
+                   Deno.writeAllSync(Deno.stdout, contentBytes); ];
+            ; to window.console-low-level-type
+        else
+            "console-low-level-type needs to be defined" console.log(1);
+        endif
     endif
 endif
 

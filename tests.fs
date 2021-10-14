@@ -26,14 +26,19 @@ include "forth.fs"
 include »console.fs«
 include "filesystem.fs"
 
-"tests" Filesystem.readdirSync(1) { test-files }
+typeof Deno "undefined" !== if
+:[ Array.from(Deno.readDirSync("tests")).map(a => a.name) ]:
+else
+"tests" Filesystem.readdirSync(1)
+endif
+{ test-files }
 
 0 test-files.length 1 do i
 		"tests/" i test-files @ + { filename }
 		".fs" filename.endsWith(1) not if continue endif
 		»Execute « filename + . cr
 		filename readFileSync { file }
-		file.toString(0) sforth.compile { res } res.generated_code vm.runInThisContext(1);
+		file.toString(0) sforth.compile { res } res.generated_code eval(1);
 loop
 
 »Done\n« .

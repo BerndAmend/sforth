@@ -29,10 +29,6 @@ include filesystem.fs
 »sforth, Copyright (C) 2013-2021 Bernd Amend <bernd.amend+sforth@gmail.com>
 Type `bye' to exit\n« .
 
-true process.stdin.setRawMode(1);
-process.stdin.resume drop
-"utf8" process.stdin.setEncoding drop
-
 2000 value cmd_history_save_size
 
 : bye ( -- )
@@ -44,7 +40,12 @@ process.stdin.resume drop
 		0 remove_element_count cmd_history.stac.splice(2);
 	endif
 	".sforth_history" cmd_history.toJSON writeFileSync
-	0 process.exit ;
+	typeof process "undefined" !== if
+		0 process.exit
+	else
+		window.close()
+	endif
+	;
 
 "" value entered
 
@@ -59,8 +60,7 @@ endtry
 : forthconsole ;
 null to forthconsole.onKey
 
-"data"
-:jsnoname { key }
+:js handleKey { key }
 	key "\u0003" === if
 		\ Control-C was pressed
 		\ restore console handler
@@ -85,7 +85,7 @@ null to forthconsole.onKey
 			entered
 			»« to entered
 			sforth.compile(1) let res
-			res.generated_code vm.runInThisContext(1);
+			res.generated_code eval(1);
 			' forthconsole.onKey null === if
 				» ok\n« type
 			endif
@@ -143,4 +143,31 @@ null to forthconsole.onKey
 		entered key + to entered
 	endif
 ;
-process.stdin.on drop \ register the key handling function
+
+typeof process "undefined" !== if
+	true process.stdin.setRawMode(1);
+	process.stdin.resume drop
+	"utf8" process.stdin.setEncoding drop
+	"data" ' handleKey process.stdin.on(2) drop \ register the key handling function
+else
+	:[
+		(async function() {
+			const buffer = new Uint8Array(1000);
+			Deno.setRaw(0, true);
+			while(true) {
+				const nread = await Deno.stdin.read(buffer);
+
+				if (!nread) {
+					break;
+				}
+
+				const string = new TextDecoder().decode(buffer.slice(0, nread));
+
+				for (const char of string) {
+					handleKey(char)
+				}
+			}
+			Deno.setRaw(0, false);
+		})();
+	];
+endif

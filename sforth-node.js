@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 "use strict";
 /**
 The MIT License (MIT)
@@ -24,25 +23,50 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+import * as SForthSystem from "./sforth-compiler.js"
+
+import util from "util"
+import fs from "fs"
+
+import http from "http"
+import path from "path"
+import url from "url"
+
 // handle command line arguments
-var sforthArguments = [];
+let sforthArguments = []
 
 for (let i = 0; i < process.argv.length; i += 1) {
-	if (process.argv[i] == __filename) {
+	if (("file://" + process.argv[i]) == import.meta.url) {
 		sforthArguments = process.argv.slice(i + 1);
 		break;
 	}
 }
 
-// forward require that it can be called from sforth code
-global.require = require;
 
-global.vm = global.vm || require('vm');
-global.util = global.util || require('util');
-global.Filesystem = global.Filesystem || require('fs');
+global.util = global.util || util;
+global.http = global.http || http;
+global.path = global.path || path;
+global.url = global.url || url;
 
-global.SForthSystem = require("./sforth-compiler.js");
-global.sforth = new SForthSystem.Compiler();
+global.Filesystem = global.Filesystem || fs;
+global.SForthSystem = global.SForthSystem || SForthSystem;
+
+function loadFile(filename, includeDirectories) {
+	for (const i of includeDirectories) {
+		const fullfilename = i + "/" + filename
+		if (Filesystem.existsSync(fullfilename)) {
+			return Filesystem.readFileSync(fullfilename).toString()
+		}
+	}
+	throw new Error(`Could not load file ${filename}`)
+}
+
+const compilerOptions = SForthSystem.Compiler.getDefaultOptions()
+compilerOptions.enableEvalWorkaround = true
+compilerOptions.loadFile = loadFile
+
+globalThis.sforth = new SForthSystem.Compiler(compilerOptions);
+globalThis.loadFile = loadFile
 
 let filename = "repl.fs"
 {
@@ -53,25 +77,25 @@ let filename = "repl.fs"
 			switch (sforthArguments[i]) {
 				case "--compile":
 					{
-						let compiler = new SForthSystem.Compiler();
-						let result = compiler.compileFile(filename);
-						Filesystem.writeFileSync(filename + ".js", result.generated_code);
-						return;
+						const result = sforth.compileFile(filename)
+						Filesystem.writeFileSync(filename + ".js", result.generated_code)
+						filename = ""
+						break;
 					}
-					break;
 				case "--dump":
 					{
-						let compiler = new SForthSystem.Compiler();
-						let result = compiler.compileFile(filename);
-						Filesystem.writeFileSync(filename + ".js", result.generated_code);
-						Filesystem.writeFileSync(filename + ".json", JSON.stringify(result, null, "\t"));
-						return;
+						const result = sforth.compileFile(filename)
+						Filesystem.writeFileSync(filename + ".js", result.generated_code)
+						Filesystem.writeFileSync(filename + ".json", JSON.stringify(result, null, "\t"))
+						filename = ""
+						break;
 					}
-					break;
 			}
 		}
 	}
 }
 
-let compileResult = sforth.compileFile(filename);
-vm.runInThisContext(compileResult.generated_code);
+if (filename != "") {
+	const compileResult = sforth.compileFile(filename);
+	eval(compileResult.generated_code);
+}

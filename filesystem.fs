@@ -22,10 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
-' Filesystem.promises.readFile { readFile }
-' Filesystem.promises.writeFile { writeFile }
-
-: readFileSync { filename -- content } filename Filesystem.readFileSync(1) ;
-: writeFileSync { filename data -- } filename data Filesystem.writeFileSync(2); ;
+: readFileSync { filename -- content }
+    typeof Deno "undefined" !== if
+        :[ new TextDecoder().decode(Deno.readFileSync(filename)) ]:
+    else
+        filename Filesystem.readFileSync(1)
+    endif
+;
+: writeFileSync { filename data -- }
+    typeof Deno "undefined" !== if
+        :[ Deno.writeFileSync(filename, new TextEncoder().encode(data)) ];
+    else
+        filename data Filesystem.writeFileSync(2);
+    endif
+;
 
 : readLineWise ( filename ) readFileSync { content } content.toString(0) { str } "\n" str.split(1) ;

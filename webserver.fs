@@ -26,11 +26,6 @@ include "forth.fs"
 include »console.fs«
 include filesystem.fs
 
-"http" require(1) let http
-"path" require(1) let path
-"url" require(1) let url
-"fs" require(1) let fs
-
 8080 value port
 
 :[ {
@@ -65,7 +60,7 @@ pathname +
 
 	:js addRow { filename }
 		pathname filename path.join(2) let fullfilename
-		:[ fs.statSync(fullfilename).isDirectory() ]: if
+		:[ Filesystem.statSync(fullfilename).isDirectory() ]: if
 			"/" +to filename
 		endif
 
@@ -75,7 +70,7 @@ pathname +
 	"." addRow
 	".." addRow
 
-	pathname fs.readdirSync(1) let files
+	pathname Filesystem.readdirSync(1) let files
 
 	' addRow files.forEach(1);
 
@@ -98,8 +93,8 @@ return;
 			return
 		endif
 
-		:[ fs.statSync(filename).isDirectory() ]: if
-			filename "/index.html" + fs.existsSync(1) if
+		:[ Filesystem.statSync(filename).isDirectory() ]: if
+			filename "/index.html" + Filesystem.existsSync(1) if
 				"/index.html" +to filename
 				".html" to ext
 			else
@@ -131,7 +126,7 @@ return;
                 "Compile " filename + "\n" + .
                 try
                     SForthSystem.Compiler.getDefaultOptions() let options
-				    false to options.sforthThrowOnUnderflow
+					' loadFile to options.loadFile
                     :[ [".", dirname] ]: to options.includeDirectories
                     :[ new SForthSystem.Compiler(options) ]: let compiler
                     file compiler.compile(1) let compiled
@@ -148,10 +143,10 @@ return;
 
 			response.end(0);
 		;
-		fs.readFile(3);
+		Filesystem.readFile(3);
 	;
 
-	filename ' func fs.exists(2);
+	filename ' func Filesystem.exists(2);
 ;
 http.createServer(1) let server
 port server.listen(1);
