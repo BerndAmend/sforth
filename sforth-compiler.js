@@ -523,7 +523,6 @@ export class Compiler {
 	static getDefaultOptions() {
 		return {
 			includeDirectories: ["."],
-			enableEvalWorkaround: false,
 			loadFile: function (_filename, _includeDirectories) {
 				throw new Error("no loadFile handler was provided in the compiler options")
 			}
@@ -1472,8 +1471,6 @@ export class Compiler {
 		if (indent_characters === undefined)
 			indent_characters = "\t"
 
-		const enableEvalWorkaround = this.options.enableEvalWorkaround
-
 		function generateCode(code_tree, level) {
 
 			let out = ""
@@ -1655,8 +1652,6 @@ export class Compiler {
 					out += generateCode(code_tree.body, level)
 					append("}")
 					append(`${name}.forth_function=true;`)
-					if(enableEvalWorkaround)
-						append(`(this || globalThis).${name} = ${name};`)
 					break
 				}
 
@@ -1677,8 +1672,6 @@ export class Compiler {
 					append(indent_characters + "var stack = new SForthStack();")
 					out += generateCode(code_tree.body, level)
 					append("}")
-					if(enableEvalWorkaround)
-						append(`(this || globalThis).${name} = ${name};`)
 					break
 				}
 
@@ -1807,19 +1800,10 @@ export class Compiler {
 		}
 		this.runtimeProvided = true
 
-		if (enableEvalWorkaround) {
-			return "\"use strict\";\n" +
-				SForthStack.toString() + ";" +
-				"(this || globalThis).SForthStack = SForthStack;" +
-				"var stack = stack || new SForthStack();" +
-				"(this || globalThis).stack = stack;" +
-				generated_code
-		} else {
-			return "\"use strict\";\n" +
+		return "\"use strict\";\n" +
 			SForthStack.toString() + ";" +
 			"var stack = stack || new SForthStack();" +
 			generated_code
-		}
 	}
 
 	optimizeCodeTree(org_code_tree) {

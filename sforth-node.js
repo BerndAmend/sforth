@@ -25,6 +25,7 @@ THE SOFTWARE.
 
 import * as SForthSystem from "./sforth-compiler.js"
 
+import vm from "vm"
 import util from "util"
 import fs from "fs"
 
@@ -42,7 +43,7 @@ for (let i = 0; i < process.argv.length; i += 1) {
 	}
 }
 
-
+global.vm = global.vm || vm;
 global.util = global.util || util;
 global.http = global.http || http;
 global.path = global.path || path;
@@ -62,7 +63,6 @@ function loadFile(filename, includeDirectories) {
 }
 
 const compilerOptions = SForthSystem.Compiler.getDefaultOptions()
-compilerOptions.enableEvalWorkaround = true
 compilerOptions.loadFile = loadFile
 
 globalThis.sforth = new SForthSystem.Compiler(compilerOptions);
@@ -97,5 +97,5 @@ let filename = "repl.fs"
 
 if (filename != "") {
 	const compileResult = sforth.compileFile(filename);
-	eval(compileResult.generated_code);
+	vm.runInThisContext(compileResult.generated_code);
 }

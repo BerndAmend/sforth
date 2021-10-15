@@ -38,7 +38,7 @@ endif
 		".fs" filename.endsWith(1) not if continue endif
 		»Execute « filename + . cr
 		filename readFileSync { file }
-		file.toString(0) sforth.compile { res } res.generated_code eval(1);
+		file.toString(0) sforth.compile { res } res.generated_code eval;
 loop
 
 »Done\n« .

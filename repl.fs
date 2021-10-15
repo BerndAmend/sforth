@@ -85,7 +85,7 @@ null to forthconsole.onKey
 			entered
 			»« to entered
 			sforth.compile(1) let res
-			res.generated_code eval(1);
+			res.generated_code eval;
 			' forthconsole.onKey null === if
 				» ok\n« type
 			endif

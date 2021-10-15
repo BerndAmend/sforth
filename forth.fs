@@ -257,3 +257,11 @@ THE SOFTWARE.
 :macro await; {} :[ await stack.pop() ]; ;
 
 :js sleep { milliseconds } :[ new Promise(resolve => setTimeout(resolve, milliseconds)) ]: return;
+
+:macro eval; {}
+    typeof Deno "undefined" !== if
+        Deno.core.evalContext(1);
+    else
+        vm.runInThisContext(1);
+    endif
+;

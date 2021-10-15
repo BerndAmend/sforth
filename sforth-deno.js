@@ -40,10 +40,10 @@ function loadFile(filename, includeDirectories) {
 }
 
 const compilerOptions = SForthSystem.Compiler.getDefaultOptions()
-compilerOptions.enableEvalWorkaround = true
 compilerOptions.loadFile = loadFile
 
 const sforth = new SForthSystem.Compiler(compilerOptions);
+globalThis.SForthSystem = SForthSystem
 globalThis.sforth = sforth
 globalThis.loadFile = loadFile
 
@@ -78,5 +78,5 @@ let filename = "repl.fs"
 
 if (filename != "") {
 	const compileResult = sforth.compileFile(filename);
-	eval(compileResult.generated_code);
+	Deno.core.evalContext(compileResult.generated_code);
 }
