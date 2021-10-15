@@ -77,6 +77,8 @@ let filename = "repl.fs"
 }
 
 if (filename != "") {
-	const compileResult = sforth.compileFile(filename);
-	Deno.core.evalContext(compileResult.generated_code);
+	const compileResult = sforth.compileFile(filename)
+	const err = Deno.core.evalContext(compileResult.generated_code)[1]
+	if (err !== null)
+		throw err.thrown
 }

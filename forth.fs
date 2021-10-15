@@ -260,7 +260,11 @@ THE SOFTWARE.
 
 :macro eval; {}
     typeof Deno "undefined" !== if
-        Deno.core.evalContext(1);
+        :[
+            let _tmp_err = Deno.core.evalContext(stack.pop())[1]
+            if (_tmp_err !== null)
+                throw _tmp_err.thrown
+        ];
     else
         vm.runInThisContext(1);
     endif
