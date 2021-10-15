@@ -40,10 +40,10 @@ Type `bye' to exit\n« .
 		0 remove_element_count cmd_history.stac.splice(2);
 	endif
 	".sforth_history" cmd_history.toJSON writeFileSync
-	typeof process "undefined" !== if
-		0 process.exit
-	else
+	typeof Deno "undefined" !== if
 		window.close()
+	else
+		0 process.exit
 	endif
 	;
 
@@ -144,12 +144,7 @@ null to forthconsole.onKey
 	endif
 ;
 
-typeof process "undefined" !== if
-	true process.stdin.setRawMode(1);
-	process.stdin.resume drop
-	"utf8" process.stdin.setEncoding drop
-	"data" ' handleKey process.stdin.on(2) drop \ register the key handling function
-else
+typeof Deno "undefined" !== if
 	:[
 		(async function() {
 			const buffer = new Uint8Array(1000);
@@ -170,4 +165,9 @@ else
 			Deno.setRaw(0, false);
 		})();
 	];
+else
+	true process.stdin.setRawMode(1);
+	process.stdin.resume drop
+	"utf8" process.stdin.setEncoding drop
+	"data" ' handleKey process.stdin.on(2) drop \ register the key handling function
 endif
