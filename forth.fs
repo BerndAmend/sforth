@@ -212,14 +212,6 @@ THE SOFTWARE.
 : sindeg {} ( x1 -- x2 ) deg2rad Math.sin ;
 : tandeg {} ( x1 -- x2 ) deg2rad Math.tan ;
 
-\ return stack functions
-:macro >r {} ( w -- R:w ) :[ var returnStack = returnStack || new SForthStack() ]; returnStack.push ;
-:macro r> {} ( R:w -- w ) returnStack.pop(0) ;
-:macro r@ {} ( -- w R: w -- w ) returnStack.top ;
-:macro rdrop {} ( R:w -- ) returnStack.pop(0); ;
-:macro rdepth {} ( -- n ) returnStack.size ;
-:macro rpick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) returnStack.get ;
-
 : assert { flag text -- } flag not if text "\n" + . endif ;
 
 \ Exceptions

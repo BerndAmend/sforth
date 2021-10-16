@@ -96,15 +96,6 @@ endif
 	loop
 	drop ;
 
-: print-returnstack
-	:[ if(!this.returnStack) return ]; \ return if no return stack exists
-	this.returnStack to returnStack \ get the return stack of the caller
-	"<" rdepth »> « + + . rdepth 1- rdepth 0 swap 1
-	do i
-		dup i - rpick type space
-	loop
-	drop ;
-
 : emit ( x -- ) String.fromCharCode . ;
 
 : space ( -- ) » « . ;
