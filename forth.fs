@@ -235,7 +235,7 @@ THE SOFTWARE.
 
 : count { str -- len } :[ str.toString().length ]: ;
 
-: o>string { n -- str } n.toString(0) ;
+: o>string { n -- str } n.toString() ;
 : /string { str n -- str } n str.substr(1) ;
 
 : time-in-ms ( -- x ) Date.now() ;

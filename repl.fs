@@ -39,11 +39,11 @@ Type `bye' to exit\n« .
 	remove_element_count 0> if
 		0 remove_element_count cmd_history.stac.splice(2);
 	endif
-	".sforth_history" cmd_history.toJSON writeFileSync
+	".sforth_history" cmd_history.toJSON() writeFileSync
 	typeof Deno "undefined" !== if
 		window.close()
 	else
-		0 process.exit
+		0 process.exit(1);
 	endif
 	;
 
@@ -53,7 +53,7 @@ Type `bye' to exit\n« .
 new SForthStack value cmd_history
 
 try
-	".sforth_history" readFileSync cmd_history.fromJSON
+	".sforth_history" readFileSync cmd_history.fromJSON(1);
 catch err
 endtry
 
@@ -90,7 +90,7 @@ null to forthconsole.onKey
 				» ok\n« type
 			endif
 		catch e
-			`\n${SForthSystem.Mangling.demangle(e.stack)}\n` .
+			`\n${SForthSystem.demangle(e.stack)}\n` .
 		endtry
 
 	elseif 0 key.charCodeAt 27 = if
@@ -100,7 +100,7 @@ null to forthconsole.onKey
 				of 65 \ up
 					cmd_last_pos 0= if
 						cmd_last_pos cmd_history.get count 0<> if
-							»« cmd_history.push
+							»« cmd_history.push(1);
 						endif
 					endif
 					cmd_last_pos cmd_history.size 1- < if
@@ -122,7 +122,7 @@ null to forthconsole.onKey
 					entered .
 					cmd_last_pos 0= if
 						entered count 0<> if
-							»« cmd_history.push
+							»« cmd_history.push(1);
 						endif
 					endif
 				endof
