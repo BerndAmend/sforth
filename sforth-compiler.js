@@ -536,6 +536,7 @@ export class Compiler {
 		const clean_code = code.replace(/\r\n/gm, "\n")
 			.replace(/\n/gm, " \n ")
 			.replace(/\t/gm, " \t ")
+			.replace(/\f/gm, " \f ")
 			.replace(/\r/gm, " \n ")
 
 		// tokenize code
