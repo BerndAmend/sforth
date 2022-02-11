@@ -22,26 +22,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import * as SForthSystem from "./sforth-compiler.ts";
+import * as SForthSystem from "./sforth-compiler.js";
 
 declare const globalThis: any;
 
-import vm from "vm";
-import util from "util";
-import fs from "fs";
-import http from "http";
-import path from "path";
-import url from "url";
+import * as vm from "vm";
+import * as util from "util";
+import * as fs from "fs";
+import * as http from "http";
+import * as path from "path";
+import * as url from "url";
 
 // handle command line arguments
 let sforthArguments = [];
 
-for (let i = 0; i < process.argv.length; i += 1) {
-  if (("file://" + process.argv[i]) == import.meta.url) {
-    sforthArguments = process.argv.slice(i + 1);
-    break;
-  }
-}
+//for (let i = 2; i < process.argv.length; i += 1) {
+//  console.log(`${i} ${process.argv[i]}`);
+// if (("file://" + process.argv[i]) == import.meta.url) {
+sforthArguments = process.argv.slice(2);
+//   break;
+// }
+//}
+console.log(sforthArguments);
 
 globalThis.vm = globalThis.vm || vm;
 globalThis.util = globalThis.util || util;
@@ -55,8 +57,8 @@ globalThis.SForthSystem = globalThis.SForthSystem || SForthSystem;
 function loadFile(filename: string, includeDirectories: string[]) {
   for (const i of includeDirectories) {
     const fullfilename = i + "/" + filename;
-    if (Filesystem.existsSync(fullfilename)) {
-      return Filesystem.readFileSync(fullfilename).toString();
+    if (fs.existsSync(fullfilename)) {
+      return fs.readFileSync(fullfilename).toString();
     }
   }
   throw new Error(`Could not load file ${filename}`);
@@ -78,14 +80,14 @@ let filename = "repl.fs";
       switch (sforthArguments[i]) {
         case "--compile": {
           const result = sforth.compileFile(filename);
-          Filesystem.writeFileSync(filename + ".js", result.generated_code);
+          fs.writeFileSync(filename + ".js", result.generated_code);
           filename = "";
           break;
         }
         case "--dump": {
           const result = sforth.compileFile(filename);
-          Filesystem.writeFileSync(filename + ".js", result.generated_code);
-          Filesystem.writeFileSync(
+          fs.writeFileSync(filename + ".js", result.generated_code);
+          fs.writeFileSync(
             filename + ".json",
             JSON.stringify(result, null, "\t"),
           );

@@ -1,3 +1,4 @@
 #!/usr/bin/sh
 set -e
-ts-node sforth-node.ts "$@"
+tsc --lib esnext,dom --module esnext --target esnext sforth-compiler.ts sforth-node.ts
+node sforth-node.js "$@"

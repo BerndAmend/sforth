@@ -22,6 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+declare function structuredClone(
+  // deno-lint-ignore no-explicit-any
+  value: any,
+  options?: StructuredSerializeOptions,
+  // deno-lint-ignore no-explicit-any
+): any;
+
 function replaceWholeWord(
   target: string,
   search: string,
