@@ -22,66 +22,74 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import * as SForthSystem from "./sforth-compiler.ts"
+import * as SForthSystem from "./sforth-compiler.ts";
 
 import { existsSync } from "https://deno.land/std@0.111.0/fs/mod.ts";
 
 declare const globalThis: any;
 
 // handle command line arguments
-const sforthArguments = Deno.args
+const sforthArguments = Deno.args;
 
 function loadFile(filename: string, includeDirectories: string[]) {
-	for (const i of includeDirectories) {
-		const fullfilename = i + "/" + filename
-		if (existsSync(fullfilename)) {
-			return new TextDecoder().decode(Deno.readFileSync(filename))
-		}
-	}
-	throw new Error(`Could not load file ${filename}`)
+  for (const i of includeDirectories) {
+    const fullfilename = i + "/" + filename;
+    if (existsSync(fullfilename)) {
+      return new TextDecoder().decode(Deno.readFileSync(filename));
+    }
+  }
+  throw new Error(`Could not load file ${filename}`);
 }
 
-const compilerOptions = SForthSystem.Compiler.getDefaultOptions()
-compilerOptions.loadFile = loadFile
+const compilerOptions = SForthSystem.Compiler.getDefaultOptions();
+compilerOptions.loadFile = loadFile;
 
 const sforth = new SForthSystem.Compiler(compilerOptions);
-globalThis.SForthSystem = SForthSystem
-globalThis.sforth = sforth
-globalThis.loadFile = loadFile
+globalThis.SForthSystem = SForthSystem;
+globalThis.sforth = sforth;
+globalThis.loadFile = loadFile;
 
-let filename = "repl.fs"
+let filename = "repl.fs";
 {
-	if (sforthArguments.length > 0) {
-		filename = sforthArguments[sforthArguments.length - 1];
+  if (sforthArguments.length > 0) {
+    filename = sforthArguments[sforthArguments.length - 1];
 
-		for (let i = 0; i < sforthArguments.length - 1; i++) {
-			switch (sforthArguments[i]) {
-				case "--compile":
-					{
-						const result = sforth.compileFile(filename)
-						Deno.writeFileSync(filename + ".js", new TextEncoder().encode(result.generated_code))
-						self.close()
-						filename = ""
-						break
-					}
-				case "--dump":
-					{
-						const result = sforth.compileFile(filename)
-						Deno.writeFileSync(filename + ".js", new TextEncoder().encode(result.generated_code))
-						Deno.writeFileSync(filename + ".json", new TextEncoder().encode(JSON.stringify(result, null, "\t")))
-						self.close()
-						filename = ""
-						break
-					}
-			}
-		}
-	}
+    for (let i = 0; i < sforthArguments.length - 1; i++) {
+      switch (sforthArguments[i]) {
+        case "--compile": {
+          const result = sforth.compileFile(filename);
+          Deno.writeFileSync(
+            filename + ".js",
+            new TextEncoder().encode(result.generated_code),
+          );
+          self.close();
+          filename = "";
+          break;
+        }
+        case "--dump": {
+          const result = sforth.compileFile(filename);
+          Deno.writeFileSync(
+            filename + ".js",
+            new TextEncoder().encode(result.generated_code),
+          );
+          Deno.writeFileSync(
+            filename + ".json",
+            new TextEncoder().encode(JSON.stringify(result, null, "\t")),
+          );
+          self.close();
+          filename = "";
+          break;
+        }
+      }
+    }
+  }
 }
 
 if (filename != "") {
-	const compileResult = sforth.compileFile(filename)
-	// @ts-ignore: Deno.core has no typescript type information
-	const err = Deno.core.evalContext(compileResult.generated_code)[1]
-	if (err !== null)
-		throw err.thrown
+  const compileResult = sforth.compileFile(filename);
+  // @ts-ignore: Deno.core has no typescript type information
+  const err = Deno.core.evalContext(compileResult.generated_code)[1];
+  if (err !== null) {
+    throw err.thrown;
+  }
 }
