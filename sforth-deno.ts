@@ -35,7 +35,7 @@ function loadFile(filename: string, includeDirectories: string[]) {
   for (const i of includeDirectories) {
     const fullfilename = i + "/" + filename;
     if (existsSync(fullfilename)) {
-      return new TextDecoder().decode(Deno.readFileSync(filename));
+      return new TextDecoder().decode(Deno.readFileSync(fullfilename));
     }
   }
   throw new Error(`Could not load file ${filename}`);
