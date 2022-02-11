@@ -65,6 +65,7 @@ function isNumeric(obj: string): boolean {
 }
 
 export class SForthStack {
+  // deno-lint-ignore no-explicit-any
   stac: Array<any>;
   pos: number;
 
@@ -98,6 +99,7 @@ export class SForthStack {
     return this.stac.splice(realpos, 1)[0];
   }
 
+  // deno-lint-ignore no-explicit-any
   push(item: any) {
     this.stac[++this.pos] = item;
   }
@@ -1708,7 +1710,7 @@ export class Compiler {
     return this.createFromForthTokens(this.tokenize(code));
   }
 
-  generateJsCode(code_tree: any, indent_characters = "\t"): string {
+  generateJsCode(code_tree: BodyType, indent_characters = "\t"): string {
     function generateCode(code_tree: NodeType, level: number) {
       let out = "";
 
@@ -2114,7 +2116,10 @@ export class Compiler {
     let modified;
 
     function visitNodes(
-      func: any,
+      func: (
+        current: NodeType[],
+        previous?: NodeType,
+      ) => NodeType | undefined,
       current?: NodeType | NodeType[],
       previous?: NodeType,
     ): NodeType | undefined {
@@ -2180,6 +2185,7 @@ export class Compiler {
             console.log("Unexpected entry found: " + JSON.stringify(current));
         }
       }
+      return undefined;
     }
 
     // rewrite do without a compare operation to do with an increment
@@ -2234,6 +2240,7 @@ export class Compiler {
         }
         visitNodes(rewriteStackPop, val);
       }
+      return undefined;
     }
 
     // remove empty code tree entries
@@ -2251,6 +2258,7 @@ export class Compiler {
         }
         visitNodes(removeEmptyCodeTreeEntries, val);
       }
+      return undefined;
     }
 
     function inlineValueLocal(
