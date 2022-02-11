@@ -40,11 +40,7 @@ Type `bye' to exit\n« .
 		0 remove_element_count cmd_history.stac.splice(2);
 	endif
 	".sforth_history" cmd_history.toJSON() writeFileSync
-	typeof Deno "undefined" !== if
-		window.close()
-	else
-		0 process.exit(1);
-	endif
+	0 process.exit(1);
 	;
 
 "" value entered
@@ -144,30 +140,7 @@ null to forthconsole.onKey
 	endif
 ;
 
-typeof Deno "undefined" !== if
-	:[
-		(async function() {
-			const buffer = new Uint8Array(1000);
-			Deno.setRaw(0, true);
-			while(true) {
-				const nread = await Deno.stdin.read(buffer);
-
-				if (!nread) {
-					break;
-				}
-
-				const string = new TextDecoder().decode(buffer.slice(0, nread));
-
-				for (const char of string) {
-					handleKey(char)
-				}
-			}
-			Deno.setRaw(0, false);
-		})();
-	];
-else
-	true process.stdin.setRawMode(1);
-	process.stdin.resume drop
-	"utf8" process.stdin.setEncoding drop
-	"data" ' handleKey process.stdin.on(2) drop \ register the key handling function
-endif
+true process.stdin.setRawMode(1);
+process.stdin.resume drop
+"utf8" process.stdin.setEncoding drop
+"data" ' handleKey process.stdin.on(2) drop \ register the key handling function

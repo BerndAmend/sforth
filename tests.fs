@@ -26,12 +26,7 @@ include "forth.fs"
 include »console.fs«
 include "filesystem.fs"
 
-typeof Deno "undefined" !== if
-:[ Array.from(Deno.readDirSync("tests")).map(a => a.name) ]:
-else
-"tests" Filesystem.readdirSync(1)
-endif
-{ test-files }
+"tests" fs.readdirSync(1) { test-files }
 
 0 test-files.length 1 do i
 		"tests/" i test-files @ + { filename }

@@ -253,6 +253,7 @@ THE SOFTWARE.
                 throw _tmp_err.thrown
         ];
     else
+        // the compat function from deno behaves differently therefore we just use our own implementation
         vm.runInThisContext(1);
     endif
 ;

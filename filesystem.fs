@@ -23,18 +23,10 @@ THE SOFTWARE.
 )
 
 : readFileSync { filename -- content }
-    typeof Deno "undefined" !== if
-        :[ new TextDecoder().decode(Deno.readFileSync(filename)) ]:
-    else
-        filename Filesystem.readFileSync(1)
-    endif
+    filename fs.readFileSync(1)
 ;
 : writeFileSync { filename data -- }
-    typeof Deno "undefined" !== if
-        :[ Deno.writeFileSync(filename, new TextEncoder().encode(data)) ];
-    else
-        filename data Filesystem.writeFileSync(2);
-    endif
+    filename data fs.writeFileSync(2);
 ;
 
 : readLineWise ( filename ) readFileSync { content } content.toString(0) { str } "\n" str.split(1) ;

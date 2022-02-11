@@ -60,7 +60,7 @@ pathname +
 
 	:js addRow { filename }
 		pathname filename path.join(2) let fullfilename
-		:[ Filesystem.statSync(fullfilename).isDirectory() ]: if
+		:[ fs.statSync(fullfilename).isDirectory() ]: if
 			"/" +to filename
 		endif
 
@@ -70,7 +70,7 @@ pathname +
 	"." addRow
 	".." addRow
 
-	pathname Filesystem.readdirSync(1) let files
+	pathname fs.readdirSync(1) let files
 
 	' addRow files.forEach(1);
 
@@ -93,8 +93,8 @@ return;
 			return
 		endif
 
-		:[ Filesystem.statSync(filename).isDirectory() ]: if
-			filename "/index.html" + Filesystem.existsSync(1) if
+		:[ fs.statSync(filename).isDirectory() ]: if
+			filename "/index.html" + fs.existsSync(1) if
 				"/index.html" +to filename
 				".html" to ext
 			else
@@ -143,10 +143,10 @@ return;
 
 			response.end(0);
 		;
-		Filesystem.readFile(3);
+		fs.readFile(3);
 	;
 
-	filename ' func Filesystem.exists(2);
+	filename ' func fs.exists(2);
 ;
 http.createServer(1) let server
 port server.listen(1);

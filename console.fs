@@ -24,22 +24,14 @@ THE SOFTWARE.
 
 // this file expects that you have already define a console-low-level-type function
 typeof console-low-level-type "function" !== if
-	typeof Deno "undefined" !== if
-            // automatically define console-low-level-type if deno is used
-            :noname { x -- }
-                :[ const contentBytes = new TextEncoder().encode(x);
-                   Deno.writeAllSync(Deno.stdout, contentBytes); ];
-            ; to window.console-low-level-type
-    else
-		typeof process "undefined" !== if
-			// automatically define console-low-level-type if node.js is used
-			:noname { x -- }
-				x process.stdout.write(1);
-			; to global.console-low-level-type
-        else
-            "console-low-level-type needs to be defined" console.log(1);
-        endif
-    endif
+	typeof process "undefined" !== if
+		// automatically define console-low-level-type if node.js is used
+		:noname { x -- }
+			x process.stdout.write(1);
+		; to global.console-low-level-type
+	else
+		"console-low-level-type needs to be defined" console.log(1);
+	endif
 endif
 
 10 value consolebase
