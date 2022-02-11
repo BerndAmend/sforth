@@ -2,7 +2,7 @@
   "name": "sforth",
   "version": "1.0.0",
   "description": "sforth is a script language with a forth like syntax that compiles to javascript ",
-  "main": "sforth-compiler.js",
+  "main": "sforth-compiler.ts",
   "type": "module",
   "directories": {
     "example": "examples",

@@ -24,8 +24,6 @@ THE SOFTWARE.
 
 import * as SForthSystem from "./sforth-compiler.js";
 
-declare const globalThis: any;
-
 import * as vm from "vm";
 import * as util from "util";
 import * as fs from "fs";
@@ -33,32 +31,39 @@ import * as http from "http";
 import * as path from "path";
 import * as url from "url";
 
-// handle command line arguments
-let sforthArguments = [];
+declare const globalThis: any;
+declare const Deno: any;
 
-//for (let i = 2; i < process.argv.length; i += 1) {
-//  console.log(`${i} ${process.argv[i]}`);
-// if (("file://" + process.argv[i]) == import.meta.url) {
-sforthArguments = process.argv.slice(2);
-//   break;
-// }
-//}
-console.log(sforthArguments);
-
+globalThis.SForthSystem = globalThis.SForthSystem || SForthSystem;
+globalThis.fs = globalThis.fs || fs;
 globalThis.vm = globalThis.vm || vm;
 globalThis.util = globalThis.util || util;
 globalThis.http = globalThis.http || http;
 globalThis.path = globalThis.path || path;
 globalThis.url = globalThis.url || url;
 
-globalThis.Filesystem = globalThis.Filesystem || fs;
-globalThis.SForthSystem = globalThis.SForthSystem || SForthSystem;
+// handle command line arguments
+let sforthArguments = [];
+
+if (typeof Deno !== "undefined") {
+  sforthArguments = Deno.args;
+} else {
+  //for (let i = 2; i < process.argv.length; i += 1) {
+  //  console.log(`${i} ${process.argv[i]}`);
+  // if (("file://" + process.argv[i]) == import.meta.url) {
+  sforthArguments = process.argv.slice(2);
+  //   break;
+  // }
+  //}
+}
 
 function loadFile(filename: string, includeDirectories: string[]) {
   for (const i of includeDirectories) {
     const fullfilename = i + "/" + filename;
-    if (fs.existsSync(fullfilename)) {
+    try {
       return fs.readFileSync(fullfilename).toString();
+    } catch {
+      // we just ignore the error
     }
   }
   throw new Error(`Could not load file ${filename}`);
@@ -80,13 +85,13 @@ let filename = "repl.fs";
       switch (sforthArguments[i]) {
         case "--compile": {
           const result = sforth.compileFile(filename);
-          fs.writeFileSync(filename + ".js", result.generated_code);
+          fs.writeFileSync(filename + ".js", result.generated_code!);
           filename = "";
           break;
         }
         case "--dump": {
           const result = sforth.compileFile(filename);
-          fs.writeFileSync(filename + ".js", result.generated_code);
+          fs.writeFileSync(filename + ".js", result.generated_code!);
           fs.writeFileSync(
             filename + ".json",
             JSON.stringify(result, null, "\t"),
@@ -101,5 +106,13 @@ let filename = "repl.fs";
 
 if (filename != "") {
   const compileResult = sforth.compileFile(filename);
-  vm.runInThisContext(compileResult.generated_code);
+  if (typeof Deno !== "undefined") {
+    // @ts-ignore: Deno.core has no typescript type information
+    const err = Deno.core.evalContext(compileResult.generated_code!)[1];
+    if (err !== null) {
+      throw err.thrown;
+    }
+  } else {
+    vm.runInThisContext(compileResult.generated_code!, {});
+  }
 }
