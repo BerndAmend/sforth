@@ -70,7 +70,7 @@ null to forthconsole.onKey
 	elseif key "\u007f" === if
 		\ Backspace was pressed
 		entered.length 0> if
-			0 entered.length 1- entered.substr to entered
+			0 entered.length 1- entered.slice(2) to entered
 		clearcurrentline
 			entered.length 0> if entered . endif
 		endif

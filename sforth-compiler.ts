@@ -37,13 +37,13 @@ function replaceWholeWord(
   }
 
   // handle the case where the search word is at the beginning
-  if (target.substr(0, search.length) === search) {
-    target = replacement + target.substr(search.length);
+  if (target.slice(0, search.length) === search) {
+    target = replacement + target.slice(search.length);
   }
 
   // or the end
-  if (target.substr(target.length - search.length) === search) {
-    target = target.substr(0, target.length - search.length) + replacement;
+  if (target.slice(target.length - search.length) === search) {
+    target = target.slice(0, target.length - search.length) + replacement;
   }
 
   return target;
@@ -55,17 +55,13 @@ function isNumeric(obj: string): boolean {
   }
   if (BigInt && obj.endsWith("n")) {
     try {
-      BigInt(obj.substr(0, obj.length - 1));
+      BigInt(obj.slice(0, obj.length - 1));
       return true;
     } catch (_e) {
       return false;
     }
   }
   return !isNaN(Number(obj));
-}
-
-function cloneObject(other: any): any {
-  return JSON.parse(JSON.stringify(other));
 }
 
 export class SForthStack {
@@ -203,16 +199,16 @@ export function mangle(str: string): string {
   }
 
   for (const s in ManglingCharacters) {
-    if (ManglingCharacters.hasOwnProperty(s)) {
+    if (Object.prototype.hasOwnProperty.call(ManglingCharacters, s)) {
       result = result.replaceAll(s, ManglingCharacters[s]);
     }
   }
 
   if (result[0] === ".") {
-    result = "$$dot" + result.substr(1);
+    result = "$$dot" + result.slice(1);
   }
   if (result[result.length - 1] === ".") {
-    result = result.substr(0, result.length - 1) + "$$dot";
+    result = result.slice(0, result.length - 1) + "$$dot";
   }
 
   return result;
@@ -221,7 +217,7 @@ export function mangle(str: string): string {
 export function demangle(str: string): string {
   let result = str;
   for (const s in ManglingCharacters) {
-    if (ManglingCharacters.hasOwnProperty(s)) {
+    if (Object.prototype.hasOwnProperty.call(ManglingCharacters, s)) {
       result = result.replaceAll(ManglingCharacters[s], s);
     }
   }
@@ -232,7 +228,7 @@ export function demangle(str: string): string {
     result.startsWith("$$") && result.charAt(2) >= "0" &&
     result.charAt(2) <= "9"
   ) {
-    result = result.substr(2);
+    result = result.slice(2);
   }
 
   return result;
@@ -275,6 +271,21 @@ export interface BranchIfBody {
   body: BodyType;
 }
 
+export interface BranchIf {
+  type: "BranchIf";
+  if_body: BodyType;
+  else_if_bodies?: BranchIfBody[];
+  else_body?: BodyType;
+}
+
+export interface TryCatchFinally {
+  type: "TryCatchFinally";
+  body: BodyType;
+  catchVar?: string;
+  catchBody?: BodyType;
+  finallyBody?: BodyType;
+}
+
 export type NodeType =
   | {
     type: "Empty";
@@ -282,7 +293,9 @@ export type NodeType =
   | TokenType
   | BodyType
   | MacroType
+  | BranchIf
   | BranchIfBody
+  | TryCatchFinally
   | {
     type: "BeginAgain" | "BeginUntil";
     body: BodyType;
@@ -296,12 +309,6 @@ export type NodeType =
     type: "BranchCase";
     body: BodyType;
     defaultOf?: BodyType;
-  }
-  | {
-    type: "BranchIf";
-    if_body: BodyType;
-    else_if_bodies?: BranchIfBody[];
-    else_body?: BodyType;
   }
   | {
     type: "Call";
@@ -372,13 +379,6 @@ export type NodeType =
     value: string;
     name: string;
     interpolate?: boolean; // not set means false
-  }
-  | {
-    type: "TryCatchFinally";
-    body: BodyType;
-    catchVar?: string;
-    catchBody?: BodyType;
-    finallyBody?: BodyType;
   }
   | {
     type: "ValueLocalTemp" | "ValueLocal";
@@ -762,17 +762,17 @@ export class Compiler {
           } else if (t[0] === "\u00bb") { // »
             let str = "";
             if (
-              tokens[i].substr(tokens[i].length - 1) === "\u00ab" && // «
-              tokens[i].substr(tokens[i].length - 2) !== "\\\u00ab" // «
+              tokens[i].slice(tokens[i].length - 1) === "\u00ab" && // «
+              tokens[i].slice(tokens[i].length - 2) !== "\\\u00ab" // «
             ) {
-              str = tokens[i].substr(1, tokens[i].length - 1);
+              str = tokens[i].slice(1, tokens[i].length);
             } else {
-              str = tokens[i].substr(1) + " ";
+              str = tokens[i].slice(1) + " ";
               i++;
               while (true) {
                 if (
-                  tokens[i].substr(tokens[i].length - 1) === "\u00ab" && // «
-                  tokens[i].substr(tokens[i].length - 2) !== "\\\u00ab" // «
+                  tokens[i].slice(tokens[i].length - 1) === "\u00ab" && // «
+                  tokens[i].slice(tokens[i].length - 2) !== "\\\u00ab" // «
                 ) {
                   if (tokens[i].length === 1) {
                     str += " ";
@@ -805,22 +805,22 @@ export class Compiler {
               },
             );
           } else if (t[0] === "$" && t.length >= 2) { // handle hex numbers
-            if (t.substr(1, 1) === "-") {
+            if (t.slice(1, 2) === "-") {
               add({
                 type: "Number",
-                value: "-0x" + t.substr(2),
+                value: "-0x" + t.slice(2),
               });
             } else {
               add({
                 type: "Number",
-                value: "0x" + t.substr(1),
+                value: "0x" + t.slice(1),
               });
             }
           } else if (t[0] === "%" && t.length >= 2) { // handle binary numbers
-            if (t.substr(1, 1) === "-") {
-              add({ type: "Number", value: "-0b" + t.substr(2) });
+            if (t.slice(1, 2) === "-") {
+              add({ type: "Number", value: "-0b" + t.slice(2) });
             } else {
-              add({ type: "Number", value: "0b" + t.substr(1) });
+              add({ type: "Number", value: "0b" + t.slice(1) });
             }
           } else {
             add({ type: "Token", value: t });
@@ -973,19 +973,16 @@ export class Compiler {
             }
           }
 
-          let compiledIf: BodyType | undefined = undefined;
-          let compiledElseIf: BranchIfBody[] | undefined = undefined;
-          let compiledElse: BodyType | undefined = undefined;
-
-          if (tokensIf) {
-            compiledIf = this.createFromForthTokens(tokensIf);
-          } else {
-            compiledIf = { type: "Body", body: [] };
-          }
+          const newNode: BranchIf = {
+            type: "BranchIf",
+            if_body: tokensIf
+              ? this.createFromForthTokens(tokensIf)
+              : { type: "Body", body: [] },
+          };
 
           if (tokensElseIf) {
             /*jshint loopfunc:true */
-            compiledElseIf = [];
+            const compiledElseIf: BranchIfBody[] = [];
             tokensElseIf.forEach((entry) => {
               const condition = this.createFromForthTokens(entry.condition);
               const body = this.createFromForthTokens(entry.body);
@@ -998,18 +995,14 @@ export class Compiler {
                 body,
               });
             });
+            newNode.else_if_bodies = compiledElseIf;
           }
 
           if (tokensElse) {
-            compiledElse = this.createFromForthTokens(tokensElse);
+            newNode.else_body = this.createFromForthTokens(tokensElse);
           }
 
-          add({
-            type: "BranchIf",
-            if_body: compiledIf,
-            else_if_bodies: compiledElseIf,
-            else_body: compiledElse,
-          });
+          add(newNode);
           break;
         }
 
@@ -1071,31 +1064,25 @@ export class Compiler {
             }
           }
 
-          let compiledBody: BodyType = { type: "Body", body: [] };
-          let compiledCatch = undefined;
-          let compiledFinally = undefined;
+          const newNode: TryCatchFinally = {
+            type: "TryCatchFinally",
+            body: { type: "Body", body: [] },
+            catchVar,
+          };
 
           if (tokensBody) {
-            compiledBody = this.createFromForthTokens(tokensBody);
+            newNode.body = this.createFromForthTokens(tokensBody);
           }
 
           if (tokensCatch) {
-            compiledCatch = this.createFromForthTokens(tokensCatch);
+            newNode.catchBody = this.createFromForthTokens(tokensCatch);
           }
 
           if (tokensFinally) {
-            compiledFinally = this.createFromForthTokens(tokensFinally);
+            newNode.finallyBody = this.createFromForthTokens(tokensFinally);
           }
 
-          add(
-            {
-              type: "TryCatchFinally",
-              body: compiledBody,
-              catchVar,
-              catchBody: compiledCatch,
-              finallyBody: compiledFinally,
-            },
-          );
+          add(newNode);
           break;
         }
 
@@ -1155,7 +1142,6 @@ export class Compiler {
 
         case "case": {
           // TODO: we have to parse the of entries
-          const defaultOf = undefined;
           while (depth > 0) {
             i++;
 
@@ -1190,7 +1176,6 @@ export class Compiler {
           add({
             type: "BranchCase",
             body: this.createFromForthTokens(current),
-            defaultOf,
           });
           break;
         }
@@ -1618,7 +1603,7 @@ export class Compiler {
               gcode = this.createFromForthTokens(dmacro.body);
               add(gcode);
             } else {
-              gcode = cloneObject(dmacro.body);
+              gcode = JSON.parse(JSON.stringify(dmacro.body));
               for (let k = dmacro.args.length - 1; k >= 0; --k) {
                 i++;
                 for (let n = 0; n < gcode.length; ++n) {
@@ -1723,7 +1708,7 @@ export class Compiler {
     return this.createFromForthTokens(this.tokenize(code));
   }
 
-  generateJsCode(code_tree: any, indent_characters: string = "\t"): string {
+  generateJsCode(code_tree: any, indent_characters = "\t"): string {
     function generateCode(code_tree: NodeType, level: number) {
       let out = "";
 
@@ -1804,7 +1789,7 @@ export class Compiler {
           }
           for (let j = 0; j < openingBrackets + 1; ++j) {
             append(identLevel + "}");
-            identLevel = identLevel.substr(0, identLevel.length - 1);
+            identLevel = identLevel.slice(0, identLevel.length - 1);
           }
           break;
         }
@@ -2123,7 +2108,8 @@ export class Compiler {
   }
 
   optimizeCodeTree(org_code_tree: BodyType) {
-    const code_tree: BodyType = cloneObject(org_code_tree);
+    // TODO: check why structuredClone doesn't work here
+    const code_tree: BodyType = JSON.parse(JSON.stringify(org_code_tree));
 
     let modified;
 
