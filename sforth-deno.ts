@@ -22,14 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import * as SForthSystem from "./sforth-compiler.js"
+import * as SForthSystem from "./sforth-compiler.ts"
 
-import {existsSync} from "https://deno.land/std@0.111.0/fs/mod.ts";
+import { existsSync } from "https://deno.land/std@0.111.0/fs/mod.ts";
+
+declare const globalThis: any;
 
 // handle command line arguments
 const sforthArguments = Deno.args
 
-function loadFile(filename, includeDirectories) {
+function loadFile(filename: string, includeDirectories: string[]) {
 	for (const i of includeDirectories) {
 		const fullfilename = i + "/" + filename
 		if (existsSync(fullfilename)) {
@@ -78,6 +80,7 @@ let filename = "repl.fs"
 
 if (filename != "") {
 	const compileResult = sforth.compileFile(filename)
+	// @ts-ignore: Deno.core has no typescript type information
 	const err = Deno.core.evalContext(compileResult.generated_code)[1]
 	if (err !== null)
 		throw err.thrown

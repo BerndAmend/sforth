@@ -22,11 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
-
-\ numbers
-:macro Infinity {} :[ Infinity ]: ;
-:macro NaN {} :[ NaN ]: ;
-
 \ Literals
 :macro true {} :[ true ]: ;
 :macro false {} :[ false ]: ;
