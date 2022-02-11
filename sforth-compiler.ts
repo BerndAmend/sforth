@@ -1596,7 +1596,7 @@ export class Compiler {
           // TODO: resolve macro
           // first try to find the macro within the current list
           if (this.macros[mangledT]) {
-            dmacro = this.macros[mangledT];
+            dmacro = structuredClone(this.macros[mangledT]);
           }
 
           if (dmacro) {
@@ -1605,7 +1605,7 @@ export class Compiler {
               gcode = this.createFromForthTokens(dmacro.body);
               add(gcode);
             } else {
-              gcode = JSON.parse(JSON.stringify(dmacro.body));
+              gcode = dmacro.body;
               for (let k = dmacro.args.length - 1; k >= 0; --k) {
                 i++;
                 for (let n = 0; n < gcode.length; ++n) {
@@ -2110,8 +2110,7 @@ export class Compiler {
   }
 
   optimizeCodeTree(org_code_tree: BodyType) {
-    // TODO: check why structuredClone doesn't work here
-    const code_tree: BodyType = JSON.parse(JSON.stringify(org_code_tree));
+    const code_tree: BodyType = structuredClone(org_code_tree);
 
     let modified;
 
