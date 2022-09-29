@@ -30,6 +30,7 @@ import * as fs from "fs";
 import * as http from "http";
 import * as path from "path";
 import * as url from "url";
+import * as process from "process";
 
 declare const globalThis: any;
 declare const Deno: any;
@@ -41,6 +42,7 @@ globalThis.util = globalThis.util || util;
 globalThis.http = globalThis.http || http;
 globalThis.path = globalThis.path || path;
 globalThis.url = globalThis.url || url;
+globalThis.process = globalThis.process || process;
 
 // handle command line arguments
 let sforthArguments = [];
