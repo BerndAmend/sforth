@@ -28,7 +28,7 @@ typeof console-low-level-type "function" !== if
 		// automatically define console-low-level-type if node.js is used
 		:noname { x -- }
 			x process.stdout.write(1);
-		; to global.console-low-level-type
+		; to globalThis.console-low-level-type
 	else
 		"console-low-level-type needs to be defined" console.log(1);
 	endif
