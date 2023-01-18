@@ -1,4 +1,4 @@
 #!/usr/bin/sh
 set -e
-tsc --lib esnext,dom --module esnext --target esnext sforth-compiler.ts sforth.ts
+tsc --lib esnext,dom --module esnext --esModuleInterop --target esnext sforth-compiler.ts sforth.ts
 node sforth.js "$@"
