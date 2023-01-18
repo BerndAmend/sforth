@@ -29,6 +29,10 @@
     "@types/node": "^18"
   },
   "dependencies": {
+    "@types/pdfkit": "^0.12.8",
+    "@types/serialport": "^8.0.2",
+    "pdfkit": "^0.13.0",
+    "serialport": "^10.5.0",
     "typescript": "^4.9.4"
   }
 }
