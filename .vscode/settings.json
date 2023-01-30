@@ -5,5 +5,4 @@
   "deno.suggest.imports.hosts": {
     "https://deno.land": true
   },
-  "deno.importMap": "./import_map.json"
 }

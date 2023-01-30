@@ -82,14 +82,14 @@ THE SOFTWARE.
 :macro instanceof { name } :[ stack.pop() instanceof name ]: ;
 
 \ dummy function
-: ok {} ;
+:js ok ;
 
-: clearstack ( -- ) stack.clear ;
+: clearstack ( -- ) stack.clear(0); ;
 
 \ data stack operations
-: dup { x -- x x } ' x ' x ;
+: dup ( x -- x x ) :[ stack.get(0) ]: ;
 
-: drop { x } ;
+:js drop { x } ;
 
 : swap { x1 x2 -- x2 x1 } ' x2 ' x1 ;
 
@@ -112,11 +112,11 @@ THE SOFTWARE.
 
 : 2over { x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2 } ' x1 ' x2 ' x3 ' x4 ' x1 ' x2 ;
 
-: depth {} ( -- n ) stack.size ;
+: depth {} ( -- n ) stack.size(0) ;
 
-: pick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get ;
+: pick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get(1) ;
 
-: roll {} ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove ;
+: roll {} ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove(1) ;
 
 
 :macro & {} local{ x1 x2 -- x3 } :[ x1 & x2 ]: ;
@@ -140,7 +140,7 @@ THE SOFTWARE.
 :macro * {} local{ x1 x2 -- x3 } :[ x1 * x2 ]: ;
 :macro / {} local{ x1 x2 -- x3 } :[ x1 / x2 ]: ;
 :macro mod {} local{ x1 x2 -- x3 } :[ x1 % x2 ]: ;
-: /mod { x1 x2 -- x3 } :[ x1 % x2 ]: :[ x1 / x2 ]: Math.floor ;
+: /mod { x1 x2 -- x3 } :[ x1 % x2 ]: :[ x1 / x2 ]: Math.floor(1) ;
 :macro ** {} local{ x1 x2 -- x3 } :[ x1 ** x2 ]: ;
 
 : negate ( n -- -n ) -1 * ;
@@ -200,14 +200,14 @@ THE SOFTWARE.
 : deg2rad {} ( x1 -- x2 ) 180.0 / ' Math.PI * ;
 : rad2deg {} ( x1 -- x2 ) ' Math.PI / 180.0 * ;
 
-: acosdeg {} ( x1 -- x2 ) Math.acos rad2deg ;
-: asindeg {} ( x1 -- x2 ) Math.asin rad2deg ;
-: atandeg {} ( x1 -- x2 ) Math.atan rad2deg ;
-: cosdeg {} ( x1 -- x2 ) deg2rad Math.cos ;
-: sindeg {} ( x1 -- x2 ) deg2rad Math.sin ;
-: tandeg {} ( x1 -- x2 ) deg2rad Math.tan ;
+: acosdeg {} ( x1 -- x2 ) Math.acos(1) rad2deg ;
+: asindeg {} ( x1 -- x2 ) Math.asin(1) rad2deg ;
+: atandeg {} ( x1 -- x2 ) Math.atan(1) rad2deg ;
+: cosdeg {} ( x1 -- x2 ) deg2rad Math.cos(1) ;
+: sindeg {} ( x1 -- x2 ) deg2rad Math.sin(1) ;
+: tandeg {} ( x1 -- x2 ) deg2rad Math.tan(1) ;
 
-: assert { flag text -- } flag not if text "\n" + . endif ;
+: assert { flag text -- } ' flag not if ' text "\n" + . endif ;
 
 \ Exceptions
 :macro throw {} ( obj -- ) :[ throw stack.pop() ]; ;
@@ -235,25 +235,11 @@ THE SOFTWARE.
 
 : count { str -- len } :[ str.toString().length ]: ;
 
-: o>string { n -- str } n.toString() ;
+: o>string { n -- str } n.toString(0) ;
 : /string { str n -- str } n str.slice(1) ;
 
-: time-in-ms ( -- x ) Date.now() ;
+: time-in-ms ( -- x ) Date.now(0) ;
 
-:macro await {} :[ await stack.pop() ]: ;
-:macro await; {} :[ await stack.pop() ]; ;
+:macro import {} :[ import(stack.pop()) ]: ;
 
 :js sleep { milliseconds } :[ new Promise(resolve => setTimeout(resolve, milliseconds)) ]: return;
-
-:macro eval; {}
-    typeof Deno "undefined" !== if
-        :[
-            let _tmp_err = Deno.core.evalContext(stack.pop())[1]
-            if (_tmp_err !== null)
-                throw _tmp_err.thrown
-        ];
-    else
-        // the compat function from deno behaves differently therefore we just use our own implementation
-        vm.runInThisContext(1);
-    endif
-;

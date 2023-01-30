@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 )
 
+"node:fs" import await { fs }
+
 : readFileSync { filename -- content }
     filename fs.readFileSync(1)
 ;

@@ -22,13 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-declare function structuredClone(
-  // deno-lint-ignore no-explicit-any
-  value: any,
-  options?: StructuredSerializeOptions,
-  // deno-lint-ignore no-explicit-any
-): any;
-
 function replaceWholeWord(
   target: string,
   search: string,
@@ -248,7 +241,7 @@ export interface CompileResult {
   tokens?: NodeType[];
   code_tree?: BodyType;
   optimized_code_tree?: BodyType;
-  generated_code?: string;
+  generated_code?: { code: string; dropResult: boolean }[];
 }
 
 export interface Position {
@@ -397,6 +390,10 @@ export type NodeType =
   | {
     type: "ValueToStack";
     name: string;
+  }
+  | {
+    type: "Await";
+    dropResult: boolean;
   };
 
 interface CompilerOptions {
@@ -410,14 +407,12 @@ export class Compiler {
   macros: Record<string, MacroType>;
   includedFiles: string[];
   info: (msg: string) => void;
-  runtimeProvided: boolean;
 
   constructor(options: CompilerOptions) {
     this.options = options || Compiler.getDefaultOptions();
     this.macros = {};
     this.includedFiles = [];
     this.info = console.log;
-    this.runtimeProvided = false;
   }
 
   static getDefaultOptions() {
@@ -671,6 +666,14 @@ export class Compiler {
           });
           break;
         }
+        case "await": {
+          add({ type: "Await", dropResult: false });
+          break;
+        }
+        case "await;": {
+          add({ type: "Await", dropResult: true });
+          break;
+        }
         default: {
           const replacedcommawithperiod = t.replaceAll(",", ".");
           if (isNumeric(replacedcommawithperiod)) {
@@ -874,6 +877,7 @@ export class Compiler {
 
       const inputToken = tokens[i];
       switch (inputToken.type) {
+        case "Await":
         case "CommentLine":
         case "CommentParentheses":
         case "JsCodeWithReturn":
@@ -1717,94 +1721,112 @@ export class Compiler {
     return this.createFromForthTokens(this.tokenize(code));
   }
 
-  generateJsCode(code_tree: BodyType, indent_characters = "\t"): string {
-    function generateCode(code_tree: NodeType, level: number) {
-      let out = "";
+  generateJsCode(
+    code_tree: BodyType,
+    splitOnTopLevelAwait: boolean,
+  ): { code: string; dropResult: boolean }[] {
+    const output: { code: string; dropResult: boolean }[] = [];
+    let out = '"use strict";\n';
 
-      let lp = "";
-      for (let i = 0; i < level; i++) {
-        lp += indent_characters;
+    function nextBlock(dropResult: boolean) {
+      output.push({ code: out, dropResult: dropResult });
+      out = '"use strict";\n';
+    }
+
+    function append(str: string) {
+      if (str && str !== "") {
+        out += str + "\n";
       }
+    }
 
-      function append(str: string, addLevel = 0) {
-        if (str && str !== "") {
-          out += lp + indent_characters.repeat(addLevel) + str + "\n";
-        }
-      }
-
+    function generateCode(
+      code_tree: NodeType,
+      topLevel: boolean,
+    ) {
       switch (code_tree.type) {
+        case "Await": {
+          // split the code into before and after
+          if (splitOnTopLevelAwait && topLevel) {
+            append("stack.pop()");
+            nextBlock(code_tree.dropResult);
+          } else {
+            if (code_tree.dropResult) {
+              append("await stack.pop();");
+            } else {
+              append("stack.push(await stack.pop());");
+            }
+          }
+          break;
+        }
         case "Empty": {
           break;
         }
         case "BeginAgain": {
           append("do {");
-          out += generateCode(code_tree.body, level);
+          generateCode(code_tree.body, false);
           append("} while(true);");
           break;
         }
         case "BeginUntil": {
           append("do {");
-          out += generateCode(code_tree.body, level);
+          generateCode(code_tree.body, false);
           append("} while(!stack.pop());");
           break;
         }
         case "BeginWhileRepeat": {
           append("do {");
-          out += generateCode(code_tree.condition, level);
+          generateCode(code_tree.condition, false);
           append("if(!stack.pop()) break;");
-          out += generateCode(code_tree.body, level);
+          generateCode(code_tree.body, false);
           append("} while(true);");
           break;
         }
         case "BranchCase": {
           append("switch(stack.pop()) {");
           //code_tree.body.forEach(function(entry) {
-          //	out += generateCode(entry, level+1)
+          //	generateCode(entry, level+1)
           //})
-          out += generateCode(code_tree.body, level + 1);
+          generateCode(code_tree.body, false);
           if (code_tree.defaultOf) {
             append("default:");
-            out += generateCode(code_tree.defaultOf, level);
+            generateCode(code_tree.defaultOf, false);
           }
           append("}");
           break;
         }
         case "BranchCaseOf": {
           append("case " + code_tree.condition + ":");
-          out += generateCode(code_tree.body, level + 1);
+          generateCode(code_tree.body, false);
           append("break;");
           break;
         }
         case "BranchIf": {
           let openingBrackets = 0;
-          let identLevel = "";
           append("if(stack.pop()) {");
-          out += generateCode(code_tree.if_body, level);
+          generateCode(code_tree.if_body, false);
           if (code_tree.else_if_bodies) {
             code_tree.else_if_bodies.forEach(
               function (entry: { condition: BodyType; body: BodyType }) {
-                append(identLevel + "} else {");
-                identLevel += indent_characters;
-                out += generateCode(entry.condition, level + openingBrackets);
-                append(identLevel + "if(stack.pop()) {");
-                out += generateCode(entry.body, level + openingBrackets + 1);
+                append("} else {");
+                generateCode(entry.condition, false);
+                append("if(stack.pop()) {");
+                generateCode(entry.body, false);
                 openingBrackets++;
               },
             );
           }
           if (code_tree.else_body) {
-            append(identLevel + "} else {");
-            out += generateCode(code_tree.else_body, level + openingBrackets);
+            append("} else {");
+            generateCode(code_tree.else_body, false);
           }
           for (let j = 0; j < openingBrackets + 1; ++j) {
-            append(identLevel + "}");
-            identLevel = identLevel.slice(0, identLevel.length - 1);
+            append("}");
           }
           break;
         }
         case "Body":
           for (const entry of code_tree.body) {
-            out += generateCode(entry, level + 1);
+            generateCode(entry, topLevel);
           }
           break;
 
@@ -1878,7 +1900,7 @@ export class Compiler {
               );
             }
 
-            append("(() => {");
+            append("(async () => {");
             append("let " + idx + "_increment=stack.pop();");
             append("let " + idx + "_end=stack.pop();");
 
@@ -1887,11 +1909,11 @@ export class Compiler {
                 code_tree.compareOperation + idx + "_end;" + idx + "+= " + idx +
                 "_increment) {",
             );
-            out += generateCode(code_tree.body, level);
+            generateCode(code_tree.body, false);
             append("}");
             append("})();");
           } else {
-            append("(() => {");
+            append("(async () => {");
             append("let " + idx + "_end=stack.pop();");
 
             if (code_tree.increment === 1) {
@@ -1915,7 +1937,7 @@ export class Compiler {
                   "_end;" + idx + "+= " + code_tree.increment + ") {",
               );
             }
-            out += generateCode(code_tree.body, level);
+            generateCode(code_tree.body, false);
             append("}");
             append("})();");
           }
@@ -1926,7 +1948,7 @@ export class Compiler {
         case "FunctionForth": {
           if (code_tree.name === undefined) {
             append("stack.push(function(stack) {");
-            out += generateCode(code_tree.body, level);
+            generateCode(code_tree.body, false);
             append("});\n");
             append("stack.top().forth_function=true;");
           } else {
@@ -1935,7 +1957,7 @@ export class Compiler {
               throw new Error("Function names can not contain .");
             }
             append(`function ${name}(stack) {`);
-            out += generateCode(code_tree.body, level);
+            generateCode(code_tree.body, false);
             append("}");
             append(`${name}.forth_function=true;`);
           }
@@ -1955,8 +1977,13 @@ export class Compiler {
               code_tree.isAsync ? "async " : ""
             }function ${name}(${args}) {`,
           );
-          append(indent_characters + "var stack = new SForthStack();");
-          out += generateCode(code_tree.body, level);
+          if (
+            code_tree.body.body.length !== 0 &&
+            code_tree.body.body[0].type !== "CommentParentheses"
+          ) {
+            append("var stack = new SForthStack();");
+          }
+          generateCode(code_tree.body, false);
           if (code_tree.name === undefined) {
             append("});");
           } else {
@@ -2062,20 +2089,21 @@ export class Compiler {
 
         case "TryCatchFinally": {
           append("try {");
-          out += generateCode(code_tree.body, level + 1);
+          generateCode(code_tree.body, false);
           if (code_tree.catchVar === undefined) {
             append("} catch( " + code_tree.catchVar + ") {");
           } else {
             append("} catch( " + code_tree.catchVar + ") {");
           }
           if (code_tree.catchBody) {
-            out += generateCode(code_tree.catchBody, level + 1);
+            generateCode(code_tree.catchBody, false);
           }
           if (code_tree.finallyBody) {
             append("} finally {");
-            out += generateCode(code_tree.finallyBody, level + 1);
+            generateCode(code_tree.finallyBody, false);
           }
           append("}");
+          "";
           break;
         }
         case "ValueLocal":
@@ -2096,24 +2124,19 @@ export class Compiler {
           );
         }
       }
-
-      return out;
     }
 
-    const generated_code = generateCode(code_tree, -1);
+    generateCode(code_tree, true);
 
-    if (this.runtimeProvided) {
-      if (generated_code === "") {
-        return "";
-      }
-      return '"use strict";\n' + generated_code;
+    if (out !== "") {
+      output.push({ code: out, dropResult: true });
     }
-    this.runtimeProvided = true;
 
-    return '"use strict";\n' +
-      SForthStack.toString() + ";" +
-      "var stack = stack || new SForthStack();" +
-      generated_code;
+    return output;
+  }
+
+  get runtime() {
+    return `"use strict";\n${SForthStack.toString()};\nvar stack = stack || new SForthStack();`;
   }
 
   optimizeCodeTree(org_code_tree: BodyType) {
@@ -2156,6 +2179,7 @@ export class Compiler {
             visitNodes(func, current.else_if_bodies);
             visitNodes(func, current.else_body);
             break;
+          case "Await":
           case "Empty":
           case "Call":
           case "CommentLine":
@@ -2647,13 +2671,16 @@ export class Compiler {
     return code_tree;
   }
 
-  compile(code: string): CompileResult {
+  compile(code: string, splitOnTopLevelAwait: boolean = false): CompileResult {
     const res: CompileResult = { code };
     try {
       res.tokens = this.tokenize(res.code);
       res.code_tree = this.createFromForthTokens(res.tokens);
       res.optimized_code_tree = this.optimizeCodeTree(res.code_tree);
-      res.generated_code = this.generateJsCode(res.optimized_code_tree);
+      res.generated_code = this.generateJsCode(
+        res.optimized_code_tree,
+        splitOnTopLevelAwait,
+      );
     } catch (err) {
       err.stack = demangle(err.stack);
       err.res = res;
@@ -2664,6 +2691,35 @@ export class Compiler {
 
   compileFile(filename: string) {
     return this.compile(
+      this.options.loadFile(filename, this.options.includeDirectories),
+    );
+  }
+
+  async eval(code: string) {
+    const internalEval = (c: string): Promise<void> => {
+      //console.log(`Stuff: ${c}`);
+      if (typeof Deno === "undefined") {
+        throw new Error("Unsupported environment");
+      }
+      // @ts-expect-error "Deno[Deno.internal].core" is not a public interface
+      const ret = Deno[Deno.internal].core.evalContext(c);
+      if (ret[1] !== null) {
+        throw ret[1].thrown;
+      }
+      return ret[0];
+    };
+    const compileResult = this.compile(code, true);
+    for (const g of compileResult.generated_code!) {
+      const result = await internalEval(g.code);
+      if (!g.dropResult) {
+        // @ts-expect-error It's only available at runtime
+        globalThis.stack.push(result);
+      }
+    }
+  }
+
+  evalFile(filename: string): Promise<void> {
+    return this.eval(
       this.options.loadFile(filename, this.options.includeDirectories),
     );
   }

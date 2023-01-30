@@ -23,16 +23,19 @@ THE SOFTWARE.
 )
 
 // this file expects that you have already define a console-low-level-type function
-typeof console-low-level-type "function" !== if
-	typeof process "undefined" !== if
-		// automatically define console-low-level-type if node.js is used
+:async automatically-determine-console-low-level-type {}
+	typeof console-low-level-type "function" !== if
+		"node:process" import await to globalThis.process
+		"node:util" import await to globalThis.util
+
+		// automatically define console-low-level-type if node.js or deno are used
 		:noname { x -- }
 			' x process.stdout.write(1);
 		; to globalThis.console-low-level-type
-	else
-		"console-low-level-type needs to be defined" console.log(1);
 	endif
-endif
+;
+
+automatically-determine-console-low-level-type(0) await
 
 10 value consolebase
 

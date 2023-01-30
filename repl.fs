@@ -1,7 +1,7 @@
 (
 The MIT License (MIT)
 
-Copyright (c) 2013-2022 Bernd Amend <bernd.amend+sforth@gmail.com>
+Copyright (c) 2013-2023 Bernd Amend <bernd.amend+sforth@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,10 @@ include "forth.fs"
 include »console.fs«
 include filesystem.fs
 
-»sforth, Copyright (C) 2013-2022 Bernd Amend <bernd.amend+sforth@gmail.com>
+»sforth, Copyright (C) 2013-2023 Bernd Amend <bernd.amend+sforth@gmail.com>
 Type `bye' to exit\n« .
 
-2000 value cmd_history_save_size
+2000 { cmd_history_save_size }
 
 : bye ( -- )
     cr
@@ -43,10 +43,10 @@ Type `bye' to exit\n« .
 	0 process.exit(1);
 	;
 
-"" value entered
+"" { entered }
 
-0 value cmd_last_pos
-new SForthStack value cmd_history
+0 { cmd_last_pos }
+new SForthStack { cmd_history }
 
 try
 	".sforth_history" readFileSync cmd_history.fromJSON(1);
@@ -56,7 +56,7 @@ endtry
 : forthconsole ;
 null to forthconsole.onKey
 
-:js handleKey { key }
+:async handleKey { key }
 	key "\u0003" === if
 		\ Control-C was pressed
 		\ restore console handler
@@ -80,8 +80,8 @@ null to forthconsole.onKey
 		try
 			entered
 			»« to entered
-			sforth.compile(1) let res
-			res.generated_code eval;
+			// TODO this code should block the console until the operation as completed.
+			sforth.eval(1) await;
 			' forthconsole.onKey null === if
 				» ok\n« type
 			endif
@@ -141,6 +141,6 @@ null to forthconsole.onKey
 ;
 
 true process.stdin.setRawMode(1);
-process.stdin.resume drop
-"utf8" process.stdin.setEncoding drop
-"data" ' handleKey process.stdin.on(2) drop \ register the key handling function
+process.stdin.resume(0);
+"utf8" process.stdin.setEncoding(1);
+"data" ' handleKey process.stdin.on(2); \ register the key handling function

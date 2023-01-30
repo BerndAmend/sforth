@@ -1,9 +1,10 @@
 # sforth
 
-sforth is a script language with a forth like syntax that compiles to javascript.
-It allows a seamless integration into normal javascript applications and websites.
+sforth is a script language with a forth like syntax that compiles to
+javascript. It allows a seamless integration into normal javascript applications
+and websites.
 
-## node.js
+## deno
 
 Get the source code and start the sforth repl
 
@@ -11,9 +12,9 @@ Get the source code and start the sforth repl
 
 ## Firefox / Chromium / Google Chrome / Edge / ...
 
-The examples require that they are served using a static webserver.
-A test webserver is included that only requires node.js.
-Start it and follow the printed instructions
+The examples require that they are served using a static webserver. A test
+webserver is included that only requires deno. Start it and follow the printed
+instructions
 
 ./sforth webserver.fs
 
@@ -68,7 +69,10 @@ To test the raytracer locally go to http://localhost:8080/examples/raytracer/
 ```
 
 ### macros
-Macros are used to rewrite sourcecode before the code gets compiled. value and to are implemented as macros.
+
+Macros are used to rewrite sourcecode before the code gets compiled. value and
+to are implemented as macros.
+
 ```forth
 :macro <name> { <arguments> } <body> ;
 
@@ -98,6 +102,7 @@ Macros are used to rewrite sourcecode before the code gets compiled. value and t
 ```
 
 ### strings
+
 ```forth
 \ normal strings
 "text"
@@ -107,12 +112,14 @@ Macros are used to rewrite sourcecode before the code gets compiled. value and t
 ```
 
 ### objects
+
 ```forth
 \ allocating an object
 new <classname>
 ```
 
 ### arrays
+
 ```forth
 <size> new Array
 
@@ -135,6 +142,7 @@ new <classname>
 ```
 
 ### if
+
 ```forth
 <condition> if
 	<code>
@@ -153,6 +161,7 @@ endif
 ```
 
 ### case ... endcase
+
 ```forth
 <value> case
 	of <value>
@@ -179,6 +188,7 @@ endcase
 ```
 
 ### do ... loop
+
 ```forth
 <start> <end> <increment> do <variable>
 	<code>
@@ -196,6 +206,7 @@ loop
 ```
 
 ### try ... catch ... finally
+
 ```forth
 try
 	<code>
@@ -213,8 +224,8 @@ catch err
 endtry
 ```
 
-
 ### embed javascript code
+
 ```forth
 \ push the result on the stack
 :[ <javascript code> ]:
@@ -225,7 +236,6 @@ endtry
 \ insert the code and append a ;
 :[ <javascript code> ];
 ```
-
 
 ### comments
 

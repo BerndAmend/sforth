@@ -22,52 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import * as SForthSystem from "./sforth-compiler.js";
-
-import * as vm from "vm";
-import * as util from "util";
-import * as fs from "fs";
-import * as http from "http";
-import * as path from "path";
-import * as url from "url";
-import * as process from "process";
-//import SerialPort from 'serialport'
-//import PDFDocument from 'pdfkit';
+import * as SForthSystem from "./sforth-compiler.ts";
 
 declare const globalThis: any;
-declare const Deno: any;
-
-globalThis.SForthSystem = globalThis.SForthSystem || SForthSystem;
-globalThis.fs = globalThis.fs || fs;
-globalThis.vm = globalThis.vm || vm;
-globalThis.util = globalThis.util || util;
-globalThis.http = globalThis.http || http;
-globalThis.path = globalThis.path || path;
-globalThis.url = globalThis.url || url;
-globalThis.process = globalThis.process || process;
-//globalThis.SerialPort = globalThis.SerialPort || SerialPort;
-//globalThis.PDFDocument = globalThis.PDFDocument || PDFDocument;
-
-// handle command line arguments
-let sforthArguments = [];
-
-if (typeof Deno !== "undefined") {
-  sforthArguments = Deno.args;
-} else {
-  //for (let i = 2; i < process.argv.length; i += 1) {
-  //  console.log(`${i} ${process.argv[i]}`);
-  // if (("file://" + process.argv[i]) == import.meta.url) {
-  sforthArguments = process.argv.slice(2);
-  //   break;
-  // }
-  //}
-}
 
 function loadFile(filename: string, includeDirectories: string[]) {
   for (const i of includeDirectories) {
     const fullfilename = i + "/" + filename;
     try {
-      return fs.readFileSync(fullfilename).toString();
+      return new TextDecoder("utf-8").decode(Deno.readFileSync(fullfilename));
     } catch {
       // we just ignore the error
     }
@@ -81,28 +44,37 @@ compilerOptions.loadFile = loadFile;
 const sforth = new SForthSystem.Compiler(compilerOptions);
 globalThis.loadFile = loadFile;
 globalThis.sforth = sforth;
+globalThis.SForthSystem = SForthSystem;
+globalThis.stack = new SForthSystem.SForthStack();
+globalThis.SForthStack = SForthSystem.SForthStack;
 
 let filename = "repl.fs";
 {
-  if (sforthArguments.length > 0) {
-    filename = sforthArguments[sforthArguments.length - 1];
+  if (Deno.args.length > 0) {
+    filename = Deno.args[Deno.args.length - 1];
 
-    for (let i = 0; i < sforthArguments.length - 1; i++) {
-      switch (sforthArguments[i]) {
+    for (let i = 0; i < Deno.args.length - 1; i++) {
+      switch (Deno.args[i]) {
         case "--compile": {
           const result = sforth.compileFile(filename);
-          fs.writeFileSync(filename + ".js", result.generated_code!);
-          filename = "";
+          Deno.writeFileSync(
+            filename + ".js",
+            new TextEncoder().encode(result.generated_code![0].code),
+          );
+          Deno.exit(0);
           break;
         }
         case "--dump": {
           const result = sforth.compileFile(filename);
-          fs.writeFileSync(filename + ".js", result.generated_code!);
-          fs.writeFileSync(
-            filename + ".json",
-            JSON.stringify(result, null, "\t"),
+          Deno.writeFileSync(
+            filename + ".js",
+            new TextEncoder().encode(result.generated_code![0].code),
           );
-          filename = "";
+          Deno.writeFileSync(
+            filename + ".json",
+            new TextEncoder().encode(JSON.stringify(result, null, "\t")),
+          );
+          Deno.exit(0);
           break;
         }
       }
@@ -110,15 +82,4 @@ let filename = "repl.fs";
   }
 }
 
-if (filename != "") {
-  const compileResult = sforth.compileFile(filename);
-  if (typeof Deno !== "undefined") {
-    // @ts-ignore: Deno.core has no typescript type information
-    const err = Deno.core.evalContext(compileResult.generated_code!)[1];
-    if (err !== null) {
-      throw err.thrown;
-    }
-  } else {
-    vm.runInThisContext(compileResult.generated_code!, {});
-  }
-}
+await sforth.evalFile(filename);

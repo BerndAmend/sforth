@@ -1,3 +1,0 @@
-#!/usr/bin/sh
-set -e
-deno run --unstable --allow-all sforth.ts "$@"

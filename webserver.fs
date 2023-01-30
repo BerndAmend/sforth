@@ -1,7 +1,7 @@
 (
 The MIT License (MIT)
 
-Copyright (c) 2013-2022 Bernd Amend <bernd.amend+sforth@gmail.com>
+Copyright (c) 2013-2023 Bernd Amend <bernd.amend+sforth@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,11 @@ THE SOFTWARE.
 include "forth.fs"
 include »console.fs«
 include filesystem.fs
+
+"node:fs" import await { fs }
+"node:http" import await { http }
+"node:path" import await { path }
+"node:url" import await { url }
 
 8080 value port
 
@@ -129,7 +134,7 @@ return;
 					' loadFile to options.loadFile
                     :[ [".", dirname] ]: to options.includeDirectories
                     :[ new SForthSystem.Compiler(options) ]: let compiler
-                    file compiler.compile(1) let compiled
+                    ' sforth.runtime :[ compiler.compile(file)[0].code ]: + let compiled
                     200 :[ {"Content-Type": content_type} ]: response.writeHead(2);
                     compiled.generated_code encoding response.write(2);
                 catch e

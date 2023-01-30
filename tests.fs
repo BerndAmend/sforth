@@ -28,12 +28,16 @@ include "filesystem.fs"
 
 "tests" fs.readdirSync(1) { test-files }
 
+:async doit {}
 0 test-files.length 1 do i
-		"tests/" i test-files @ + { filename }
-		".fs" filename.endsWith(1) not if continue endif
-		»Execute « filename + . cr
-		filename readFileSync { file }
-		file.toString(0) sforth.compile { res } res.generated_code eval;
+	"tests/" i test-files @ + { filename }
+	".fs" filename.endsWith(1) not if continue endif
+	»Execute « filename + . cr
+	filename readFileSync { file }
+	file.toString(0) sforth.eval(1) await;
 loop
+;
+
+doit(0) await;
 
 »Done\n« .
