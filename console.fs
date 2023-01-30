@@ -35,7 +35,7 @@ THE SOFTWARE.
 	endif
 ;
 
-automatically-determine-console-low-level-type(0) await
+automatically-determine-console-low-level-type(0) await;
 
 10 value consolebase
 

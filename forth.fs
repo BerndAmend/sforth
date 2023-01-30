@@ -82,12 +82,12 @@ THE SOFTWARE.
 :macro instanceof { name } :[ stack.pop() instanceof name ]: ;
 
 \ dummy function
-:js ok ;
+:macro ok {} ;
 
 : clearstack ( -- ) stack.clear(0); ;
 
 \ data stack operations
-: dup ( x -- x x ) :[ stack.get(0) ]: ;
+: dup { x -- x x } ' x ' x ;
 
 :js drop { x } ;
 
