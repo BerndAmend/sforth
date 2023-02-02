@@ -62,6 +62,7 @@ THE SOFTWARE.
 :macro let { name } :[ let name = stack.pop() ]; ;
 :macro value { name } :[ var name = stack.pop() ]; ;
 :macro const { name } :[ const name = stack.pop() ];  ;
+:macro constant { name } :[ const name = stack.pop() ];  ;
 
 :macro to { name } :[ name = stack.pop() ]; ;
 :macro !> { name } to name ;
