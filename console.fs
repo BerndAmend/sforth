@@ -103,4 +103,4 @@ automatically-determine-console-low-level-type(0) await;
 : decimal ( -- ) 10 to consolebase ;
 : hex ( -- ) 16 to consolebase ;
 
-:macro see { function_object -- } :[ #function_object.toString() ]: cr . ;
+:macro see { function_object -- } :[ "#function_object".startsWith("$dot") ? $#function_object.toString() : #function_object.toString() ]: "\n" + . ;
