@@ -811,9 +811,10 @@ export class Compiler {
                   .replace(/ \n /gm, "\\n")
                   .replace(/ \t /gm, "\\t")
                   .replace(/ \r /gm, "\\r")
-                  .replaceAll('"', '\\"')
+                  .replaceAll("`", "\\`")
                   .replaceAll("\\\u00bb", "\u00bb")
                   .replaceAll("\\\u00ab", "\u00ab"),
+                interpolate: true,
               },
             );
           } else if (t[0] === "$" && t.length >= 2) { // handle hex numbers

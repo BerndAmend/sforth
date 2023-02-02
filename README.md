@@ -53,6 +53,14 @@ To test the raytracer locally go to http://localhost:8080/examples/raytracer/
 :jsnoname { <parameters> } <body> ;
 :jsnoname { <parameters> } <body> return;
 
+\ async javascript functions
+:async <name> { <parameters> } <body> ;
+:async <name> { <parameters> } <body> return;
+
+\ anonymous async javascript functions
+:asyncnoname <name> { <parameters> } <body> ;
+:asyncnoname <name> { <parameters> } <body> return;
+
 \ push a function reference to the stack
 ' <function-name>
 \ e.g.
@@ -107,16 +115,20 @@ to are implemented as macros.
 \ normal strings
 "text"
 
+\ interpolate strings
+»text ${blobvar}«
+
 \ or
-»text«
+`text ${blobvar}`
 ```
 
+````
 ### objects
 
 ```forth
 \ allocating an object
 new <classname>
-```
+````
 
 ### arrays
 
