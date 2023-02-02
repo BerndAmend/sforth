@@ -6,6 +6,6 @@ begin-until-test 12 = »begin-until-test result should be 12« assert
 begin-again-test ":)" = »begin-again-test should return :)« assert
 
 (
-: begin-while-repeat-test  ( -- )  7 BEGIN 1+ dup 12 < WHILE dup cr . REPEAT 5 spaces . ;
+: begin-while-repeat-test  ( -- )  7 BEGIN 1+ dup 12 < WHILE dup "\n" + . REPEAT :[ " ".repeat(5) ]: type ;
 begin-while-repeat-test
 )

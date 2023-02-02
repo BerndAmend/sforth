@@ -32,7 +32,7 @@ include "filesystem.fs"
 0 test-files.length 1 do i
 	"tests/" i test-files @ + { filename }
 	".fs" filename.endsWith(1) not if continue endif
-	»Execute « filename + . cr
+	`Execute ${filename}\n` .
 	filename readFileSync { file }
 	file.toString(0) sforth.eval(1) await;
 loop

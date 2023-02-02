@@ -32,7 +32,7 @@ Type `bye' to exit\n« .
 2000 { cmd_history_save_size }
 
 : bye ( -- )
-    cr
+    "\n" .
 	\ save the cmd_history
 	\ this won't handle concurrent instances
 	cmd_history.size cmd_history_save_size - { remove_element_count }

@@ -61,12 +61,12 @@ automatically-determine-console-low-level-type(0) await;
 	else
 		x type
 	endif
-	typeof-x "number" = if space endif
+	typeof-x "number" = if " " . endif
 ;
 
 : .c { x -- }
 	typeof x "number" = if
-		x.toString(0) { y } "." "," y.replaceAll type space
+		x.toString(0) { y } "." "," y.replaceAll type " " .
 	endif
 ;
 
@@ -86,15 +86,11 @@ automatically-determine-console-low-level-type(0) await;
 				e
 			endif
 		endif
-		type space
+		type " " .
 	loop
 	drop ;
 
 : emit ( x -- ) String.fromCharCode . ;
-
-: space ( -- ) » « . ;
-: spaces { n -- } »« 0 n 0 Math.max 1 do i » « + loop type ;
-: cr ( -- ) "\n" . ;
 
 : clearcurrentline »\r\u001B[K« . ;
 
