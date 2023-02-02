@@ -70,7 +70,6 @@ automatically-determine-console-low-level-type(0) await;
 	endif
 ;
 
-: hex2str { x1 -- x2 } "$" 16 x1.toString + ;
 : hex. hex2str . ;
 
 : .s

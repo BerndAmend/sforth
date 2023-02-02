@@ -235,6 +235,8 @@ THE SOFTWARE.
 
 : count { str -- len } :[ str.toString().length ]: ;
 
+: hex2str { x1 -- x2 } "$" 16 x1.toString + ;
+
 : o>string { n -- str } n.toString(0) ;
 : /string { str n -- str } n str.slice(1) ;
 
