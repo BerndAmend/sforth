@@ -1612,12 +1612,11 @@ export class Compiler {
           }
 
           if (dmacro) {
-            let gcode = undefined;
             if (dmacro.args.length === 0) {
-              gcode = this.createFromForthTokens(dmacro.body);
+              const gcode = this.createFromForthTokens(dmacro.body);
               add(gcode);
             } else {
-              gcode = dmacro.body;
+              const gcode = dmacro.body;
               for (let k = dmacro.args.length - 1; k >= 0; --k) {
                 i++;
                 for (let n = 0; n < gcode.length; ++n) {
@@ -1626,7 +1625,7 @@ export class Compiler {
                     case "Token": {
                       const token = asToken(tokens[i]);
                       if (entry.value === dmacro.args[k]) {
-                        gcode[n].value = token.value;
+                        entry.value = token.value;
                       } else if (entry.value === ("#" + dmacro.args[k])) {
                         gcode[n] = {
                           type: "String",
