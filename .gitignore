@@ -1,4 +1,1 @@
 .sforth_history
-*.js
-node_modules
-yarn.lock
