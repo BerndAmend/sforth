@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+import vm from "node:vm";
+
 function replaceWholeWord(
   target: string,
   search: string,
@@ -2696,21 +2698,9 @@ export class Compiler {
   }
 
   async eval(code: string) {
-    const internalEval = (c: string): Promise<void> => {
-      //console.log(`Stuff: ${c}`);
-      if (typeof Deno === "undefined") {
-        throw new Error("Unsupported environment");
-      }
-      // @ts-expect-error "Deno[Deno.internal].core" is not a public interface
-      const ret = Deno[Deno.internal].core.evalContext(c);
-      if (ret[1] !== null) {
-        throw ret[1].thrown;
-      }
-      return ret[0];
-    };
     const compileResult = this.compile(code, true);
     for (const g of compileResult.generated_code!) {
-      const result = await internalEval(g.code);
+      const result = await vm.runInThisContext(g.code);
       if (!g.dropResult) {
         // @ts-expect-error It's only available at runtime
         globalThis.stack.push(result);
