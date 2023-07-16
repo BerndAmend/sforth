@@ -70,9 +70,9 @@ automatically-determine-console-low-level-type(0) await;
 	endif
 ;
 
-: hex. hex2str . ;
+: hex. ( x1 ) hex2str . ;
 
-: .s
+: .s ( skipCheck )
 	"<" depth 1- »> « + + . depth dup 0 swap 1
 	do i
 		dup i - pick { e }
@@ -92,7 +92,7 @@ automatically-determine-console-low-level-type(0) await;
 
 : emit ( x -- ) String.fromCharCode . ;
 
-: clearcurrentline »\r\u001B[K« . ;
+: clearcurrentline {} »\r\u001B[K« . ;
 
 : binary ( -- ) 2 to consolebase ;
 : decimal ( -- ) 10 to consolebase ;

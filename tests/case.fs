@@ -1,5 +1,5 @@
 
-: case-test-1 ( n -- )
+: case-test-1 ( n -- n )
 case
    of 14 1 endof
    of 17 2 endof

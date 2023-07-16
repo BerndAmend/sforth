@@ -1,7 +1,7 @@
 /**
 The MIT License (MIT)
 
-Copyright (c) 2013-2022 Bernd Amend <bernd.amend+sforth@gmail.com>
+Copyright (c) 2013-2023 Bernd Amend <bernd.amend+sforth@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -68,56 +68,68 @@ function isNumeric(obj: string): boolean {
 
 export class SForthStack {
   // deno-lint-ignore no-explicit-any
-  stac: Array<any>;
-  pos: number;
+  #stac: Array<any>;
+  #pos: number;
 
   constructor() {
-    this.stac = new Array(32);
-    this.pos = -1;
+    this.#stac = new Array(5);
+    this.#pos = -1;
   }
 
   pop() {
-    if (this.pos === -1) {
+    if (this.#pos === -1) {
       throw new Error("Stack underflow");
     }
-    return this.stac[this.pos--];
+    return this.#stac[this.#pos--];
   }
 
   getTopElements(count: number) {
-    const realpos = this.pos - count + 1;
+    const realpos = this.#pos - count + 1;
     if (realpos < 0) {
       throw new Error("Stack underflow");
     }
-    this.pos -= count;
-    return this.stac.slice(realpos, realpos + count);
+    this.#pos -= count;
+    return this.#stac.slice(realpos, realpos + count);
   }
 
   remove(pos: number) {
-    const realpos = this.pos - pos;
+    const realpos = this.#pos - pos;
     if (realpos < 0) {
       throw new Error("Stack underflow"); //?
     }
-    --this.pos;
-    return this.stac.splice(realpos, 1)[0];
+    --this.#pos;
+    return this.#stac.splice(realpos, 1)[0];
   }
 
   // deno-lint-ignore no-explicit-any
   push(item: any) {
-    this.stac[++this.pos] = item;
+    this.#stac[++this.#pos] = item;
   }
 
-  pushIfNotUndefined(item: undefined) {
+  // deno-lint-ignore no-explicit-any
+  pushArray(items: any[]) {
+    for (const e of items) {
+      this.#stac[++this.#pos] = e;
+    }
+  }
+
+  // deno-lint-ignore no-explicit-any
+  pushIfNotUndefined(item: any) {
     if (item !== undefined) {
-      this.stac[++this.pos] = item;
+      this.#stac[++this.#pos] = item;
     }
   }
 
   isEmpty() {
-    return this.pos === -1;
+    return this.#pos === -1;
   }
 
   size() {
-    return this.pos + 1;
+    return this.#pos + 1;
+  }
+
+  get length() {
+    return this.size();
   }
 
   top() {
@@ -125,20 +137,20 @@ export class SForthStack {
   }
 
   get(pos: number) {
-    const realpos = this.pos - pos;
+    const realpos = this.#pos - pos;
     if (realpos < 0) {
       throw new Error("Stack underflow");
     }
-    return this.stac[realpos];
+    return this.#stac[realpos];
   }
 
   clear() {
-    this.stac = new Array(32);
-    this.pos = -1;
+    this.#stac = new Array(32);
+    this.#pos = -1;
   }
 
   getArray() {
-    return this.stac.slice(0, Math.max(this.pos + 1, 0));
+    return this.#stac.slice(0, Math.max(this.#pos + 1, 0));
   }
 
   toString() {
@@ -334,6 +346,9 @@ export type NodeType =
   | {
     type: "FunctionForth";
     name?: string;
+    usesStackComment: boolean;
+    arguments?: string[]; // if undefined the parentStack is used and no checks are performed
+    returns?: string[]; // if undefined everything is returned
     body: BodyType;
   }
   | {
@@ -400,6 +415,7 @@ export type NodeType =
 
 interface CompilerOptions {
   includeDirectories: string[];
+  checkStack: boolean;
   loadFile: (filename: string, includeDirectories: string[]) => string;
 }
 
@@ -417,9 +433,10 @@ export class Compiler {
     this.info = console.log;
   }
 
-  static getDefaultOptions() {
+  static getDefaultOptions(): CompilerOptions {
     return {
       includeDirectories: ["."],
+      checkStack: true,
       loadFile: function (
         _filename: string,
         _includeDirectories: string[],
@@ -1353,11 +1370,55 @@ export class Compiler {
             }
           }
 
+          const body = this.createFromForthTokens(current);
+          let args;
+          let returns;
+
+          const stackComment = body.body[0];
+          if (stackComment?.type == "ValueLocal") {
+            args = stackComment.values;
+            if (stackComment.comment === undefined) {
+              returns = [];
+            } else {
+              returns = stackComment.comment.trim().split(" ").filter((val) =>
+                val !== ""
+              );
+              if (returns[0] == "returnEverything") {
+                returns = undefined;
+              }
+            }
+          } else if (stackComment?.type == "CommentParentheses") {
+            const [argsStr, returnsStr, ...rest] = stackComment.comment.trim()
+              .split("--");
+            if (rest.length > 0) {
+              throw new Error(
+                `Stack comment contains more than one '--' ${stackComment.comment}`,
+              );
+            }
+
+            args = argsStr.trim().split(" ").filter((val) => val !== "");
+            if (args[0] === "skipCheck") {
+              args = undefined;
+            }
+
+            returns = returnsStr?.trim().split(" ").filter((val) =>
+              val !== ""
+            ) ?? [];
+            if (returns[0] == "returnEverything") {
+              returns = undefined;
+            }
+          } else {
+            throw new Error(`stack comment missing in ${function_name}`);
+          }
+
           add(
             {
               type: "FunctionForth",
               name: function_name,
-              body: this.createFromForthTokens(current),
+              usesStackComment: stackComment.type === "CommentParentheses",
+              arguments: args,
+              returns: returns,
+              body: body,
             },
           );
           break;
@@ -1385,10 +1446,55 @@ export class Compiler {
             }
           }
 
+          // TODO: merge with the code from the named case, at the moment this duplicates the code :(
+          const body = this.createFromForthTokens(current);
+          let args;
+          let returns;
+
+          const stackComment = body.body[0];
+          if (stackComment?.type == "ValueLocal") {
+            args = stackComment.values;
+            if (stackComment.comment === undefined) {
+              returns = [];
+            } else {
+              returns = stackComment.comment.trim().split(" ").filter((val) =>
+                val !== ""
+              );
+              if (returns[0] == "returnEverything") {
+                returns = undefined;
+              }
+            }
+          } else if (stackComment?.type == "CommentParentheses") {
+            const [argsStr, returnsStr, ...rest] = stackComment.comment.trim()
+              .split("--");
+            if (rest.length > 0) {
+              throw new Error(
+                `Stack comment contains more than one '--' ${stackComment.comment}`,
+              );
+            }
+
+            args = argsStr.trim().split(" ").filter((val) => val !== "");
+            if (args[0] === "skipCheck") {
+              args = undefined;
+            }
+
+            returns = returnsStr?.trim().split(" ").filter((val) =>
+              val !== ""
+            ) ?? [];
+            if (returns[0] == "returnEverything") {
+              returns = undefined;
+            }
+          } else {
+            throw new Error(`stack comment missing in ${function_name}`);
+          }
+
           add(
             {
               type: "FunctionForth",
-              body: this.createFromForthTokens(current),
+              usesStackComment: stackComment.type === "CommentParentheses",
+              arguments: args,
+              returns: returns,
+              body: body,
             },
           );
           break;
@@ -1727,6 +1833,7 @@ export class Compiler {
     code_tree: BodyType,
     splitOnTopLevelAwait: boolean,
   ): { code: string; dropResult: boolean }[] {
+    const options = this.options;
     const output: { code: string; dropResult: boolean }[] = [];
     let out = '"use strict";\n';
 
@@ -1948,18 +2055,56 @@ export class Compiler {
         }
 
         case "FunctionForth": {
-          if (code_tree.name === undefined) {
-            append("stack.push(function(stack) {");
+          const name = code_tree.name === undefined
+            ? "unnamed"
+            : mangle(code_tree.name);
+          if (name.indexOf(".") !== -1) {
+            throw new Error(`Function names can not contain '.' ${name}`);
+          }
+
+          if (!options.checkStack || code_tree.arguments === undefined) {
+            if (code_tree.name === undefined) {
+              append("stack.push(function(stack) {");
+            } else {
+              append(`function ${name}(stack) {`);
+            }
+
             generateCode(code_tree.body, false);
+          } else {
+            if (code_tree.name === undefined) {
+              append("stack.push(function($parentStack) {");
+            } else {
+              append(`function ${name}($parentStack) {`);
+            }
+            append("const stack = new SForthStack();");
+            append(
+              `if($parentStack.length < ${code_tree.arguments.length})
+                      console.trace(\`parent stack state doesn't match description expected: ${
+                JSON.stringify(code_tree.arguments)
+              } got: \` + JSON.stringify($parentStack))`,
+            );
+            append(
+              `stack.pushArray($parentStack.getTopElements(${(code_tree
+                .arguments.length)}))`,
+            );
+
+            generateCode(code_tree.body, false);
+
+            if (code_tree.returns !== undefined) {
+              append(
+                `if(stack.length !== ${code_tree.returns.length})
+                        console.trace(\`local stack state doesn't match description expected(${code_tree.returns.length}): ${
+                  JSON.stringify(code_tree.returns)
+                } got(\${stack.length}): \` + JSON.stringify(stack))`,
+              );
+            }
+            append(`$parentStack.pushArray(stack.getArray())`); // TODO: optimize this case
+          }
+
+          if (code_tree.name === undefined) {
             append("});\n");
             append("stack.top().forth_function=true;");
           } else {
-            const name = mangle(code_tree.name);
-            if (name.indexOf(".") !== -1) {
-              throw new Error("Function names can not contain .");
-            }
-            append(`function ${name}(stack) {`);
-            generateCode(code_tree.body, false);
             append("}");
             append(`${name}.forth_function=true;`);
           }
@@ -1983,7 +2128,7 @@ export class Compiler {
             code_tree.body.body.length !== 0 &&
             code_tree.body.body[0].type !== "CommentParentheses"
           ) {
-            append("var stack = new SForthStack();");
+            append("const stack = new SForthStack();");
           }
           generateCode(code_tree.body, false);
           if (code_tree.name === undefined) {

@@ -39,6 +39,7 @@ function loadFile(filename: string, includeDirectories: string[]) {
 }
 
 const compilerOptions = SForthSystem.Compiler.getDefaultOptions();
+compilerOptions.checkStack = true;
 compilerOptions.loadFile = loadFile;
 
 const sforth = new SForthSystem.Compiler(compilerOptions);

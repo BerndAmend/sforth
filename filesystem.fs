@@ -31,4 +31,4 @@ THE SOFTWARE.
     filename data fs.writeFileSync(2);
 ;
 
-: readLineWise ( filename ) readFileSync { content } content.toString(0) { str } "\n" str.split(1) ;
+: readLineWise ( filename -- array ) readFileSync { content } content.toString(0) { str } "\n" str.split(1) ;

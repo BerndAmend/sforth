@@ -53,7 +53,7 @@ try
 catch err
 endtry
 
-: forthconsole ;
+: forthconsole {} ;
 null to forthconsole.onKey
 
 :async handleKey { key }

@@ -85,53 +85,36 @@ THE SOFTWARE.
 \ dummy function
 :macro ok {} ;
 
-: clearstack ( -- ) stack.clear(0); ;
+:macro clearstack {} stack.clear(0); ;
 
 \ data stack operations
 : dup { x -- x x } ' x ' x ;
 
-:js drop { x } ;
+: drop { x } ;
 
 : swap { x1 x2 -- x2 x1 } ' x2 ' x1 ;
-
 : over { x1 x2 -- x1 x2 x1 } ' x1 ' x2 ' x1 ;
-
 : rot { x1 x2 x3 -- x2 x3 x1 } ' x2 ' x3 ' x1 ;
-
 : -rot { x1 x2 x3 -- x3 x1 x2 } ' x3 ' x1 ' x2 ;
-
 : tuck { x1 x2 -- x2 x1 x2 } ' x2 ' x1 ' x2 ;
-
 : nip { x1 x2 -- x2 } ' x2 ;
 
 
 : 2dup { x1 x2 -- x1 x2 x1 x2 } ' x1 ' x2 ' x1 ' x2 ;
-
 : 2drop { x1 x2 -- } ;
-
 : 2swap { x1 x2 x3 x4 -- x3 x4 x1 x2 } ' x3 ' x4 ' x1 ' x2 ;
-
 : 2over { x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2 } ' x1 ' x2 ' x3 ' x4 ' x1 ' x2 ;
-
-: depth {} ( -- n ) stack.size(0) ;
-
-: pick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get(1) ;
-
-: roll {} ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove(1) ;
-
+:macro depth {} ( -- n ) stack.size(0) ;
+:macro pick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get(1) ;
+:macro roll {} ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove(1) ;
 
 :macro & {} local{ x1 x2 -- x3 } :[ x1 & x2 ]: ;
-
 :macro && {} local{ x1 x2 -- x3 } :[ x1 && x2 ]: ;
-
 :macro | {} local{ x1 x2 -- x3 } :[ x1 | x2 ]: ;
-
 :macro || {} local{ x1 x2 -- x3 } :[ x1 || x2 ]: ;
-
 :macro xor {} local{ x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
 
 : not { x1 -- x2 } :[ ! x1 ]: ;
-
 : invert { x1 -- x2 } :[ ~ x1 ]: ;
 
 \ math operations
@@ -141,7 +124,7 @@ THE SOFTWARE.
 :macro * {} local{ x1 x2 -- x3 } :[ x1 * x2 ]: ;
 :macro / {} local{ x1 x2 -- x3 } :[ x1 / x2 ]: ;
 :macro mod {} local{ x1 x2 -- x3 } :[ x1 % x2 ]: ;
-: /mod { x1 x2 -- x3 } :[ x1 % x2 ]: :[ x1 / x2 ]: Math.floor(1) ;
+: /mod { x1 x2 -- x3 x4 } :[ x1 % x2 ]: :[ x1 / x2 ]: Math.floor(1) ;
 :macro ** {} local{ x1 x2 -- x3 } :[ x1 ** x2 ]: ;
 
 : negate ( n -- -n ) -1 * ;
@@ -198,37 +181,35 @@ THE SOFTWARE.
 :macro 2* {} ( x1 -- x2 ) 2 * ;
 :macro 2/ {} ( x1 -- x2 ) 2 / ;
 
-: deg2rad {} ( x1 -- x2 ) 180.0 / ' Math.PI * ;
-: rad2deg {} ( x1 -- x2 ) ' Math.PI / 180.0 * ;
+: deg2rad ( x1 -- x2 ) 180.0 / ' Math.PI * ;
+: rad2deg ( x1 -- x2 ) ' Math.PI / 180.0 * ;
 
-: acosdeg {} ( x1 -- x2 ) Math.acos(1) rad2deg ;
-: asindeg {} ( x1 -- x2 ) Math.asin(1) rad2deg ;
-: atandeg {} ( x1 -- x2 ) Math.atan(1) rad2deg ;
-: cosdeg {} ( x1 -- x2 ) deg2rad Math.cos(1) ;
-: sindeg {} ( x1 -- x2 ) deg2rad Math.sin(1) ;
-: tandeg {} ( x1 -- x2 ) deg2rad Math.tan(1) ;
+: acosdeg ( x1 -- x2 ) Math.acos(1) rad2deg ;
+: asindeg ( x1 -- x2 ) Math.asin(1) rad2deg ;
+: atandeg ( x1 -- x2 ) Math.atan(1) rad2deg ;
+: cosdeg ( x1 -- x2 ) deg2rad Math.cos(1) ;
+: sindeg ( x1 -- x2 ) deg2rad Math.sin(1) ;
+: tandeg ( x1 -- x2 ) deg2rad Math.tan(1) ;
 
 : assert { flag text -- } ' flag not if ' text "\n" + . endif ;
 
 \ Exceptions
 :macro throw {} ( obj -- ) :[ throw stack.pop() ]; ;
 
-: execute { x1 -- } x1 ;
+: execute ( skipCheck ) { x1 } x1 ;
 
 :macro create-empty-object {} :[ {} ]: ;
 
-: create-array { num -- new Array } num stack.getTopElements(1) ;
+: create-array { num -- newArray } num stack.getTopElements(1) ;
 
-: new-empty-array ( -- ) :[ [] ]: ;
-: new-array { size -- } :[ new Array(size) ]: ;
+: new-empty-array ( -- array ) :[ [] ]: ;
+: new-array { size -- newArray } :[ new Array(size) ]: ;
 
 : ! { value index variable -- } :[ variable[index] = value ]; ;
 : @ { index variable -- value } :[ variable[index] ]: ;
 
 :macro m! { variable index value -- } :[ variable [ index ] = value ]; ;
 :macro m@ { variable index -- value } :[ variable [ index ] ]: ;
-
-: store-in-array { arr -- } arr.length 1- -1 1 do i i arr ! loop ;
 
 \ String functions
 
