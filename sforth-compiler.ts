@@ -2077,6 +2077,7 @@ export class Compiler {
               append(`function ${name}($parentStack) {`);
             }
             append("const stack = new SForthStack();");
+            append("try {");
             append(
               `if($parentStack.length < ${code_tree.arguments.length})
                       console.trace(\`parent stack state doesn't match description expected: ${
@@ -2090,6 +2091,7 @@ export class Compiler {
 
             generateCode(code_tree.body, false);
 
+            append("} finally {");
             if (code_tree.returns !== undefined) {
               append(
                 `if(stack.length !== ${code_tree.returns.length})
@@ -2099,6 +2101,7 @@ export class Compiler {
               );
             }
             append(`$parentStack.pushArray(stack.getArray())`); // TODO: optimize this case
+            append("}");
           }
 
           if (code_tree.name === undefined) {
