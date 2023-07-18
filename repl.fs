@@ -62,7 +62,7 @@ null to forthconsole.onKey
 		\ restore console handler
 		null to forthconsole.onKey
 	elseif ' forthconsole.onKey null <> if
-		key forthconsole.onKey
+		key forthconsole.onKey await;
 	elseif key "\u007f" === if
 		\ Backspace was pressed
 		entered.length 0> if
