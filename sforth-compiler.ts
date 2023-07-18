@@ -1502,14 +1502,19 @@ export class Compiler {
 
         case ":async":
         case ":js": { // function definition
-          const isAsync = asToken(tokens[i]).value === ":async";
+          const functionType = asToken(tokens[i]).value;
+          const isAsync = functionType === ":async";
           i++;
           if (i >= tokens.length) {
-            throw new Error("Couldn't find closing ';/return;' for ':js'");
+            throw new Error(
+              `Couldn't find closing ';/return;' for '${functionType}' '${function_name}'`,
+            );
           }
 
           if (tokens[i].type !== "Token") {
-            throw new Error("Unexpected token type found after :js");
+            throw new Error(
+              `Unexpected token type found after '${functionType}' '${function_name}'`,
+            );
           }
 
           function_name = asToken(tokens[i]).value;
@@ -1517,7 +1522,9 @@ export class Compiler {
           while (depth > 0) {
             i++;
             if (i >= tokens.length) {
-              throw new Error("Couldn't find closing ';/return;' for ':js'");
+              throw new Error(
+                `Couldn't find closing ';/return;' for '${functionType}' '${function_name}'`,
+              );
             }
 
             if (tokens[i].type === "Token") {
@@ -1543,7 +1550,7 @@ export class Compiler {
             const values = localtree.body[0];
             if (values.type !== "ValueLocal") {
               throw new Error(
-                ":js requires { <args> -- <comment> } after the function name",
+                `${functionType} '${function_name}' requires { <args> -- <comment> } after the function name`,
               );
             }
 
