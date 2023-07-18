@@ -34,7 +34,7 @@ include "filesystem.fs"
 	".fs" filename.endsWith(1) not if continue endif
 	`Execute ${filename}\n` .
 	filename readFileSync { file }
-	file.toString(0) sforth.eval(1) await;
+	file.toString(0) filename sforth.eval(2) await;
 loop
 ;
 

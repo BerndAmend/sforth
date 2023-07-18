@@ -258,49 +258,50 @@ export interface CompileResult {
   generated_code?: { code: string; dropResult: boolean }[];
 }
 
-export interface Position {
+export type SourcePosition = {
+  filename?: string;
   line: number;
   column: number;
-}
+};
 
-export interface BodyType {
+export type BodyType = {
   type: "Body";
   body: NodeType[];
   extendedMacro?: string;
-}
+};
 
-export interface TokenType {
+export type TokenType = {
   type: "Token";
   value: string;
-}
+};
 
-export interface MacroType {
+export type MacroType = {
   type: "Macro";
   name: string;
   args: string[];
   body: NodeType[];
-}
+};
 
-export interface BranchIfBody {
+export type BranchIfBody = {
   type: "BranchIfBody";
   condition: BodyType;
   body: BodyType;
-}
+};
 
-export interface BranchIf {
+export type BranchIf = {
   type: "BranchIf";
   if_body: BodyType;
   else_if_bodies?: BranchIfBody[];
   else_body?: BodyType;
-}
+};
 
-export interface TryCatchFinally {
+export type TryCatchFinally = {
   type: "TryCatchFinally";
   body: BodyType;
   catchVar?: string;
   catchBody?: BodyType;
   finallyBody?: BodyType;
-}
+};
 
 export type NodeType =
   | {
@@ -413,10 +414,15 @@ export type NodeType =
     dropResult: boolean;
   };
 
+type LoadFile = (
+  filename: string,
+  includeDirectories: string[],
+) => { fullfilename: string; content: string };
+
 interface CompilerOptions {
   includeDirectories: string[];
   checkStack: boolean;
-  loadFile: (filename: string, includeDirectories: string[]) => string;
+  loadFile: LoadFile;
 }
 
 // Compiler
@@ -437,10 +443,7 @@ export class Compiler {
     return {
       includeDirectories: ["."],
       checkStack: true,
-      loadFile: function (
-        _filename: string,
-        _includeDirectories: string[],
-      ): string {
+      loadFile: function () {
         throw new Error(
           "no loadFile handler was provided in the compiler options",
         );
@@ -448,18 +451,57 @@ export class Compiler {
     };
   }
 
-  // Currently this function only splits the code into tokens
-  // later version will also keep track where the tokens are fetched from
-  tokenize(code: string): NodeType[] {
-    // unify line endings
-    const clean_code = code.replace(/\r\n/gm, "\n")
-      .replace(/\n/gm, " \n ")
-      .replace(/\t/gm, " \t ")
-      .replace(/\f/gm, " \f ")
-      .replace(/\r/gm, " \n ");
+  tokenize(code: string, filename?: string): NodeType[] {
+    code = code.replace(/\r\n/gm, "\n").replace(/\r/gm, "\n"); // unify line endings
 
     // tokenize code
-    const tokens = clean_code.split(" ");
+    const tokenSourcePosition: SourcePosition[] = [];
+    const tokens: string[] = [];
+
+    {
+      let startLine = 1;
+      let startColumn = 0;
+      let line = 1;
+      let column = 0;
+      let newToken = "";
+      for (const c of code) {
+        if (c !== "\f") {
+          column += 1;
+        }
+        if (c === "\n") {
+          column = 0;
+          line += 1;
+        }
+        if (c === " " || c === "\n" || c === "\t" || c === "\f") {
+          tokenSourcePosition.push({
+            column: startColumn,
+            line: startLine,
+            filename,
+          });
+          tokens.push(newToken);
+          newToken = "";
+        } else {
+          if (newToken === "") {
+            startLine = line;
+            startColumn = column;
+          }
+          newToken += c;
+        }
+
+        if (c === "\n" || c === "\t" || c === "\f") {
+          tokenSourcePosition.push({ column, line, filename });
+          tokens.push(c);
+        }
+      }
+
+      if (newToken !== "") {
+        tokenSourcePosition.push({ column, line, filename });
+        tokens.push(newToken);
+        newToken = "";
+      }
+    }
+
+    //console.error(JSON.stringify(tokens, undefined, 4));
 
     // merge tokens
     const merged_tokens: NodeType[] = [];
@@ -471,8 +513,24 @@ export class Compiler {
     let depth;
 
     for (let i = 0; i < tokens.length; i++) {
+      const const_i = i;
       const t = tokens[i];
       depth = 1;
+
+      const error = (msg: string) => {
+        const sourcePosition = tokenSourcePosition[const_i];
+        throw new Error(
+          `${
+            sourcePosition.filename ?? "unknown"
+          }:${sourcePosition.line}:${sourcePosition.column}: ${msg}\nsource:\n${
+            [
+              ...tokens.slice(Math.max(0, const_i - 5), const_i),
+              `-->${tokens[const_i]}<--`,
+              ...tokens.slice(const_i + 1, const_i + 10),
+            ].join(" ")
+          }`,
+        );
+      };
 
       switch (t.toLowerCase()) {
         case "": // ignore empty/whitespace tokens
@@ -548,7 +606,7 @@ export class Compiler {
             i++;
 
             if (i >= tokens.length) {
-              throw new Error("Couldn't find closing ')'");
+              error("Couldn't find closing ')'");
             }
 
             if (tokens[i] === "(") {
@@ -575,7 +633,7 @@ export class Compiler {
             i++;
 
             if (i >= tokens.length) {
-              throw new Error("Couldn't find closing '*/'");
+              error("Couldn't find closing '*/'");
             }
 
             if (tokens[i] === "/*" || tokens[i] === "/**") {
@@ -605,9 +663,7 @@ export class Compiler {
             i++;
 
             if (i >= tokens.length) {
-              throw new Error(
-                "Couldn't find closing ']:' or ']:d' or '];' for ':[",
-              );
+              error("Couldn't find closing ']:' or ']:d' or '];' for ':[");
             }
           }
           const localjscode = str.slice(0, str.length - 1).replace(
@@ -630,7 +686,6 @@ export class Compiler {
 
         case "{": // local variable start
         case "local{": { // local variable start
-          const start = tokens[i];
           let done = false;
           const localvars = [];
           let comment = "";
@@ -651,10 +706,10 @@ export class Compiler {
             i++;
 
             if (i >= tokens.length) {
-              throw new Error("Couldn't find closing '}' for '" + start + "'");
+              error("Couldn't find closing '}' for '" + t + "'");
             }
           }
-          switch (start) {
+          switch (t) {
             case "{":
               add(
                 {
@@ -714,7 +769,7 @@ export class Compiler {
                 j = 0;
                 i++;
                 if (i >= tokens.length) {
-                  throw new Error("Couldn't find '\"'");
+                  error("Couldn't find '\"'");
                 }
                 str += " ";
                 if (tokens[i].length === 0) {
@@ -756,7 +811,7 @@ export class Compiler {
                 j = 0;
                 i++;
                 if (i >= tokens.length) {
-                  throw new Error("Couldn't find '`'");
+                  error("Couldn't find '`'");
                 }
                 str += " ";
                 if (tokens[i].length === 0) {
@@ -817,7 +872,7 @@ export class Compiler {
                 i++;
 
                 if (i >= tokens.length) {
-                  throw new Error(
+                  error(
                     "Couldn't find closing '\u00ab' for '\u00bb'",
                   );
                 }
@@ -890,7 +945,6 @@ export class Compiler {
       let depth = 1;
       let current: NodeType[] = [];
       let localtree = undefined;
-      let function_name = undefined;
       let values: NodeType | undefined = undefined;
 
       let token_handled = false;
@@ -1318,41 +1372,45 @@ export class Compiler {
           const token = tokens[i];
           if (token.type !== "String" && token.type !== "Token") {
             throw Error(
-              `Unexpect token type found in createFromForthTokens got: ${t.type} expected String | Token`,
+              `Unexpected token type found in createFromForthTokens got: ${t.type} expected String | Token`,
             );
           }
+          const { fullfilename, content } = this.options.loadFile(
+            token.value,
+            this.options.includeDirectories,
+          );
           add(
-            this.createFromForth(
-              this.options.loadFile(
-                token.value,
-                this.options.includeDirectories,
-              ),
-            ),
+            this.createFromForth(content, fullfilename),
           );
           break;
         }
 
-        case ":": { // function definition
-          i++;
-          if (i >= tokens.length) {
-            throw new Error("Couldn't find closing ';' for ':'");
-          }
+        case ":": // function definition
+        case ":noname": {
+          const functionType = asToken(tokens[i]).value;
+          let function_name;
+          if (functionType === ":") {
+            i++;
+            if (i >= tokens.length) {
+              throw new Error("Couldn't find closing ';' for nameless ':'");
+            }
 
-          if (tokens[i].type !== "Token") {
-            throw new Error(
-              `Unexpected token type found after : (expected: Token got: ${
-                tokens[i].type
-              } content: ${JSON.stringify(tokens[i])})`,
-            );
+            if (tokens[i].type !== "Token") {
+              throw new Error(
+                `Unexpected token type found after : (expected: Token got: ${
+                  tokens[i].type
+                } content: ${JSON.stringify(tokens[i])})`,
+              );
+            }
+            function_name = asToken(tokens[i]).value;
           }
-
-          const token = asToken(tokens[i]);
-          function_name = token.value;
 
           while (depth > 0) {
             i++;
             if (i >= tokens.length) {
-              throw new Error("Couldn't find closing ';' for ':'");
+              throw new Error(
+                `Couldn't find closing ';' for '${functionType}' in function "${function_name}"`,
+              );
             }
 
             const token = tokens[i];
@@ -1392,7 +1450,9 @@ export class Compiler {
               .split("--");
             if (rest.length > 0) {
               throw new Error(
-                `Stack comment contains more than one '--' ${stackComment.comment}`,
+                `Stack comment in '${functionType}' function "${
+                  function_name ?? ":noname"
+                } contains more than one '--' ${stackComment.comment}`,
               );
             }
 
@@ -1408,89 +1468,15 @@ export class Compiler {
               returns = undefined;
             }
           } else {
-            throw new Error(`stack comment missing in ${function_name}`);
+            throw new Error(
+              `stack comment missing in "${function_name ?? ":noname"}`,
+            );
           }
 
           add(
             {
               type: "FunctionForth",
               name: function_name,
-              usesStackComment: stackComment.type === "CommentParentheses",
-              arguments: args,
-              returns: returns,
-              body: body,
-            },
-          );
-          break;
-        }
-
-        case ":noname": { // function definition
-          while (depth > 0) {
-            i++;
-            if (i >= tokens.length) {
-              throw new Error("Couldn't find closing ';' for ':noname'");
-            }
-
-            const token = tokens[i];
-            if (token.type === "Token") {
-              if (isFunctionStart(token.value)) {
-                depth++;
-              } else if (
-                token.value === ";" || token.value === "return;"
-              ) {
-                depth--;
-              }
-            }
-            if (depth > 0) {
-              current.push(token);
-            }
-          }
-
-          // TODO: merge with the code from the named case, at the moment this duplicates the code :(
-          const body = this.createFromForthTokens(current);
-          let args;
-          let returns;
-
-          const stackComment = body.body[0];
-          if (stackComment?.type == "ValueLocal") {
-            args = stackComment.values;
-            if (stackComment.comment === undefined) {
-              returns = [];
-            } else {
-              returns = stackComment.comment.trim().split(" ").filter((val) =>
-                val !== ""
-              );
-              if (returns[0] == "returnEverything") {
-                returns = undefined;
-              }
-            }
-          } else if (stackComment?.type == "CommentParentheses") {
-            const [argsStr, returnsStr, ...rest] = stackComment.comment.trim()
-              .split("--");
-            if (rest.length > 0) {
-              throw new Error(
-                `Stack comment contains more than one '--' ${stackComment.comment}`,
-              );
-            }
-
-            args = argsStr.trim().split(" ").filter((val) => val !== "");
-            if (args[0] === "skipCheck") {
-              args = undefined;
-            }
-
-            returns = returnsStr?.trim().split(" ").filter((val) =>
-              val !== ""
-            ) ?? [];
-            if (returns[0] == "returnEverything") {
-              returns = undefined;
-            }
-          } else {
-            throw new Error(`stack comment missing in ${function_name}`);
-          }
-
-          add(
-            {
-              type: "FunctionForth",
               usesStackComment: stackComment.type === "CommentParentheses",
               arguments: args,
               returns: returns,
@@ -1507,17 +1493,17 @@ export class Compiler {
           i++;
           if (i >= tokens.length) {
             throw new Error(
-              `Couldn't find closing ';/return;' for '${functionType}' '${function_name}'`,
+              `Couldn't find closing ';/return;' for nameless '${functionType}'`,
             );
           }
 
           if (tokens[i].type !== "Token") {
             throw new Error(
-              `Unexpected token type found after '${functionType}' '${function_name}'`,
+              `Unexpected token type found after '${functionType}' nameless`,
             );
           }
 
-          function_name = asToken(tokens[i]).value;
+          const function_name = asToken(tokens[i]).value;
 
           while (depth > 0) {
             i++;
@@ -1651,7 +1637,7 @@ export class Compiler {
             );
           }
 
-          function_name = asToken(tokens[i]).value;
+          const function_name = asToken(tokens[i]).value;
 
           while (depth > 0) {
             i++;
@@ -1832,8 +1818,8 @@ export class Compiler {
     return out;
   }
 
-  createFromForth(code: string) {
-    return this.createFromForthTokens(this.tokenize(code));
+  createFromForth(code: string, filename?: string) {
+    return this.createFromForthTokens(this.tokenize(code, filename));
   }
 
   generateJsCode(
@@ -2085,27 +2071,58 @@ export class Compiler {
             }
             append("const stack = new SForthStack();");
             append("try {");
-            append(
-              `if($parentStack.length < ${code_tree.arguments.length})
-                      console.trace(\`parent stack state doesn't match description expected: ${
-                JSON.stringify(code_tree.arguments)
-              } got: \` + JSON.stringify($parentStack))`,
-            );
-            append(
-              `stack.pushArray($parentStack.getTopElements(${(code_tree
-                .arguments.length)}))`,
-            );
+            if (code_tree.arguments[0] === "n...") {
+              if (code_tree.arguments.length !== 1) {
+                throw new Error(
+                  `Code generator doesn't support n... if other arguments are used in function "${code_tree.name}"`,
+                );
+              }
+              append(
+                `if($parentStack.length < ($parentStack.top()+1))
+                        console.trace(\`parent stack state doesn't match the number of elements that were promised by using n... description expected(\${$parentStack.top()+1}): ${
+                  JSON.stringify(code_tree.arguments)
+                } got: \` + JSON.stringify($parentStack))`,
+              );
+              append(
+                `stack.pushArray($parentStack.getTopElements($parentStack.top()+1))`,
+              );
+            } else {
+              append(
+                `if($parentStack.length < ${code_tree.arguments.length})
+                        console.trace(\`parent stack state doesn't match description expected: ${
+                  JSON.stringify(code_tree.arguments)
+                } got: \` + JSON.stringify($parentStack))`,
+              );
+              append(
+                `stack.pushArray($parentStack.getTopElements(${(code_tree
+                  .arguments.length)}))`,
+              );
+            }
 
             generateCode(code_tree.body, false);
 
             append("} finally {");
             if (code_tree.returns !== undefined) {
-              append(
-                `if(stack.length !== ${code_tree.returns.length})
+              if (code_tree.returns[0] === "n...") {
+                if (code_tree.returns.length !== 1) {
+                  throw new Error(
+                    `Code generator doesn't support n... if other returns are used in function "${code_tree.name}"`,
+                  );
+                }
+                append(
+                  `if(stack.length !== (stack.top()+1))
+                        console.trace(\`local stack state doesn't match the number of elements that were promised by using n... description expected(\${stack.top()+1}): ${
+                    JSON.stringify(code_tree.returns)
+                  } got: \` + JSON.stringify(stack))`,
+                );
+              } else {
+                append(
+                  `if(stack.length !== ${code_tree.returns.length})
                         console.trace(\`local stack state doesn't match description expected(${code_tree.returns.length}): ${
-                  JSON.stringify(code_tree.returns)
-                } got(\${stack.length}): \` + JSON.stringify(stack))`,
-              );
+                    JSON.stringify(code_tree.returns)
+                  } got: \` + JSON.stringify(stack))`,
+                );
+              }
             }
             append(`$parentStack.pushArray(stack.getArray())`); // TODO: optimize this case
             append("}");
@@ -2134,12 +2151,7 @@ export class Compiler {
               code_tree.isAsync ? "async " : ""
             }function ${name}(${args}) {`,
           );
-          if (
-            code_tree.body.body.length !== 0 &&
-            code_tree.body.body[0].type !== "CommentParentheses"
-          ) {
-            append("const stack = new SForthStack();");
-          }
+          append("const stack = new SForthStack();");
           generateCode(code_tree.body, false);
           if (code_tree.name === undefined) {
             append("});");
@@ -2828,10 +2840,14 @@ export class Compiler {
     return code_tree;
   }
 
-  compile(code: string, splitOnTopLevelAwait: boolean = false): CompileResult {
+  compile(
+    code: string,
+    filename?: string,
+    splitOnTopLevelAwait = true,
+  ): CompileResult {
     const res: CompileResult = { code };
     try {
-      res.tokens = this.tokenize(res.code);
+      res.tokens = this.tokenize(res.code, filename);
       res.code_tree = this.createFromForthTokens(res.tokens);
       res.optimized_code_tree = this.optimizeCodeTree(res.code_tree);
       res.generated_code = this.generateJsCode(
@@ -2847,13 +2863,15 @@ export class Compiler {
   }
 
   compileFile(filename: string) {
-    return this.compile(
-      this.options.loadFile(filename, this.options.includeDirectories),
+    const { fullfilename, content } = this.options.loadFile(
+      filename,
+      this.options.includeDirectories,
     );
+    return this.compile(content, fullfilename);
   }
 
-  async eval(code: string) {
-    const compileResult = this.compile(code, true);
+  async eval(code: string, filename?: string) {
+    const compileResult = this.compile(code, filename);
     for (const g of compileResult.generated_code!) {
       const result = await vm.runInThisContext(g.code);
       if (!g.dropResult) {
@@ -2864,8 +2882,10 @@ export class Compiler {
   }
 
   evalFile(filename: string): Promise<void> {
-    return this.eval(
-      this.options.loadFile(filename, this.options.includeDirectories),
+    const { fullfilename, content } = this.options.loadFile(
+      filename,
+      this.options.includeDirectories,
     );
+    return this.eval(content, fullfilename);
   }
 }

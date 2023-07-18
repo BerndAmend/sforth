@@ -30,7 +30,12 @@ function loadFile(filename: string, includeDirectories: string[]) {
   for (const i of includeDirectories) {
     const fullfilename = i + "/" + filename;
     try {
-      return new TextDecoder("utf-8").decode(Deno.readFileSync(fullfilename));
+      return {
+        fullfilename,
+        content: new TextDecoder("utf-8").decode(
+          Deno.readFileSync(fullfilename),
+        ),
+      };
     } catch {
       // we just ignore the error
     }
