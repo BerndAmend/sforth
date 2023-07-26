@@ -2070,6 +2070,7 @@ export class Compiler {
               append(`function ${name}($parentStack) {`);
             }
             append("const stack = new SForthStack();");
+            append("let $_has_an_unhandled_exception = false;");
             append("try {");
             if (code_tree.arguments[0] === "n...") {
               if (code_tree.arguments.length !== 1) {
@@ -2101,6 +2102,9 @@ export class Compiler {
 
             generateCode(code_tree.body, false);
 
+            append("} catch(e) {");
+            append("$_has_an_unhandled_exception = true;");
+            append("throw e;");
             append("} finally {");
             if (code_tree.returns !== undefined) {
               if (code_tree.returns[0] === "n...") {
@@ -2110,14 +2114,14 @@ export class Compiler {
                   );
                 }
                 append(
-                  `if(stack.length !== (stack.top()+1))
+                  `if(!$_has_an_unhandled_exception && stack.length !== (stack.top()+1))
                         console.trace(\`local stack state doesn't match the number of elements that were promised by using n... description expected(\${stack.top()+1}): ${
                     JSON.stringify(code_tree.returns)
                   } got: \` + JSON.stringify(stack))`,
                 );
               } else {
                 append(
-                  `if(stack.length !== ${code_tree.returns.length})
+                  `if(!$_has_an_unhandled_exception && stack.length !== ${code_tree.returns.length})
                         console.trace(\`local stack state doesn't match description expected(${code_tree.returns.length}): ${
                     JSON.stringify(code_tree.returns)
                   } got: \` + JSON.stringify(stack))`,
