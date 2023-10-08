@@ -1,3 +1,14 @@
+// requires the following arudino program
+// void setup() {
+//   Serial.begin(115200);
+// }
+
+// void loop() {
+//   if (Serial.available()) {
+//     Serial.write(Serial.read());
+//   }
+// }
+
 include "forth.fs"
 include »console.fs«
 "https://raw.githubusercontent.com/BerndAmend/deno_serial/master/main.ts" import await { serial }
