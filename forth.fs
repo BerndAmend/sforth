@@ -108,24 +108,24 @@ THE SOFTWARE.
 :macro pick {} ( x ) ( xu ... x1 x0 u -- xu ... x1 x0 xu ) stack.get(1) ;
 :macro roll {} ( x ) ( xu xu-1 ... x0 u -- xu-1 ... x0 xu ) stack.remove(1) ;
 
-:macro & {} local{ x1 x2 -- x3 } :[ x1 & x2 ]: ;
-:macro && {} local{ x1 x2 -- x3 } :[ x1 && x2 ]: ;
-:macro | {} local{ x1 x2 -- x3 } :[ x1 | x2 ]: ;
-:macro || {} local{ x1 x2 -- x3 } :[ x1 || x2 ]: ;
-:macro xor {} local{ x1 x2 -- x3 } :[ x1 ^ x2 ]: ;
+:macro & {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 & $$sfi_macro_x2 ]: ;
+:macro && {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 && $$sfi_macro_x2 ]: ;
+:macro | {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 | $$sfi_macro_x2 ]: ;
+:macro || {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 || $$sfi_macro_x2 ]: ;
+:macro xor {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 ^ $$sfi_macro_x2 ]: ;
 
 : not { x1 -- x2 } :[ ! x1 ]: ;
 : invert { x1 -- x2 } :[ ~ x1 ]: ;
 
 \ math operations
 
-:macro + {} local{ x1 x2 -- x3 } :[ x1 + x2 ]: ;
-:macro - {} local{ x1 x2 -- x3 } :[ x1 - x2 ]: ;
-:macro * {} local{ x1 x2 -- x3 } :[ x1 * x2 ]: ;
-:macro / {} local{ x1 x2 -- x3 } :[ x1 / x2 ]: ;
-:macro mod {} local{ x1 x2 -- x3 } :[ x1 % x2 ]: ;
+:macro + {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 + $$sfi_macro_x2 ]: ;
+:macro - {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 - $$sfi_macro_x2 ]: ;
+:macro * {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 * $$sfi_macro_x2 ]: ;
+:macro / {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 / $$sfi_macro_x2 ]: ;
+:macro mod {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 % $$sfi_macro_x2 ]: ;
 : /mod { x1 x2 -- x3 x4 } :[ x1 % x2 ]: :[ x1 / x2 ]: Math.floor(1) ;
-:macro ** {} local{ x1 x2 -- x3 } :[ x1 ** x2 ]: ;
+:macro ** {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 ** $$sfi_macro_x2 ]: ;
 
 : negate ( n -- -n ) -1 * ;
 
@@ -136,20 +136,20 @@ THE SOFTWARE.
 :macro mmod { x1 x2 -- x3 } :[ x1 % x2 ]: ;
 :macro m** { x1 x2 -- x3 } :[ x1 ** x2 ]: ;
 
-:macro << {} local{ x1 x2 -- x3 } :[ x1 << x2 ]: ;
-:macro >> {} local{ x1 x2 -- x3 } :[ x1 >> x2 ]: ;
-:macro >>> {} local{ x1 x2 -- x3 } :[ x1 >>> x2 ]: ;
+:macro << {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 << $$sfi_macro_x2 ]: ;
+:macro >> {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 >> $$sfi_macro_x2 ]: ;
+:macro >>> {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 >>> $$sfi_macro_x2 ]: ;
 :macro lshift {} << ;
 :macro rshift {} >>> ;
 
-:macro = {} local{ x1 x2 -- f } :[ x1 == x2 ]: ;
-:macro === {} local{ x1 x2 -- f } :[ x1 === x2 ]: ;
-:macro !== {} local{ x1 x2 -- f } :[ x1 !== x2 ]: ;
-:macro <> {} local{ x1 x2 -- f } :[ x1 != x2 ]: ;
-:macro > {} local{ x1 x2 -- f } :[ x1 > x2 ]: ;
-:macro >= {} local{ x1 x2 -- f } :[ x1 >= x2 ]: ;
-:macro < {} local{ x1 x2 -- f } :[ x1 < x2 ]: ;
-:macro <= {} local{ x1 x2 -- f } :[ x1 <= x2 ]: ;
+:macro = {} { $$sfi_macro_x1 $$sfi_macro_x2 -- f } :[ $$sfi_macro_x1 == $$sfi_macro_x2 ]: ;
+:macro === {} { $$sfi_macro_x1 $$sfi_macro_x2 -- f } :[ $$sfi_macro_x1 === $$sfi_macro_x2 ]: ;
+:macro !== {} { $$sfi_macro_x1 $$sfi_macro_x2 -- f } :[ $$sfi_macro_x1 !== $$sfi_macro_x2 ]: ;
+:macro <> {} { $$sfi_macro_x1 $$sfi_macro_x2 -- f } :[ $$sfi_macro_x1 != $$sfi_macro_x2 ]: ;
+:macro > {} { $$sfi_macro_x1 $$sfi_macro_x2 -- f } :[ $$sfi_macro_x1 > $$sfi_macro_x2 ]: ;
+:macro >= {} { $$sfi_macro_x1 $$sfi_macro_x2 -- f } :[ $$sfi_macro_x1 >= $$sfi_macro_x2 ]: ;
+:macro < {} { $$sfi_macro_x1 $$sfi_macro_x2 -- f } :[ $$sfi_macro_x1 < $$sfi_macro_x2 ]: ;
+:macro <= {} { $$sfi_macro_x1 $$sfi_macro_x2 -- f } :[ $$sfi_macro_x1 <= $$sfi_macro_x2 ]: ;
 
 :macro m= { x1 x2 -- f } :[ x1 == x2 ]: ;
 :macro m=== { x1 x2 -- f } :[ x1 === x2 ]: ;
@@ -161,12 +161,12 @@ THE SOFTWARE.
 :macro m<= { x1 x2 -- f } :[ x1 >= x2 ]: ;
 
 \ we provide a faster implementation for important functions
-:macro 0= {} local{ x1 -- f } :[ x1 === 0 ]: ;
-:macro 0<> {} local{ x1 -- f } :[ x1 != 0 ]: ;
-:macro 0> {} local{ x1 -- f } :[ x1 > 0 ]: ;
-:macro 0>= {} local{ x1 -- f } :[ x1 >= 0 ]: ;
-:macro 0< {} local{ x1 -- f } :[ x1 < 0 ]: ;
-:macro 0<= {} local{ x1 -- f } :[ x1 <= 0 ]: ;
+:macro 0= {} { x1 -- f } :[ x1 === 0 ]: ;
+:macro 0<> {} { x1 -- f } :[ x1 != 0 ]: ;
+:macro 0> {} { x1 -- f } :[ x1 > 0 ]: ;
+:macro 0>= {} { x1 -- f } :[ x1 >= 0 ]: ;
+:macro 0< {} { x1 -- f } :[ x1 < 0 ]: ;
+:macro 0<= {} { x1 -- f } :[ x1 <= 0 ]: ;
 
 :macro m0= { x1 -- f } :[ x1 == 0 ]: ;
 :macro m0=== { x1 -- f } :[ x1 === 0 ]: ;
