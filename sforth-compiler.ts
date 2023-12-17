@@ -51,19 +51,19 @@ function replaceWholeWord(
   return target;
 }
 
-function isNumeric(obj: string): boolean {
-  if (obj === "NaN") {
+function isNumeric(str: string): boolean {
+  if (str === "NaN") {
     return true;
   }
-  if (BigInt && obj.endsWith("n")) {
+  if (BigInt && str.length > 1 && str.endsWith("n")) {
     try {
-      BigInt(obj.slice(0, obj.length - 1));
+      BigInt(str.slice(0, str.length - 1));
       return true;
     } catch (_e) {
       return false;
     }
   }
-  return !isNaN(Number(obj));
+  return !isNaN(Number(str));
 }
 
 export class SForthStack {
