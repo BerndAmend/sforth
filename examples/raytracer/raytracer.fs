@@ -5,28 +5,28 @@
 		' b to this.b
 	;
 
-	:noname { k }
+	:noname { k -- r }
 		m* k this.r
 		m* k this.g
 		m* k this.b
 		new Color
 	; to Color.prototype.scale
 
-	:noname { other }
+	:noname { other -- r }
 		m+ this.r other.r
 		m+ this.g other.g
 		m+ this.b other.b
 		new Color
 	; to Color.prototype.plus
 
-	:noname { other }
+	:noname { other -- r }
 		' this.r ' other.r *
 		' this.g ' other.g *
 		' this.b ' other.b *
 		new Color
 	; to Color.prototype.times
 
-	:noname { }
+	:noname { -- r }
 		:[ {
 			r: Math.floor(Math.min(Math.max(this.r,0),1) * 255),
 			g: Math.floor(Math.min(Math.max(this.g,0),1) * 255),
@@ -34,7 +34,7 @@
 		} ]:
 	; to Color.prototype.toDrawingColor
 
-	:jsnoname {}
+	:jsnoname { }
 		:[ {r: this.r, g: this.g, b: this.b} ]:
 	return; to Color.prototype.toString
 
@@ -55,28 +55,28 @@ Color.black to Color.defaultColor
 		' z to this.z
 	;
 
-	:noname { k }
+	:noname { k -- r }
 		m* k this.x
 		m* k this.y
 		m* k this.z
 		new Vector
 	; to Vector.prototype.times
 
-	:noname { other }
+	:noname { other -- r }
 		m- this.x other.x
 		m- this.y other.y
 		m- this.z other.z
 		new Vector
 	; to Vector.prototype.minus
 
-	:noname { other }
+	:noname { other -- r }
 		m+ this.x other.x
 		m+ this.y other.y
 		m+ this.z other.z
 		new Vector
 	; to Vector.prototype.plus
 
-	:noname { other }
+	:noname { other -- r }
 		m* this.x other.x { v1 }
 		m* this.y other.y { v2 }
 		m+ v1 v2 { v3 }
@@ -84,11 +84,11 @@ Color.black to Color.defaultColor
 		m+ v3 v4
 	; to Vector.prototype.dot
 
-	:noname {}
+	:noname { -- r }
 		' this this.dot Math.sqrt
 	; to Vector.prototype.mag
 
-	:noname {}
+	:noname { -- r }
 		this.mag { vmag }
 		m=== vmag 0 if
 			Infinity
@@ -98,7 +98,7 @@ Color.black to Color.defaultColor
 		this.times
 	; to Vector.prototype.norm
 
-	:noname { other }
+	:noname { other -- r }
 		m* this.y other.z { x1 } m* this.z other.y { x2 } m- x1 x2
 		m* this.z other.x { y1 } m* this.x other.z { y2 } m- y1 y2
 		m* this.x other.y { z1 } m* this.y other.x { z2 } m- z1 z2
@@ -128,11 +128,11 @@ Color.black to Color.defaultColor
 		' radius to this.radius
 		m* radius radius to this.radius2
 	;
-	:noname { pos }
+	:noname { pos -- r }
 		' this.center pos.minus { tmp } tmp.norm
 	; to Sphere.prototype.normal
 
-	:noname { ray }
+	:noname { ray -- r }
 		' ray.start this.center.minus { eo }
 		' ray.dir eo.dot { v }
 		0 { dist }
@@ -157,11 +157,11 @@ Color.black to Color.defaultColor
 		' surface to this.surface
 	;
 
-	:noname { pos }
+	:noname { pos -- r }
 		this.norm
 	; to Plane.prototype.normal
 
-	:noname { ray }
+	:noname { ray -- r }
 		' ray.dir this.norm.dot { denom }
 		m0> denom if
 			null
@@ -232,7 +232,7 @@ var Surfaces;
 : RayTracer { }
 	5 to this.maxDepth
 
-	:noname { ray scene }
+	:noname { ray scene -- r }
 		Infinity { closest }
 		null { closestInter }
 		0 scene.things.length 1 do i
@@ -248,7 +248,7 @@ var Surfaces;
 		' closestInter
 	; to this.intersections
 
-	:noname { ray scene }
+	:noname { ray scene -- r }
 		' ray ' scene this.intersections { isect }
 		m!== isect null if
 			isect.dist
@@ -257,7 +257,7 @@ var Surfaces;
 		endif
 	; to this.testRay
 
-	:noname { ray scene depth }
+	:noname { ray scene depth -- r  }
 		' ray ' scene this.intersections { isect }
 		m=== isect null if
 			' Color.background
@@ -266,7 +266,7 @@ var Surfaces;
 		endif
 	; to this.traceRay
 
-	:noname { isect scene depth }
+	:noname { isect scene depth -- r }
 		isect.ray.dir { d }
 		isect.dist d.times isect.ray.start.plus { pos }
 		pos isect.thing.normal { normal }
@@ -291,13 +291,13 @@ var Surfaces;
 		reflectedColor naturalColor.plus
 	; to this.shade
 
-	:noname { thing pos normal rd scene depth }
+	:noname { thing pos normal rd scene depth -- r }
 		' pos thing.surface.reflect
 		:[ { start: pos, dir: rd } ]: ' scene m+ depth 1 this.traceRay { tmp }
 		tmp.scale
 	; to this.getReflectionColor
 
-	:noname { thing pos norm rd scene }
+	:noname { thing pos norm rd scene -- r }
 		this { _this }
 		:jsnoname { col light }
 			' pos light.pos.minus { ldis }
@@ -342,11 +342,11 @@ var Surfaces;
 	; to this.getNaturalColor
 
 	:noname { scene width height y-start y-end line-finish-callback }
-		:noname { x y camera }
-			:noname { x }
+		:noname { x y camera -- r }
+			:noname { x -- r }
 				:[ (x - (width / 2.0)) / 2.0 / width ]:
 			; { recenterX }
-			:noname { y }
+			:noname { y -- r }
 				:[ -(y - (height / 2.0)) / 2.0 / height ]:
 			; { recenterY }
 
@@ -377,11 +377,11 @@ var Surfaces;
 	; to this.render
 ;
 
-: create-light { pos color }
+: create-light { pos color -- r }
 	:[ { pos: pos, color: color } ]:
 ;
 
-: default-scene {}
+: default-scene { -- r }
 	create-empty-object { result }
 
 	0.0 1.0  0.0  new Vector  0.0  Surfaces.checkerboard  new Plane

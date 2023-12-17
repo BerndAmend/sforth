@@ -2,7 +2,7 @@ include forth.fs
 
 : funGraph { ctx axes func color thick }
 	0 0 4 axes.x0 axes.y0 axes.scale { xx yy dx x0 y0 scale }
-	
+
 	ctx.canvas.width x0 - dx / Math.round { iMax }
 	0 { iMin }
 
@@ -42,7 +42,7 @@ include forth.fs
 ;
 
 
-: fun1 ( x ) 3 * Math.cos ;
+: fun1 ( x -- r ) 3 * Math.cos ;
 
 : draw {}
 	"canvas" document.getElementById(1) { canvas }
@@ -60,4 +60,4 @@ include forth.fs
 	ctx axes ' fun1 "rgb(66,44,255)" 2 funGraph
 ;
 
-draw 
+draw

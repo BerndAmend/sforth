@@ -1,8 +1,7 @@
 include forth.fs
 
-:js sendMessage {}
-	"message" document.getElementById(1) { msg }
-	msg.value worker.postMessage(1)
+:async fetchData {}
+	"testfile.txt" fetch(1) await { d } d.text(0) await log
 ;
 
 : log { msg }
@@ -11,11 +10,3 @@ include forth.fs
 	"br" document.createElement(1) fragment.appendChild(1);
 	"#log" document.querySelector(1) { node } fragment node.appendChild(1);
 ;
-
-:[ new Worker("worker.fs") ]: { worker }
-
-:jsnoname { e }
-	»Received: « e.data + log
-; to worker.onmessage
-
-"Hi" worker.postMessage(1)
