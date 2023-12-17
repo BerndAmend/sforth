@@ -401,7 +401,7 @@ export type NodeType =
     interpolate?: boolean; // not set means false
   }
   | {
-    type: "ValueLocalTemp" | "ValueLocal";
+    type: "ValueLocalLet" | "ValueLocal";
     values: string[];
     comment?: string;
   }
@@ -685,7 +685,7 @@ export class Compiler {
         }
 
         case "{": // local variable start
-        case "local{": { // local variable start
+        case "let{": {
           let done = false;
           const localvars = [];
           let comment = "";
@@ -719,10 +719,10 @@ export class Compiler {
                 },
               );
               break;
-            case "local{":
+            case "let{":
               add(
                 {
-                  type: "ValueLocalTemp",
+                  type: "ValueLocalLet",
                   values: localvars.reverse(),
                   comment: comment.slice(0, comment.length - 1),
                 },
@@ -958,7 +958,7 @@ export class Compiler {
         case "JsCodeDirect":
         case "JsCode":
         case "ValueLocal":
-        case "ValueLocalTemp":
+        case "ValueLocalLet":
         case "Number":
         case "Screen":
         case "String":
@@ -2279,10 +2279,15 @@ export class Compiler {
           "";
           break;
         }
-        case "ValueLocal":
-        case "ValueLocalTemp": {
+        case "ValueLocal": {
           for (const entry of code_tree.values) {
             append(`var ${mangle(entry)} = stack.pop();`);
+          }
+          break;
+        }
+        case "ValueLocalLet": {
+          for (const entry of code_tree.values) {
+            append(`let ${mangle(entry)} = stack.pop();`);
           }
           break;
         }
@@ -2377,7 +2382,7 @@ export class Compiler {
           case "StringAssignToVar":
           case "StringAddToVar":
           case "ValueLocal":
-          case "ValueLocalTemp":
+          case "ValueLocalLet":
             break;
           case "TryCatchFinally":
             visitNodes(func, current.body);
@@ -2451,7 +2456,7 @@ export class Compiler {
       for (let i = 0; i < current.length; ++i) {
         const val = current[i];
         if (
-          ((val.type === "ValueLocal" || val.type === "ValueLocalTemp") &&
+          ((val.type === "ValueLocal" || val.type === "ValueLocalLet") &&
             val.values.length === 0) ||
           (val.type === "Body" && val.body.length === 0) ||
           (val.type === "Empty")
@@ -2509,7 +2514,7 @@ export class Compiler {
         ) {
           // nothing todo
         } else if (
-          val.type === "ValueLocalTemp" && val.values.length === 0
+          val.type === "ValueLocalLet" && val.values.length === 0
         ) {
           // nothing todo
         } else if (
@@ -2531,7 +2536,7 @@ export class Compiler {
       return previous;
     }
 
-    function inlineValueLocalTemp(
+    function inlineValueLocalLet(
       current: NodeType[],
       previous?: NodeType,
     ) {
@@ -2540,7 +2545,7 @@ export class Compiler {
         if (
           previous !== undefined &&
           (
-            val.type === "ValueLocalTemp" && val.values.length > 0
+            val.type === "ValueLocalLet" && val.values.length > 0
           )
         ) {
           if (previous.type === "Number") {
@@ -2578,7 +2583,7 @@ export class Compiler {
         ) {
           // nothing todo
         } else if (
-          val.type === "ValueLocalTemp" && val.values.length === 0
+          val.type === "ValueLocalLet" && val.values.length === 0
         ) {
           // nothing todo
         } else if (
@@ -2591,9 +2596,9 @@ export class Compiler {
         ) {
           // nothing todo
         } else if (val.type === "Body") {
-          previous = visitNodes(inlineValueLocalTemp, val, previous);
+          previous = visitNodes(inlineValueLocalLet, val, previous);
         } else {
-          visitNodes(inlineValueLocalTemp, val);
+          visitNodes(inlineValueLocalLet, val);
           previous = val;
         }
       }
@@ -2718,7 +2723,7 @@ export class Compiler {
         ) {
           // nothing todo
         } else if (
-          val.type === "ValueLocalTemp" && val.values.length === 0
+          val.type === "ValueLocalLet" && val.values.length === 0
         ) {
           // nothing todo
         } else if (val.type === "Body") {
@@ -2731,7 +2736,7 @@ export class Compiler {
       return previous;
     }
 
-    function inlineValueLocalTempIntoJsOperators(
+    function inlineValueLocalLetIntoJsOperators(
       current: NodeType[],
       previous?: NodeType,
     ) {
@@ -2812,17 +2817,17 @@ export class Compiler {
         ) {
           // nothing todo
         } else if (
-          val.type === "ValueLocalTemp" && val.values.length === 0
+          val.type === "ValueLocalLet" && val.values.length === 0
         ) {
           // nothing todo
         } else if (val.type === "Body") {
           previous = visitNodes(
-            inlineValueLocalTempIntoJsOperators,
+            inlineValueLocalLetIntoJsOperators,
             val,
             previous,
           );
         } else {
-          visitNodes(inlineValueLocalTempIntoJsOperators, val);
+          visitNodes(inlineValueLocalLetIntoJsOperators, val);
           previous = val;
         }
       }
@@ -2835,9 +2840,9 @@ export class Compiler {
       visitNodes(fixIncompleteDoLoops, code_tree);
       visitNodes(rewriteStackPop, code_tree);
       //visitNodes(inlineValueLocal, code_tree)
-      //visitNodes(inlineValueLocalTemp, code_tree)
+      //visitNodes(inlineValueLocalLet, code_tree);
       visitNodes(rewriteJSCode, code_tree);
-      visitNodes(inlineValueLocalTempIntoJsOperators, code_tree);
+      visitNodes(inlineValueLocalLetIntoJsOperators, code_tree);
       visitNodes(removeEmptyCodeTreeEntries, code_tree);
     } while (modified);
 
