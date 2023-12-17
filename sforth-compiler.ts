@@ -209,6 +209,10 @@ export const ManglingCharacters: Record<string, string> = {
 export function mangle(str: string): string {
   let result = str;
 
+  if (isNumeric(str)) {
+    throw new Error("cannot mangle a number, this should not happen");
+  }
+
   const start = str.charAt(0);
   if (start >= "0" && start <= "9") {
     result = "$$" + result;
@@ -1706,30 +1710,42 @@ export class Compiler {
         default: {
           const mangledT = mangle(t.value);
           let dmacro = undefined;
-          // TODO: resolve macro
-          // first try to find the macro within the current list
           if (this.macros[mangledT]) {
             dmacro = structuredClone(this.macros[mangledT]);
           }
 
+          // handle a macro replacement
           if (dmacro) {
+            // macro replacement without arguments
             if (dmacro.args.length === 0) {
               const gcode = this.createFromForthTokens(dmacro.body);
               add(gcode);
             } else {
+              // macro replacement with arguments
               const gcode = dmacro.body;
               for (let k = dmacro.args.length - 1; k >= 0; --k) {
                 i++;
                 for (let n = 0; n < gcode.length; ++n) {
-                  const entry: NodeType = gcode[n];
+                  const entry = gcode[n];
                   switch (entry.type) {
                     case "Token": {
-                      const token = asToken(tokens[i]);
+                      const token = tokens[i];
+                      if (
+                        token.type !== "Token" && token.type !== "Number" &&
+                        token.type !== "String"
+                      ) {
+                        throw Error(
+                          `macro replacements only allow Token, String or Number but got ${t.type}`,
+                        );
+                      }
                       if (entry.value === dmacro.args[k]) {
-                        entry.value = token.value;
+                        gcode[n] = {
+                          type: token.type,
+                          value: token.value,
+                        };
                       } else if (entry.value === ("#" + dmacro.args[k])) {
                         gcode[n] = {
-                          type: "String",
+                          type: (token.type === "Number") ? "Number" : "String",
                           value: token.value,
                         };
                       }
