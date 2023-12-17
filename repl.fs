@@ -24,7 +24,6 @@ THE SOFTWARE.
 
 include "forth.fs"
 include »console.fs«
-include filesystem.fs
 
 »sforth, Copyright (C) 2013-2023 Bernd Amend <bernd.amend+sforth@gmail.com>
 Type `bye' to exit\n« .
@@ -39,7 +38,7 @@ Type `bye' to exit\n« .
 	remove_element_count 0> if
 		0 remove_element_count cmd_history.stac.splice(2);
 	endif
-	".sforth_history" cmd_history.toJSON() writeFileSync
+	".sforth_history" cmd_history.toJSON() Deno.writeTextFileSync(2)
 	0 process.exit(1);
 	;
 
@@ -49,7 +48,7 @@ Type `bye' to exit\n« .
 new SForthStack { cmd_history }
 
 try
-	".sforth_history" readFileSync cmd_history.fromJSON(1);
+	".sforth_history" Deno.readTextFileSync(1) cmd_history.fromJSON(1);
 catch err
 endtry
 

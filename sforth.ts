@@ -32,9 +32,7 @@ function loadFile(filename: string, includeDirectories: string[]) {
     try {
       return {
         fullfilename,
-        content: new TextDecoder("utf-8").decode(
-          Deno.readFileSync(fullfilename),
-        ),
+        content: Deno.readTextFileSync(fullfilename),
       };
     } catch {
       // we just ignore the error
