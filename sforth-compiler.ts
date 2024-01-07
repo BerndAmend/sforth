@@ -220,7 +220,7 @@ export function mangle(str: string): string {
 
   for (const s in ManglingCharacters) {
     if (Object.prototype.hasOwnProperty.call(ManglingCharacters, s)) {
-      result = result.replaceAll(s, ManglingCharacters[s]);
+      result = result.replaceAll(s, "$$" + ManglingCharacters[s]);
     }
   }
 
