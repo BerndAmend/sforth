@@ -79,12 +79,10 @@ automatically-determine-console-low-level-type(0) await;
 		typeof e { typeof-e }
 		typeof-e "string" = if
 			"»" e "«" + +
+		elseif typeof-e "function" = typeof-e "undefined" = || if
+			' e
 		else
-			typeof-e "function" = typeof-e "undefined" = || if
-				' e
-			else
-				e
-			endif
+			e
 		endif
 		type " " .
 	loop
