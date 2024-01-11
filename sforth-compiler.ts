@@ -220,7 +220,7 @@ export function mangle(str: string): string {
 
   for (const s in ManglingCharacters) {
     if (Object.prototype.hasOwnProperty.call(ManglingCharacters, s)) {
-      result = result.replaceAll(s, "$$" + ManglingCharacters[s]);
+      result = result.replaceAll(s, () => ManglingCharacters[s]);
     }
   }
 
@@ -238,7 +238,7 @@ export function demangle(str: string): string {
   let result = str;
   for (const s in ManglingCharacters) {
     if (Object.prototype.hasOwnProperty.call(ManglingCharacters, s)) {
-      result = result.replaceAll(ManglingCharacters[s], s);
+      result = result.replaceAll(ManglingCharacters[s], () => s);
     }
   }
 
@@ -1764,7 +1764,7 @@ export class Compiler {
                             mangle(token.value),
                           ).replaceAll(
                             "#" + dmacro.args[k],
-                            mangle(token.value),
+                            () => mangle(token.value),
                           );
                           break;
                         }
