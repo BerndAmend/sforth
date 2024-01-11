@@ -40,15 +40,19 @@ automatically-determine-console-low-level-type(0) await;
 10 value consolebase
 
 : type { x -- }
-	typeof x "number" = if
-		' consolebase x.toString(1) console-low-level-type
+  typeof x { typeof-x }
+	typeof-x "number" = if
+		' consolebase x.toString(1)
 	else
+	  ' x
 		typeof util "undefined" <> if
-			' x util.format(1) console-low-level-type
-		else
-			' x console-low-level-type
+			util.format(1)
+		endif
+		typeof-x "function" = if
+			SForthSystem.demangle(1)
 		endif
 	endif
+	console-low-level-type
 ;
 
 : . { x -- }
