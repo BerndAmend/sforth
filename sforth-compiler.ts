@@ -2880,8 +2880,12 @@ export class Compiler {
         splitOnTopLevelAwait,
       );
     } catch (err) {
-      err.stack = demangle(err.stack);
-      err.res = res;
+      if (err instanceof Error) {
+        if (err.stack) {
+          err.stack = demangle(err.stack);
+        }
+        (err as any).res = res;
+      }
       throw err;
     }
     return res;
