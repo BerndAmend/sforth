@@ -2280,7 +2280,7 @@ export class Compiler {
           append("try {");
           generateCode(code_tree.body, false);
           if (code_tree.catchVar === undefined) {
-            append("} catch( " + code_tree.catchVar + ") {");
+            append("} catch {");
           } else {
             append("} catch( " + code_tree.catchVar + ") {");
           }
