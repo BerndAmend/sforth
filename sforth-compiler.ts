@@ -1755,6 +1755,13 @@ export class Compiler {
                     case "JsCode":
                     case "JsCodeWithReturn": {
                       const token = tokens[i];
+                      if (token === undefined) {
+                        throw new Error(
+                          `token is undefined, context "${
+                            JSON.stringify(tokens[i - 1])
+                          }"`,
+                        );
+                      }
                       switch (token.type) {
                         case "Token": {
                           // TODO: mangling should only be done in the generateJsCode function
