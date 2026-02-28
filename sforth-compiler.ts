@@ -2786,7 +2786,7 @@ export class Compiler {
                 }
                 val.body += " " + match[2];
                 if (match[3] === previous.name) {
-                  val.body += " " + previous.value.toString;
+                  val.body += " " + previous.value.toString();
                   previousUsed = true;
                 } else {
                   val.body += " " + match[3];
