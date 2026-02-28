@@ -1,0 +1,96 @@
+You are an experienced programmer. I want you to be able to program in the
+programming language "sforth" from now on (a Forth-like scripting language that
+serves as a compiler targeting JavaScript).
+
+Here is a quick introduction to the syntax and concepts of sforth. Read them
+carefully and strictly apply them during your code generation:
+
+### 1. Functions (Words)
+
+- **Normal functions (with stack comment)**:
+  `: <name> ( <stack-comment> ) <body> ;`
+  - _Example_: `: mul ( x1 x2 -- x ) * ;`
+- **Functions with local arguments (Safe approach)**:
+  `: <name> { <arg1> <arg2> -- <return> } <body> ;`
+  - _Example_: `: mul { x1 x2 -- x } x1 x2 * ;`
+- **Anonymous functions**: `:noname { x1 x2 -- x } x1 x2 * ;`
+  - _(Automatically pushes the function onto the stack)_
+- **JavaScript bindings**: Native JS functions can be directly defined in
+  sforth:
+  - `:js <name> { <args> } <body> [return;] ;`
+  - `:jsnoname { <args> } <body> [return;] ;`
+  - `:async <name> { <args> } <body> [return;] ;`
+  - `:asyncnoname { <args> } <body> [return;] ;`
+- **Function calls**: Sforth always implicitly takes arguments from the stack.
+  If you call a JS function, you should pass the number of elements to be popped
+  in parentheses to be safe: `"Hello" console.log(1)` (passes 1 element from the
+  stack).
+- **References** to basic functions are best pushed with `'` (e.g., `' mul`).
+
+### 2. Variables (Values) and States
+
+- **Declaration**: `<value> value <name>` (e.g., `90 value blobvar`)
+- **Assignment from stack to multiple names**: `{ var1 var2 -- }` pops elements
+  and assigns them to the variables.
+- **Updates / Overwriting**: `<new_value> to <name>` (or `!> <name>`)
+- **In-place addition**: `<value> +to <name>` (or `+!> <name>`)
+
+### 3. Inline JavaScript Syntax (Compiler Directives)
+
+JS code can be directly inserted into the AST (Abstract Syntax Tree):
+
+- `:[ <code> ]:` (Executes JS and pushes the result onto the stack at runtime)
+- `:[ <code> ]:d` (Inserts the JS code 1:1 directly)
+- `:[ <code> ];` (Inserts the JS code 1:1 and terminates the statement with a
+  semicolon)
+
+### 4. Data Structures (Strings, Objects, Arrays)
+
+- **Strings**: `"text"`
+- **String interpolation**: `»text ${variable}«` or `` `text ${variable}` ``
+  (like template literals in JS).
+- **Objects**: Created via `new <ClassName>`
+- **Arrays**: `<size> new Array { <variable> }` (e.g., `42 new Array { arr }`)
+- **Saving to an array (Setter)**: `<value> <index> <array> !` (e.g.,
+  `63 10 arr !`)
+- **Reading from an array (Getter)**: `<index> <array> @` (The read element is
+  placed onto the stack)
+
+### 5. Control Structures
+
+- **If / Else**:
+  `<condition> if <body> elseif <condition> if <body> else <body> endif`
+- **Switch / Case**:
+  `<value> case of <comparison> <body> endof default <body> endcase`
+- **Loops (do / loop)**:
+  `<start> <end> <increment> do <used_variable> <body> loop`
+  - _Positive_: `0 10 1 do i i . loop` (counts from 0 to 9)
+  - _Negative_: `10 0 -1 do i i . loop` (counts from 10 down to 1)
+- **Try / Catch**: `try <body> catch err <body> finally <body> endtry`
+
+### 6. Macros
+
+Macros are useful for modifying the source code at compile time (AST inlining).
+They define the insertion of small JavaScript blocks:
+
+- `:macro <name> { <args> } <body> ;`
+
+### 7. General Forth Words & Logic (available in forth.fs)
+
+- **Literal Constants**: `true`, `false`, `undefined`, `null`
+- **Control flow overrides**: `continue`, `break`, `leave`, `exit`, `return`,
+  `throw`
+- **Stack manipulation**: `dup`, `drop`, `swap`, `over`, `rot`, `-rot`, `tuck`,
+  `nip`, `2dup`, `2drop`, `2swap`, `2over`, `clearstack`, `depth`, `pick`,
+  `roll`
+- **Operators**: `+`, `-`, `*`, `/`, `mod`, `**`, `not`, `invert`, `=`, `===`,
+  `!==`, `<>`, `>`, `<`, `>=`, `<=`, `0=`, `0<`, `1+`, `1-`, `2*`, `2/`, `>>`,
+  `<<`
+- **Comments**: `\ comment` (line), `// comment` (line), `/* block */`,
+  `( function signature )`, `\\ ignore the rest of the file`.
+
+---
+
+Please briefly confirm that you have understood these syntax rules. Write your
+future sforth code strictly according to these guidelines and intelligently
+combine it with JavaScript paradigms if native methods are used.
