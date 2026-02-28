@@ -95,7 +95,7 @@ export class SForthStack {
   remove(pos: number) {
     const realpos = this.#pos - pos;
     if (realpos < 0) {
-      throw new Error("Stack underflow"); //?
+      throw new Error("Stack underflow");
     }
     --this.#pos;
     return this.#stac.splice(realpos, 1)[0];
@@ -1757,7 +1757,7 @@ export class Compiler {
                       const token = tokens[i];
                       switch (token.type) {
                         case "Token": {
-                          // TODO: mangeling should only be done in the generateJsCode function
+                          // TODO: mangling should only be done in the generateJsCode function
                           entry.body = replaceWholeWord(
                             entry.body,
                             dmacro.args[k],
