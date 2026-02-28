@@ -128,6 +128,7 @@ THE SOFTWARE.
 :macro ** {} { $$sfi_macro_x1 $$sfi_macro_x2 -- x3 } :[ $$sfi_macro_x1 ** $$sfi_macro_x2 ]: ;
 
 : negate ( n -- -n ) -1 * ;
+: abs { n -- n } :[ Math.abs(n) ]: ;
 
 :macro m+ { x1 x2 -- x3 } :[ x1 + x2 ]: ;
 :macro m- { x1 x2 -- x3 } :[ x1 - x2 ]: ;
