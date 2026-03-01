@@ -1,0 +1,256 @@
+{
+  "name": "sforth",
+  "scopeName": "source.sforth",
+  "fileTypes": [
+    "fs",
+    "sforth"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#inline-js"
+    },
+    {
+      "include": "#macros"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#local-args"
+    },
+    {
+      "include": "#logic"
+    },
+    {
+      "include": "#numbers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "match": "(?i)(//|\\\\).*$",
+          "name": "comment.line.sforth"
+        },
+        {
+          "begin": "/\\*",
+          "end": "\\*/",
+          "name": "comment.block.sforth"
+        },
+        {
+          "begin": "(?i)(^|\\s)\\x28",
+          "end": "\\x29",
+          "name": "comment.block.stack.sforth",
+          "patterns": [
+            {
+              "include": "#comment-nested"
+            }
+          ]
+        }
+      ]
+    },
+    "comment-nested": {
+      "patterns": [
+        {
+          "begin": "\\x28",
+          "end": "\\x29",
+          "name": "comment.block.stack.sforth",
+          "patterns": [
+            {
+              "include": "#comment-nested"
+            }
+          ]
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.quoted.double.sforth",
+          "patterns": [
+            {
+              "match": "\\.",
+              "name": "constant.character.escape.sforth"
+            }
+          ]
+        },
+        {
+          "begin": "`",
+          "end": "`",
+          "name": "string.quoted.template.sforth",
+          "patterns": [
+            {
+              "match": "\\$\\{[^}]+\\}",
+              "name": "variable.other.interpolation.sforth"
+            },
+            {
+              "match": "\\.",
+              "name": "constant.character.escape.sforth"
+            }
+          ]
+        },
+        {
+          "begin": "»",
+          "end": "«",
+          "name": "string.quoted.interpolation.sforth",
+          "patterns": [
+            {
+              "match": "\\$\\{[^}]+\\}",
+              "name": "variable.other.interpolation.sforth"
+            },
+            {
+              "match": "\\.",
+              "name": "constant.character.escape.sforth"
+            }
+          ]
+        }
+      ]
+    },
+    "inline-js": {
+      "patterns": [
+        {
+          "begin": "(?i)(^|\\s)\\:\\x5B",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.other.inline-js.sforth"
+            }
+          },
+          "end": "\\x5D(:(?:d)?|;)",
+          "endCaptures": {
+            "0": {
+              "name": "keyword.other.inline-js.sforth"
+            }
+          },
+          "contentName": "source.js"
+        }
+      ]
+    },
+    "macros": {
+      "patterns": [
+        {
+          "match": "(?i)(^|\\s)(:macro)\\s+([^\\s{]+)",
+          "captures": {
+            "2": {
+              "name": "keyword.control.def.sforth"
+            },
+            "3": {
+              "name": "entity.name.function.macro.sforth"
+            }
+          }
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "match": "(?i)(^|\\s)(:(?:js|async)?noname)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.control.def.sforth"
+            }
+          }
+        },
+        {
+          "match": "(?i)(^|\\s)(:(?:js|async)?)\\s+([^\\s(]+)",
+          "captures": {
+            "2": {
+              "name": "keyword.control.def.sforth"
+            },
+            "3": {
+              "name": "entity.name.function.sforth"
+            }
+          }
+        },
+        {
+          "match": "(?i)(^|\\s)(;)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.control.def.sforth"
+            }
+          }
+        }
+      ]
+    },
+    "local-args": {
+      "patterns": [
+        {
+          "begin": "(?i)(^|\\s)\\{",
+          "end": "\\}",
+          "name": "variable.parameter.function.sforth"
+        }
+      ]
+    },
+    "logic": {
+      "patterns": [
+        {
+          "match": "(?i)(^|\\s)(true|false|undefined|null|NaN)\\b",
+          "captures": {
+            "2": {
+              "name": "constant.language.sforth"
+            }
+          }
+        },
+        {
+          "match": "(?i)(^|\\s)(value|to|!>|\\+to|\\+!>|new|Array)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.other.sforth"
+            }
+          }
+        },
+        {
+          "match": "(?i)(^|\\s)(if|elseif|else|endif|case|of|endof|default|endcase|do|loop|try|catch|finally|endtry)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.control.sforth"
+            }
+          }
+        },
+        {
+          "match": "(?i)(^|\\s)(continue|break|leave|exit|return|throw)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.control.flow.sforth"
+            }
+          }
+        },
+        {
+          "match": "(?i)(^|\\s)(dup|drop|swap|over|rot|-rot|tuck|nip|2dup|2drop|2swap|2over|clearstack|depth|pick|roll)\\b",
+          "captures": {
+            "2": {
+              "name": "support.function.sforth"
+            }
+          }
+        },
+        {
+          "match": "(?i)(^|\\s)(\\+|-|\\*|/|mod|\\*\\*|not|invert|=|===|!==|<>|>|<|>=|<=|0=|0<|1\\+|1-|2\\*|2/|>>|<<|@|!|err|i)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.operator.sforth"
+            }
+          }
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "match": "(?i)(^|\\s)(-?(?:0[xX][0-9a-fA-F]+|0[bB][01]+|0[oO][0-7]+|\\d+(?:\\.\\d+)?(?:[eE][-+]?\\d+)?))\\b",
+          "captures": {
+            "2": {
+              "name": "constant.numeric.sforth"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,8 +1,17 @@
 {
   "deno.enable": true,
   "deno.lint": true,
-  "deno.unstable": true,
-  "deno.suggest.imports.hosts": {
-    "https://deno.land": true
+  "files.associations": {
+    "*.fs": "sforth"
   },
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "keyword.control.sforth",
+        "settings": {
+          "foreground": "#FF0000"
+        }
+      }
+    ]
+  }
 }

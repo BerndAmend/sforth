@@ -1,0 +1,43 @@
+{
+  "name": "sforth",
+  "displayName": "Sforth Language Support",
+  "description": "Syntax highlighting for sforth",
+  "version": "1.0.0",
+  "publisher": "sforth",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BerndAmend/sforth"
+  },
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "sforth",
+        "extensions": [
+          ".fs",
+          ".sforth"
+        ],
+        "aliases": [
+          "Sforth",
+          "sforth"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sforth",
+        "scopeName": "source.sforth",
+        "path": "./syntaxes/sforth.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "package": "npx --yes @vscode/vsce package"
+  }
+}
